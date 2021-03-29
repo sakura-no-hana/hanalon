@@ -6,14 +6,14 @@ from discord.ext import commands
 
 
 def prefix(bot, message):
-    print(bot.user.mention)
-    print(message.content)
     return {'$', f'{bot.user.mention.replace("@!", "@")} ',
             f'{bot.user.mention.replace("@!", "@").replace("@", "@!")} '}
 
 
 bot = commands.Bot(command_prefix=prefix)
 bot.color = 0xb9b6ed
+bot.success = '🌸'
+bot.failure = '💢'
 cogs_dir = pathlib.Path('./cogs')
 
 

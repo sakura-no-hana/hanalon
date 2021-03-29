@@ -2,6 +2,7 @@ import discord
 
 from .access import is_dev
 from .bot import bot, cogs_dir
+from .embed import HanalonEmbed
 
 
 @bot.command()
@@ -9,20 +10,15 @@ from .bot import bot, cogs_dir
 async def load(ctx, module):
     try:
         bot.load_extension(f'{cogs_dir.name}.{module}')
-        e = discord.Embed(title='Module loaded!',
-                          description=f'`{module}` has been loaded successfully!',
-                          timestamp=ctx.message.created_at, color=bot.color)
-        e.set_footer(text=f'{ctx.author.name}#{ctx.author.discriminator}',
-                     icon_url=ctx.author.avatar_url)
-        await ctx.send(embed=e)
+        e = HanalonEmbed(title='Module loaded!',
+                         description=f'`{module}` has been loaded successfully!',
+                         message=ctx.message)
+        await e.respond(True)
     except Exception as err:
-        e = discord.Embed(title='Module not loaded!',
-                          description=f'Loading `{module}` failed!',
-                          timestamp=ctx.message.created_at, color=bot.color)
-        e.set_footer(text=f'{ctx.author.name}#{ctx.author.discriminator}',
-                     icon_url=ctx.author.avatar_url)
+        e = HanalonEmbed(title='Module not loaded!', description=f'Loading `{module}` failed!',
+                         message=ctx.message)
         e.add_field(name='Error', value=err)
-        await ctx.send(embed=e)
+        await e.respond(False)
 
 
 @bot.command()
@@ -30,20 +26,15 @@ async def load(ctx, module):
 async def unload(ctx, module):
     try:
         bot.unload_extension(f'{cogs_dir.name}.{module}')
-        e = discord.Embed(title='Module unloaded!',
-                          description=f'`{module}` has been unloaded successfully!',
-                          timestamp=ctx.message.created_at, color=bot.color)
-        e.set_footer(text=f'{ctx.author.name}#{ctx.author.discriminator}',
-                     icon_url=ctx.author.avatar_url)
-        await ctx.send(embed=e)
+        e = HanalonEmbed(title='Module unloaded!',
+                         description=f'`{module}` has been unloaded successfully!',
+                         message=ctx.message)
+        await e.respond(True)
     except Exception as err:
-        e = discord.Embed(title='Module not unloaded!',
-                          description=f'Unloading `{module}` failed!',
-                          timestamp=ctx.message.created_at, color=bot.color)
-        e.set_footer(text=f'{ctx.author.name}#{ctx.author.discriminator}',
-                     icon_url=ctx.author.avatar_url)
+        e = HanalonEmbed(title='Module not unloaded!', description=f'Unloading `{module}` failed!',
+                         message=ctx.message)
         e.add_field(name='Error', value=err)
-        await ctx.send(embed=e)
+        await e.respond(False)
 
 
 @bot.command()
@@ -51,17 +42,12 @@ async def unload(ctx, module):
 async def reload(ctx, module):
     try:
         bot.reload_extension(f'{cogs_dir.name}.{module}')
-        e = discord.Embed(title='Module reloaded!',
-                          description=f'`{module}` has been reloaded successfully!',
-                          timestamp=ctx.message.created_at, color=bot.color)
-        e.set_footer(text=f'{ctx.author.name}#{ctx.author.discriminator}',
-                     icon_url=ctx.author.avatar_url)
-        await ctx.send(embed=e)
+        e = HanalonEmbed(title='Module reloaded!',
+                         description=f'`{module}` has been reloaded successfully!',
+                         message=ctx.message)
+        await e.respond(True)
     except Exception as err:
-        e = discord.Embed(title='Module not reloaded!',
-                          description=f'Reloading `{module}` failed!',
-                          timestamp=ctx.message.created_at, color=bot.color)
-        e.set_footer(text=f'{ctx.author.name}#{ctx.author.discriminator}',
-                     icon_url=ctx.author.avatar_url)
+        e = HanalonEmbed(title='Module not reloaded!', description=f'Reloading `{module}` failed!',
+                         message=ctx.message)
         e.add_field(name='Error', value=err)
-        await ctx.send(embed=e)
+        await e.respond(False)
