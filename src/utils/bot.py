@@ -4,7 +4,15 @@ import pathlib
 import discord
 from discord.ext import commands
 
-bot = commands.Bot(command_prefix='$')
+
+def prefix(bot, message):
+    print(bot.user.mention)
+    print(message.content)
+    return {'$', f'{bot.user.mention.replace("@!", "@")} ',
+            f'{bot.user.mention.replace("@!", "@").replace("@", "@!")} '}
+
+
+bot = commands.Bot(command_prefix=prefix)
 bot.color = 0xb9b6ed
 cogs_dir = pathlib.Path('./cogs')
 
