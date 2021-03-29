@@ -25,6 +25,10 @@ class Diagnostics(commands.Cog):
         await self.bot.change_presence(status=discord.Status.invisible)
         await self.bot.logout()
 
+    @commands.command()
+    async def echo(self, ctx, *, msg):
+        # No fancy discord.Embed objects
+        await ctx.send(msg)
 
 def setup(bot):
     bot.add_cog(Diagnostics(bot))
