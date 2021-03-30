@@ -9,6 +9,7 @@ verify_ssl = true
 "discord.py" = {extras = ["voice"], version = "*"}
 discord = {git = "https://github.com/Rapptz/discord-ext-menus"}
 certifi = "*"
+pymongo = "*"
 
 [requires]
 python_version = "3.9"

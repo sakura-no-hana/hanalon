@@ -10,10 +10,17 @@ def prefix(bot, message):
             f'<@!{bot.user.id}> '}
 
 
-bot = commands.Bot(command_prefix=prefix)
+intents = discord.Intents.none()
+intents.guilds = True
+intents.members = True
+intents.messages = True
+intents.reactions = True
+
+bot = commands.Bot(command_prefix=prefix, intents=intents)
 bot.color = 0xb9b6ed
 bot.success = '🌸'
 bot.failure = '💢'
+bot.devs = {456185622697345034, 393172660630323200}
 cogs_dir = pathlib.Path('./cogs')
 
 

@@ -12,12 +12,6 @@ class Diagnostics(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def ping(self, ctx, precision='4'):
-        await HanalonEmbed(title='🏓 Pong!',
-                           description=f'{("%." + precision + "f") % self.bot.latency} seconds!',
-                           message=ctx.message).respond(True)
-
-    @commands.command()
     @is_dev
     async def seppuku(self, ctx):
         await HanalonEmbed(title='さよなら〜', message=ctx.message).respond(True)
