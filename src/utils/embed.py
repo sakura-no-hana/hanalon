@@ -12,8 +12,18 @@ class HanalonEmbed(discord.Embed):
         self.message = message
 
     async def respond(self, code=None):
-        if code:
-            await self.message.add_reaction(bot.success)
-        elif code is not None:
-            await self.message.add_reaction(bot.failure)
-        await self.message.channel.send(embed=self)
+        await HanalonResponse(self.message, code).send(embed=self)
+
+
+class HanalonResponse:
+    def __init__(self, query, success=None):
+        self.query = query
+        self.success = success
+
+    async def send(self, **kwargs):
+        kwargs['mention_author'] = False
+        if self.success:
+            await self.query.add_reaction(bot.success)
+        elif self.success is not None:
+            await self.query.add_reaction(bot.failure)
+        await self.query.reply(**kwargs)
