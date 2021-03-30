@@ -4,8 +4,8 @@ from .bot import bot
 
 
 class HanalonEmbed(discord.Embed):
-    def __init__(self, title, message, description=None, color=bot.color):
-        super().__init__(title=title, description=description, color=color)
+    def __init__(self, message, title=None, description=None, color=bot.color, url=None):
+        super().__init__(title=title, description=description, color=color, url=url)
         self.timestamp = message.created_at
         self.set_footer(text=f'{message.author.name}#{message.author.discriminator}',
                         icon_url=message.author.avatar_url)
@@ -28,4 +28,7 @@ class HanalonResponse:
             await self.query.add_reaction(bot.failure)
         # we don't care if the message fails to send; reactions are to verify that the command
         # worked, even if the bot doesn't send a message. this is a deliberate decision.
-        await self.query.reply(**kwargs)
+        try:
+            await self.query.reply(**kwargs)
+        except discord.errors.HTTPException:
+            pass
