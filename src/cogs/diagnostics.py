@@ -30,22 +30,22 @@ class Diagnostics(commands.Cog):
     @commands.command()
     async def echo(self, ctx, *, msg):
         guild = ctx.guild
-        if match := re.match(r'<#([0-9]+)>$', msg.split()[0]):
-            channel_id = int(match.group(1))
-            if guild:
-                channel = guild.get_channel(channel_id)
-                if channel.permissions_for(ctx.author).send_messages and channel.permissions_for(
-                        ctx.guild.me).send_messages:
-                    await HanalonResponse(query=ctx.message, success=True).send()
-                    return await channel.send(
-                        embed=HanalonEmbed(title=' '.join(msg.split()[1:]), message=ctx.message))
-                return await HanalonResponse(query=ctx.message, success=False).send()
-            else:
-                return await HanalonResponse(query=ctx.message, success=False).send()
-        if len(msg) > 256:
-            await HanalonResponse(query=ctx.message, success=False).send()
+        channel = ctx.channel
+        if len(words := msg.split()) > 1:
+            if match := re.match(r'<#([0-9]+)>$', words[0]):
+                channel_id = int(match.group(1))
+                if guild:
+                    channel = guild.get_channel(channel_id)
+                    msg = ' '.join(words[1:])
+        if len(msg) > 256 or not channel.permissions_for(
+                ctx.author).send_messages or not channel.permissions_for(
+                ctx.guild.me).send_messages:
+            return await HanalonResponse(query=ctx.message, success=False).send()
+        if ctx.channel == channel:
+            return await HanalonEmbed(title=msg, message=ctx.message).respond(True)
         else:
-            await HanalonEmbed(title=msg, message=ctx.message).respond(True)
+            await HanalonResponse(query=ctx.message, success=True).send()
+            return await channel.send(embed=HanalonEmbed(title=msg, message=ctx.message))
 
 
 def setup(bot):
