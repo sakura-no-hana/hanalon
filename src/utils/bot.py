@@ -6,8 +6,8 @@ from discord.ext import commands
 
 
 def prefix(bot, message):
-    return {'$', f'{bot.user.mention.replace("@!", "@")} ',
-            f'{bot.user.mention.replace("@!", "@").replace("@", "@!")} '}
+    return {'$', f'<@{bot.user.id}> ',
+            f'<@!{bot.user.id}> '}
 
 
 bot = commands.Bot(command_prefix=prefix)
