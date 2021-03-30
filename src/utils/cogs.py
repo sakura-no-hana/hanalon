@@ -1,6 +1,6 @@
 from .access import is_dev
 from .bot import bot, cogs_dir
-from .embed import HanalonEmbed
+from .responses import HanalonEmbed
 
 
 @bot.command()

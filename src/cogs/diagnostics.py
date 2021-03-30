@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 
 from utils.access import is_dev
-from utils.embed import HanalonEmbed
+from utils.responses import HanalonEmbed
 
 
 class Diagnostics(commands.Cog):

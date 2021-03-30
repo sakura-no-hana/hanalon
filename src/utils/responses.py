@@ -26,4 +26,6 @@ class HanalonResponse:
             await self.query.add_reaction(bot.success)
         elif self.success is not None:
             await self.query.add_reaction(bot.failure)
+        # we don't care if the message fails to send; reactions are to verify that the command
+        # worked, even if the bot doesn't send a message. this is a deliberate decision.
         await self.query.reply(**kwargs)
