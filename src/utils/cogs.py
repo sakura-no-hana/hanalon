@@ -1,5 +1,3 @@
-import discord
-
 from .access import is_dev
 from .bot import bot, cogs_dir
 from .embed import HanalonEmbed

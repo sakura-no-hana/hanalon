@@ -11,9 +11,9 @@ class HanalonEmbed(discord.Embed):
                         icon_url=message.author.avatar_url)
         self.message = message
 
-    async def respond(self, code=None):
+    async def respond(self, code=None, message=None):
         if code:
             await self.message.add_reaction(bot.success)
         elif code is not None:
             await self.message.add_reaction(bot.failure)
-        await self.message.channel.send(embed=self)
+        await self.message.reply(message, embed=self, mention_author=False)
