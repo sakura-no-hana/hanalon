@@ -17,7 +17,11 @@ async def help(ctx: commands.Context, *, command_value: Optional[str]) -> None:
         embed = HanalonEmbed(ctx.message, title='Commands', description=None)
         # Grab all loose commands
         value = ''
-        for command in bot.commands:
+        command_list = bot.commands
+        for cog in bot.cogs.values():
+            for command in cog.get_commands():
+                command_list.remove(command)
+        for command in command_list:
             value += f'{command.name}\n'
         embed.add_field(name='Loose Commands', value=value)
         del value
