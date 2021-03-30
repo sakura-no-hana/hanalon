@@ -10,7 +10,7 @@ def prefix(bot, message):
             f'<@!{bot.user.id}> '}
 
 
-bot = commands.Bot(command_prefix=prefix)
+bot = commands.Bot(command_prefix=prefix, help_command=None)
 bot.color = 0xb9b6ed
 bot.success = '🌸'
 bot.failure = '💢'
