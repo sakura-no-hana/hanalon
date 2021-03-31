@@ -3,6 +3,10 @@ import pathlib
 
 import discord
 from discord.ext import commands
+from dotenv import load_dotenv
+import pymongo
+
+load_dotenv()
 
 
 def prefix(bot, message):
@@ -21,6 +25,7 @@ bot.color = 0xb9b6ed
 bot.success = '🌸'
 bot.failure = '💢'
 bot.devs = {456185622697345034, 393172660630323200}
+bot.db = pymongo.MongoClient(os.environ['MONGO'])
 cogs_dir = pathlib.Path('./cogs')
 
 
