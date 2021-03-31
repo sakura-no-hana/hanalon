@@ -10,13 +10,10 @@ class General(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def ping(self, ctx, precision='4'):
-        try:
-            await HanalonEmbed(title='🏓 Pong!',
-                               description=f'{("%." + precision + "f") % self.bot.latency} seconds!',
-                               message=ctx.message).respond(True)
-        except TypeError:
-            await HanalonResponse(ctx.message, False).send()
+    async def ping(self, ctx, precision: int = 4):
+        await HanalonEmbed(title='🏓 Pong!',
+                           description=f'{("%." + str(precision) + "f") % self.bot.latency} seconds!',
+                           message=ctx.message).respond(True)
 
     @commands.group()
     async def about(self, ctx):

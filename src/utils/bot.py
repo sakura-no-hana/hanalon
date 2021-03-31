@@ -43,6 +43,12 @@ async def prepare():
                                                         type=discord.ActivityType.competing))
 
 
+@bot.listen('on_command_error')
+async def handle(ctx, error):
+    if not isinstance(error, commands.CommandNotFound):
+        await ctx.message.add_reaction(bot.failure)
+
+
 def run():
     load_cogs()
     bot.run(os.environ['TOKEN'])
