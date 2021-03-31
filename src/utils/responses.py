@@ -29,7 +29,7 @@ class HanalonEmbed(discord.Embed):
                 await response.send()
             except discord.Forbidden:
                 pass
-        else:
+        elif self.message.channel.permissions_for(self.message.guild.me).send_messages:
             if self.title:
                 title_proxy = f'**{self.title}**'
             else:
@@ -41,6 +41,8 @@ class HanalonEmbed(discord.Embed):
                 await response.send(message)
             except discord.Forbidden:
                 pass
+        else:
+            raise discord.Forbidden
 
 
 class HanalonResponse:
