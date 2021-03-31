@@ -34,9 +34,9 @@ class HanalonEmbed(discord.Embed):
                 title_proxy = f'**{self.title}**'
             else:
                 title_proxy = ''
-            message = f'{title_proxy}\n{self.description}\n'
+            message = f'{title_proxy}\n{self.description if self.description else ""}\n\n'
             for field in self.fields:
-                message += f'*{field.name}*\n{field.value}\n'
+                message += f'*{field.name}*\n{field.value}\n\n'
             try:
                 await response.send(message)
             except discord.Forbidden:
