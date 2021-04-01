@@ -1,0 +1,9 @@
+token:
+mongo:
+
+guild:
+devs:
+  -
+color: 0xB9B6ED
+success: '🌸'
+failure: '💢'

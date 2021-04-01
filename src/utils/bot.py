@@ -3,10 +3,11 @@ import pathlib
 
 import discord
 from discord.ext import commands, slash
-from dotenv import load_dotenv
 import pymongo
+import yaml
 
-load_dotenv()
+with open('config.yaml') as file:
+    config = yaml.load(file, Loader=yaml.FullLoader)
 
 
 def prefix(bot, message):
@@ -20,18 +21,18 @@ intents.members = True
 intents.messages = True
 intents.reactions = True
 
-bot = slash.SlashBot(command_prefix=prefix, intents=intents, debug_guild=os.environ['GUILD'])
-bot.color = 0xb9b6ed
-bot.success = '🌸'
-bot.failure = '💢'
-bot.devs = {456185622697345034, 393172660630323200, 645323345306583081}
-bot.db = pymongo.MongoClient(os.environ['MONGO'])
+bot = slash.SlashBot(command_prefix=prefix, intents=intents, debug_guild=config['guild'])
+bot.color = config['color']
+bot.success = config['success']
+bot.failure = config['failure']
+bot.devs = config['devs']
+bot.db = pymongo.MongoClient(config['mongo'])
 cogs_dir = pathlib.Path('./cogs')
+
 
 def include_cog(bot, cog):
     bot.add_cog(cog(bot))
     bot.add_slash_cog(cog(bot))
-
 
 
 def load_cogs():
@@ -57,4 +58,4 @@ async def handle(ctx, error):
 
 def run():
     load_cogs()
-    bot.run(os.environ['TOKEN'])
+    bot.run(config['token'])
