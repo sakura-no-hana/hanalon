@@ -51,9 +51,8 @@ async def prepare():
 
 @bot.listen('on_command_error')
 async def handle(ctx, error):
-    if not isinstance(error, commands.CommandNotFound):
+    if isinstance(ctx, slash.Context) and not isinstance(error, commands.CommandNotFound):
         await ctx.message.add_reaction(bot.failure)
-    await ctx.send(error.__cause__)
 
 
 def run():

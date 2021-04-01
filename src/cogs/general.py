@@ -20,7 +20,7 @@ class General(commands.Cog):
         '''Returns the ping to a specified precision (default is to nearest 10⁻⁴ seconds)'''
         await HanalonEmbed(title='🏓 Pong!',
                            description=f'{("%." + str(precision) + "f") % self.bot.latency} seconds!',
-                           context=ctx).slash_respond()
+                           context=ctx).respond()
 
     @commands.group()
     async def about(self, ctx):
