@@ -1,4 +1,5 @@
 import discord
+from discord.ext.slash import InteractionResponseType
 
 from .bot import bot
 
@@ -44,6 +45,9 @@ class HanalonEmbed(discord.Embed):
         else:
             raise discord.Forbidden
 
+    async def slash_respond(self, flags=None, rtype=InteractionResponseType.ChannelMessageWithSource):
+        await HanalonResponse(self.message).slash(embed=self, flags=flags, rtype=rtype)
+
 
 class HanalonResponse:
     def __init__(self, query, success=None, override_success=False, destination=None):
@@ -67,3 +71,6 @@ class HanalonResponse:
             await self.query.add_reaction(bot.success)
         elif self.success is not None:
             await self.query.add_reaction(bot.failure)
+
+    async def slash(self, *args, **kwargs):
+        await self.query.respond(*args, **kwargs)

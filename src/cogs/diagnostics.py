@@ -11,7 +11,7 @@ class Diagnostics(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.command(aliases=('harakiri',))
     @is_dev
     async def seppuku(self, ctx):
         await HanalonEmbed(title='さよなら〜', message=ctx.message).respond(True, override=True)

@@ -2,7 +2,7 @@ import os
 import pathlib
 
 import discord
-from discord.ext import commands
+from discord.ext import commands, slash
 from dotenv import load_dotenv
 import pymongo
 
@@ -20,7 +20,7 @@ intents.members = True
 intents.messages = True
 intents.reactions = True
 
-bot = commands.Bot(command_prefix=prefix, intents=intents)
+bot = slash.SlashBot(command_prefix=prefix, intents=intents, debug_guild=os.environ['GUILD'])
 bot.color = 0xb9b6ed
 bot.success = '🌸'
 bot.failure = '💢'
