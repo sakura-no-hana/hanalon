@@ -1,3 +1,5 @@
+from typing import Optional
+
 import discord
 from discord.ext import commands, slash
 
@@ -10,20 +12,31 @@ class General(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def ping(self, ctx, precision: int = 4):
+    async def ping(self, ctx: commands.Context, precision: int = 4):
+        """
+        Returns the ping to a specified precision. Defaults to nearest 10⁻⁴ seconds.
+        """
         await HanalonEmbed(title='🏓 Pong!',
                            description=f'{("%." + str(precision) + "f") % self.bot.latency} seconds!',
                            context=ctx).respond(True)
 
     @slash.cmd(name='ping')
-    async def _ping(self, ctx: slash.Context, precision: slash.Option(description='precision', required=False, type=slash.ApplicationCommandOptionType.INTEGER) = 4):
-        '''Returns the ping to a specified precision (default is to nearest 10⁻⁴ seconds)'''
+    async def _ping(self, ctx: slash.Context,
+                    precision: slash.Option(description='precision', required=False,
+                                            type=slash.ApplicationCommandOptionType.INTEGER) = 4):
+
+        """
+        Returns the ping to a specified precision. Defaults to nearest 10⁻⁴ seconds.
+        """
         await HanalonEmbed(title='🏓 Pong!',
                            description=f'{("%." + str(precision) + "f") % self.bot.latency} seconds!',
                            context=ctx).respond()
 
     @commands.group()
-    async def about(self, ctx):
+    async def about(self, ctx: commands.Context):
+        """
+        Shows information about things. Without any subcommands, it shows the bot's information.
+        """
         if ctx.invoked_subcommand is None:
             e = HanalonEmbed(ctx, title='About me',
                              description="Hello! I'm Hanalon, your friendly Adventurers' Guild receptionist! Don't hesitate to consult me if you need anything!")
@@ -43,13 +56,19 @@ class General(commands.Cog):
             await e.respond(True)
 
     @about.command()
-    async def party(self, ctx, user: discord.Member = None):
+    async def party(self, ctx: commands.Context, user: Optional[discord.Member] = None):
+        """
+        Unimplemented
+        """
         if user is None:
             user = ctx.message.author
         await ctx.send(user.name)
 
     @about.command()
-    async def guild(self, ctx):
+    async def guild(self, ctx: commands.Context):
+        """
+        Unimplemented
+        """
         await ctx.send(ctx.message.guild.name)
 
 

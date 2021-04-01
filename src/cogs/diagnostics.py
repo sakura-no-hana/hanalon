@@ -14,13 +14,19 @@ class Diagnostics(commands.Cog):
 
     @commands.command(aliases=('harakiri',))
     @is_dev
-    async def seppuku(self, ctx):
+    async def seppuku(self, ctx: commands.Context):
+        """
+        Kills the bot.
+        """
         await HanalonEmbed(title='さよなら〜', context=ctx).respond(True, override=True)
         await self.bot.change_presence(status=discord.Status.invisible)
         await self.bot.logout()
 
     @commands.command()
-    async def echo(self, ctx, *, msg):
+    async def echo(self, ctx: commands.Context, *, msg: str):
+        """
+        Echoes a message in the specified channel (if given). Defaults to same channel.
+        """
         guild = ctx.guild
         channel = ctx.channel
         if len(words := msg.split()) > 1:
