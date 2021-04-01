@@ -16,7 +16,9 @@ class General(commands.Cog):
                            context=ctx).respond(True)
 
     @slash.cmd(name='ping')
-    async def _ping(self, ctx: slash.Context, precision: slash.Option(description='precision', required=False, type=slash.ApplicationCommandOptionType.INTEGER) = 4):
+    async def _ping(self, ctx: slash.Context,
+                    precision: slash.Option(description='precision', required=False,
+                                            type=slash.ApplicationCommandOptionType.INTEGER) = 4):
         '''Returns the ping to a specified precision (default is to nearest 10⁻⁴ seconds)'''
         await HanalonEmbed(title='🏓 Pong!',
                            description=f'{("%." + str(precision) + "f") % self.bot.latency} seconds!',

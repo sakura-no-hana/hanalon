@@ -1,7 +1,61 @@
+from typing import Iterable, Mapping, Union
+
 import discord
-from discord.ext import slash
+from discord.ext import menus, slash
 
 from .bot import bot
+
+
+class HanalonPages(menus.Menu):
+    def __init__(self, context, pages: Iterable[Mapping]):
+        super().__init__()
+        self.context = context
+        self.pages = pages
+        self.index = 0
+
+    async def send_initial_message(self, ctx, channel):
+        if isinstance(self.context, slash.Context):
+            return await self.context.respond(**self.pages[self.index])
+        else:
+            return await self.context.send(**self.pages[self.index])
+
+    async def go_to(self, index):
+        index = int(index)
+        if not 0 <= index < len(self.pages):
+            index %= len(self.pages)
+        self.index = index
+        if isinstance(self.context, slash.Context):
+            self.message = await self.context.respond(**self.pages[self.index])
+        else:
+            await self.message.edit(**self.pages[self.index])
+
+    async def validate(self, payload):
+        if not self.context.channel.permissions_for(self.context.me).manage_messages:
+            return True
+        elif payload.event_type == 'REACTION_ADD':
+            await self.message.remove_reaction(payload.emoji.name, payload.member)
+            return True
+        return False
+
+    @menus.button('⏮️')
+    async def go_first(self, payload):
+        if await self.validate(payload):
+            await self.go_to(0)
+
+    @menus.button('⏪')
+    async def go_back(self, payload):
+        if await self.validate(payload):
+            await self.go_to(self.index - 1)
+
+    @menus.button('⏩')
+    async def go_forward(self, payload):
+        if await self.validate(payload):
+            await self.go_to(self.index + 1)
+
+    @menus.button('⏭')
+    async def do_something(self, payload):
+        if await self.validate(payload):
+            await self.go_to(-1)
 
 
 class HanalonEmbed(discord.Embed):
@@ -15,7 +69,8 @@ class HanalonEmbed(discord.Embed):
                         icon_url=context.author.avatar_url)
         self.context = context
 
-    async def respond(self, code=None, override=False, destination=None, flags=None, rtype=slash.InteractionResponseType.ChannelMessageWithSource):
+    async def respond(self, code=None, override=False, destination=None, flags=None,
+                      rtype=slash.InteractionResponseType.ChannelMessageWithSource):
         if isinstance(self.context, slash.Context):
             await HanalonResponse(self.context).send(embed=self, flags=flags, rtype=rtype)
         else:
@@ -26,7 +81,8 @@ class HanalonEmbed(discord.Embed):
             elif self.context.channel.permissions_for(self.context.me).manage_webhooks:
                 pfp = await bot.user.avatar_url.read()
                 webhook = await self.context.channel.create_webhook(
-                    name=self.context.guild.me.display_name, avatar=pfp, reason="I can't send embeds…")
+                    name=self.context.guild.me.display_name, avatar=pfp,
+                    reason="I can't send embeds…")
                 await webhook.send(embed=self)
                 await webhook.delete()
 
