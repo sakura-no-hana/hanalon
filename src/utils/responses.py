@@ -5,22 +5,22 @@ from .bot import bot
 
 
 class HanalonEmbed(discord.Embed):
-    def __init__(self, message, title=None, description=None, color=bot.color, url=None):
+    def __init__(self, context, title=None, description=None, color=bot.color, url=None):
         super().__init__(title=title, description=description, color=color, url=url)
-        self.timestamp = message.created_at
-        self.set_footer(text=f'{message.author.name}#{message.author.discriminator}',
-                        icon_url=message.author.avatar_url)
-        self.message = message
+        self.timestamp = context.message.created_at
+        self.set_footer(text=f'{context.author.name}#{context.author.discriminator}',
+                        icon_url=context.author.avatar_url)
+        self.context = context
 
     async def respond(self, code=None, override=False, destination=None):
-        response = HanalonResponse(self.message, code, override, destination)
+        response = HanalonResponse(self.context, code, override, destination)
 
-        if self.message.channel.permissions_for(self.message.guild.me).embed_links:
+        if self.context.channel.permissions_for(self.context.me).embed_links:
             await response.send(embed=self)
-        elif self.message.channel.permissions_for(self.message.guild.me).manage_webhooks:
+        elif self.context.channel.permissions_for(self.context.me).manage_webhooks:
             pfp = await bot.user.avatar_url.read()
-            webhook = await self.message.channel.create_webhook(
-                name=self.message.guild.me.display_name, avatar=pfp, reason="I can't send embeds…")
+            webhook = await self.context.channel.create_webhook(
+                name=self.context.guild.me.display_name, avatar=pfp, reason="I can't send embeds…")
             await webhook.send(embed=self)
             await webhook.delete()
 
@@ -30,7 +30,7 @@ class HanalonEmbed(discord.Embed):
                 await response.send()
             except discord.Forbidden:
                 pass
-        elif self.message.channel.permissions_for(self.message.guild.me).send_messages:
+        elif self.context.channel.permissions_for(self.context.me).send_messages:
             if self.title:
                 title_proxy = f'**{self.title}**'
             else:
@@ -46,12 +46,12 @@ class HanalonEmbed(discord.Embed):
             raise discord.Forbidden
 
     async def slash_respond(self, flags=None, rtype=InteractionResponseType.ChannelMessageWithSource):
-        await HanalonResponse(self.message).slash(embed=self, flags=flags, rtype=rtype)
+        await HanalonResponse(self.context).slash(embed=self, flags=flags, rtype=rtype)
 
 
 class HanalonResponse:
-    def __init__(self, query, success=None, override_success=False, destination=None):
-        self.query = query
+    def __init__(self, context, success=None, override_success=False, destination=None):
+        self.context = context
         self.success = success
         self.override = override_success
         self.destination = destination
@@ -63,14 +63,14 @@ class HanalonResponse:
                 if isinstance(self.destination, discord.abc.Messageable):
                     await self.destination.send(*args, **kwargs)
                 else:
-                    await self.query.reply(*args, **kwargs)
+                    await self.context.reply(*args, **kwargs)
             except Exception as err:
                 if not self.override:
                     raise err
         if self.success:
-            await self.query.add_reaction(bot.success)
+            await self.context.message.add_reaction(bot.success)
         elif self.success is not None:
-            await self.query.add_reaction(bot.failure)
+            await self.context.message.add_reaction(bot.failure)
 
     async def slash(self, *args, **kwargs):
-        await self.query.respond(*args, **kwargs)
+        await self.context.respond(*args, **kwargs)

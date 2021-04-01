@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands, slash
 
-from utils.access import is_dev
+from utils.bot import include_cog
 from utils.responses import HanalonEmbed, HanalonResponse
 
 
@@ -13,26 +13,26 @@ class General(commands.Cog):
     async def ping(self, ctx, precision: int = 4):
         await HanalonEmbed(title='🏓 Pong!',
                            description=f'{("%." + str(precision) + "f") % self.bot.latency} seconds!',
-                           message=ctx.message).respond(True)
+                           context=ctx).respond(True)
 
     @slash.cmd(name='ping')
     async def _ping(self, ctx: slash.Context, precision: slash.Option(description='precision', required=False, type=slash.ApplicationCommandOptionType.INTEGER) = 4):
         '''Returns the ping to a specified precision (default is to nearest 10⁻⁴ seconds)'''
         await HanalonEmbed(title='🏓 Pong!',
                            description=f'{("%." + str(precision) + "f") % self.bot.latency} seconds!',
-                           message=ctx).slash_respond()
+                           context=ctx).slash_respond()
 
     @commands.group()
     async def about(self, ctx):
         if ctx.invoked_subcommand is None:
-            e = HanalonEmbed(ctx.message, title='About me',
+            e = HanalonEmbed(ctx, title='About me',
                              description="Hello! I'm Hanalon, your friendly Adventurers' Guild receptionist! Don't hesitate to consult me if you need anything!")
             e.set_thumbnail(url=self.bot.user.avatar_url)
             e.add_field(name='Version', value="I'm still in my infancy… teehee~!", inline=False)
             e.add_field(name='Library', value="I'm a homunculus made with discord.py!",
                         inline=False)
             devs = [await self.bot.fetch_user(dev) for dev in self.bot.devs]
-            e.add_field(name='Developers', value='I loyally serve my masters: ' + ' and '.join(
+            e.add_field(name='Developers', value='I loyally serve my masters: ' + ', '.join(
                 [f'{dev.name}#{dev.discriminator}' for dev in devs]), inline=False)
             e.add_field(name='Servers',
                         value=f'I proudly serve {len(self.bot.guilds)} Guild branches!',
@@ -54,5 +54,4 @@ class General(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(General(bot))
-    bot.add_slash_cog(General(bot))
+    include_cog(bot, General)

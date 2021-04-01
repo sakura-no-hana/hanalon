@@ -24,9 +24,14 @@ bot = slash.SlashBot(command_prefix=prefix, intents=intents, debug_guild=os.envi
 bot.color = 0xb9b6ed
 bot.success = '🌸'
 bot.failure = '💢'
-bot.devs = {456185622697345034, 393172660630323200}
+bot.devs = {456185622697345034, 393172660630323200, 645323345306583081}
 bot.db = pymongo.MongoClient(os.environ['MONGO'])
 cogs_dir = pathlib.Path('./cogs')
+
+def include_cog(bot, cog):
+    bot.add_cog(cog(bot))
+    bot.add_slash_cog(cog(bot))
+
 
 
 def load_cogs():
@@ -47,6 +52,7 @@ async def prepare():
 async def handle(ctx, error):
     if not isinstance(error, commands.CommandNotFound):
         await ctx.message.add_reaction(bot.failure)
+    await ctx.send(error.__cause__)
 
 
 def run():

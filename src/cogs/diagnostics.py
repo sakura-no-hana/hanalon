@@ -4,6 +4,7 @@ import discord
 from discord.ext import commands
 
 from utils.access import is_dev
+from utils.bot import include_cog
 from utils.responses import HanalonEmbed, HanalonResponse
 
 
@@ -14,7 +15,7 @@ class Diagnostics(commands.Cog):
     @commands.command(aliases=('harakiri',))
     @is_dev
     async def seppuku(self, ctx):
-        await HanalonEmbed(title='さよなら〜', message=ctx.message).respond(True, override=True)
+        await HanalonEmbed(title='さよなら〜', context=ctx).respond(True, override=True)
         await self.bot.change_presence(status=discord.Status.invisible)
         await self.bot.logout()
 
@@ -28,8 +29,8 @@ class Diagnostics(commands.Cog):
                 if guild:
                     channel = guild.get_channel(channel_id)
                     msg = ' '.join(words[1:])
-        await HanalonEmbed(title=msg, message=ctx.message).respond(True, destination=channel)
+        await HanalonEmbed(title=msg, context=ctx).respond(True, destination=channel)
 
 
 def setup(bot):
-    bot.add_cog(Diagnostics(bot))
+    include_cog(bot, Diagnostics)
