@@ -16,21 +16,31 @@ class General(commands.Cog):
         """
         Returns the ping to a specified precision. Defaults to nearest 10⁻⁴ seconds.
         """
-        await HanalonEmbed(title='🏓 Pong!',
-                           description=f'{("%." + str(precision) + "f") % self.bot.latency} seconds!',
-                           context=ctx).respond(True)
+        await HanalonEmbed(
+            title="🏓 Pong!",
+            description=f'{("%." + str(precision) + "f") % self.bot.latency} seconds!',
+            context=ctx,
+        ).respond(True)
 
-    @slash.cmd(name='ping')
-    async def _ping(self, ctx: slash.Context,
-                    precision: slash.Option(description='precision', required=False,
-                                            type=slash.ApplicationCommandOptionType.INTEGER) = 4):
+    @slash.cmd(name="ping")
+    async def _ping(
+        self,
+        ctx: slash.Context,
+        precision: slash.Option(
+            description="precision",
+            required=False,
+            type=slash.ApplicationCommandOptionType.INTEGER,
+        ) = 4,
+    ):
 
         """
         Returns the ping to a specified precision. Defaults to nearest 10⁻⁴ seconds.
         """
-        await HanalonEmbed(title='🏓 Pong!',
-                           description=f'{("%." + str(precision) + "f") % self.bot.latency} seconds!',
-                           context=ctx).respond()
+        await HanalonEmbed(
+            title="🏓 Pong!",
+            description=f'{("%." + str(precision) + "f") % self.bot.latency} seconds!',
+            context=ctx,
+        ).respond()
 
     @commands.group()
     async def about(self, ctx: commands.Context):
@@ -38,21 +48,37 @@ class General(commands.Cog):
         Shows information about things. Without any subcommands, it shows the bot's information.
         """
         if ctx.invoked_subcommand is None:
-            e = HanalonEmbed(ctx, title='About me',
-                             description="Hello! I'm Hanalon, your friendly Adventurers' Guild receptionist! Don't hesitate to consult me if you need anything!")
+            e = HanalonEmbed(
+                ctx,
+                title="About me",
+                description="Hello! I'm Hanalon, your friendly Adventurers' Guild receptionist! Don't hesitate to consult me if you need anything!",
+            )
             e.set_thumbnail(url=self.bot.user.avatar_url)
-            e.add_field(name='Version', value="I'm still in my infancy… teehee~!", inline=False)
-            e.add_field(name='Library', value="I'm a homunculus made with discord.py!",
-                        inline=False)
+            e.add_field(
+                name="Version", value="I'm still in my infancy… teehee~!", inline=False
+            )
+            e.add_field(
+                name="Library",
+                value="I'm a homunculus made with discord.py!",
+                inline=False,
+            )
             devs = [await self.bot.fetch_user(dev) for dev in self.bot.devs]
-            e.add_field(name='Developers', value='I loyally serve my masters: ' + ', '.join(
-                [f'{dev.name}#{dev.discriminator}' for dev in devs]), inline=False)
-            e.add_field(name='Servers',
-                        value=f'I proudly serve {len(self.bot.guilds)} Guild branches!',
-                        inline=False)
-            e.add_field(name='Users',
-                        value=f'I am the receptionist for {len(self.bot.users)} parties!',
-                        inline=False)
+            e.add_field(
+                name="Developers",
+                value="I loyally serve my masters: "
+                + ", ".join([f"{dev.name}#{dev.discriminator}" for dev in devs]),
+                inline=False,
+            )
+            e.add_field(
+                name="Servers",
+                value=f"I proudly serve {len(self.bot.guilds)} Guild branches!",
+                inline=False,
+            )
+            e.add_field(
+                name="Users",
+                value=f"I am the receptionist for {len(self.bot.users)} parties!",
+                inline=False,
+            )
             await e.respond(True)
 
     @about.command()

@@ -12,13 +12,13 @@ class Diagnostics(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(aliases=('harakiri',))
+    @commands.command(aliases=("harakiri",))
     @is_dev
     async def seppuku(self, ctx: commands.Context):
         """
         Kills the bot.
         """
-        await HanalonEmbed(title='さよなら〜', context=ctx).respond(True, override=True)
+        await HanalonEmbed(title="さよなら〜", context=ctx).respond(True, override=True)
         await self.bot.change_presence(status=discord.Status.invisible)
         await self.bot.logout()
 
@@ -30,11 +30,11 @@ class Diagnostics(commands.Cog):
         guild = ctx.guild
         channel = ctx.channel
         if len(words := msg.split()) > 1:
-            if match := re.match(r'<#([0-9]+)>$', words[0]):
+            if match := re.match(r"<#([0-9]+)>$", words[0]):
                 channel_id = int(match.group(1))
                 if guild:
                     channel = guild.get_channel(channel_id)
-                    msg = ' '.join(words[1:])
+                    msg = " ".join(words[1:])
         await HanalonEmbed(title=msg, context=ctx).respond(True, destination=channel)
 
 
