@@ -11,13 +11,14 @@ class Gambling(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def roll(self, ctx: commands.Context, expr: str = "1d6"):
+    async def roll(self, ctx: commands.Context, *, expr: str = "1d6"):
         """
         Rolls dice based on the expression given.
         """
+        result = d20.roll(expr)
         await HanalonEmbed(
             title="Dice",
-            description=d20.roll(expr),
+            description=str(result),
             context=ctx,
         ).respond(True)
 
