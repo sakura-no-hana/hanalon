@@ -62,7 +62,7 @@ class General(commands.Cog):
                 value="I'm a homunculus made with discord.py!",
                 inline=False,
             )
-            devs = [await self.bot.fetch_user(dev) for dev in self.bot.devs]
+            devs = [await self.bot.fetch_user(dev) for dev in self.bot.owner_ids]
             e.add_field(
                 name="Developers",
                 value="I loyally serve my masters: "
