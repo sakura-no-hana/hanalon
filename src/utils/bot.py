@@ -75,9 +75,7 @@ async def handle(ctx: Context, error: commands.CommandError):
     """
     Handles command errors; it currently reacts to them
     """
-    if isinstance(ctx, slash.Context) and not isinstance(
-        error, commands.CommandNotFound
-    ):
+    if not isinstance(error, commands.CommandNotFound):
         await ctx.message.add_reaction(bot.failure)
 
 
