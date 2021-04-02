@@ -1,4 +1,5 @@
 # Hanalon
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 Hanalon is a RPG Discord bot.
 ## Requirements
 - Bash [(?)](https://www.gnu.org/software/bash/manual/html_node/Installing-Bash.html)
