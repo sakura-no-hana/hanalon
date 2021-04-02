@@ -11,7 +11,7 @@ import yaml
 Context = Union[commands.Context, slash.Context]
 Bot = Union[commands.Bot, slash.SlashBot]
 
-with open("config.yaml") as file:
+with open("config.yaml", encoding='utf-8') as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 
 
