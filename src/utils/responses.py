@@ -1,9 +1,84 @@
-from typing import Optional, Union
+from typing import Iterable, Mapping, Optional, Union
 
 import discord
-from discord.ext import slash
+from discord.ext import menus, slash
 
 from .bot import bot, Context
+
+
+class HanalonPages(menus.Menu):
+    def __init__(self, context: Context, pages: Iterable[Mapping]):
+        super().__init__()
+        self.context = context
+        self.pages = pages
+        self.index = 0
+
+    async def send_initial_message(
+        self, ctx: Context, channel: discord.abc.Messageable
+    ) -> discord.Message:
+        """
+        Sends the initial message.
+        """
+        if isinstance(self.context, slash.Context):
+            return await self.context.respond(**self.pages[self.index])
+        else:
+            return await self.context.send(**self.pages[self.index])
+
+    async def go_to(self, index: int):
+        """
+        Updates HanalonPages instance to a certain page.
+        """
+        index = int(index)
+        if not 0 <= index < len(self.pages):
+            index %= len(self.pages)
+        self.index = index
+        if isinstance(self.context, slash.Context):
+            self.message = await self.context.respond(**self.pages[self.index])
+        else:
+            await self.message.edit(**self.pages[self.index])
+
+    async def validate(self, payload: discord.RawReactionActionEvent) -> bool:
+        """
+        Returns a boolean for whether the bot should act on a reaction.
+        """
+        if not self.context.channel.permissions_for(self.context.me).manage_messages:
+            return True
+        elif payload.event_type == "REACTION_ADD":
+            await self.message.remove_reaction(payload.emoji.name, payload.member)
+            return True
+        return False
+
+    @menus.button("⏮️")
+    async def go_first(self, payload: discord.RawReactionActionEvent):
+        """
+        Go to first page.
+        """
+        if await self.validate(payload):
+            await self.go_to(0)
+
+    @menus.button("⏪")
+    async def go_back(self, payload: discord.RawReactionActionEvent):
+        """
+        Go to previous page.
+        """
+        if await self.validate(payload):
+            await self.go_to(self.index - 1)
+
+    @menus.button("⏩")
+    async def go_forward(self, payload: discord.RawReactionActionEvent):
+        """
+        Go to next page.
+        """
+        if await self.validate(payload):
+            await self.go_to(self.index + 1)
+
+    @menus.button("⏭")
+    async def go_last(self, payload: discord.RawReactionActionEvent):
+        """
+        Go to last page.
+        """
+        if await self.validate(payload):
+            await self.go_to(-1)
 
 
 class HanalonEmbed(discord.Embed):
