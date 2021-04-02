@@ -29,12 +29,14 @@ intents.messages = True
 intents.reactions = True
 
 bot = slash.SlashBot(
-    command_prefix=prefix, intents=intents, debug_guild=config["guild"]
+    command_prefix=prefix,
+    intents=intents,
+    debug_guild=config["guild"],
+    owner_ids=config["devs"],
 )
 bot.color = config["color"]
 bot.success = config["success"]
 bot.failure = config["failure"]
-bot.devs = config["devs"]
 bot.db = pymongo.MongoClient(config["mongo"])
 cogs_dir = pathlib.Path("./cogs")
 

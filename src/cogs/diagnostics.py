@@ -3,8 +3,7 @@ import re
 import discord
 from discord.ext import commands
 
-from utils.access import is_dev
-from utils.bot import include_cog
+from utils.bot import bot, include_cog
 from utils.responses import HanalonEmbed, HanalonResponse
 
 
@@ -13,7 +12,7 @@ class Diagnostics(commands.Cog):
         self.bot = bot
 
     @commands.command(aliases=("harakiri",))
-    @is_dev
+    @commands.check(lambda ctx: bot.is_owner(ctx.author))
     async def seppuku(self, ctx: commands.Context):
         """
         Kills the bot.

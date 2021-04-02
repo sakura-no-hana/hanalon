@@ -1,10 +1,11 @@
-from .access import is_dev
+from discord.ext import commands
+
 from .bot import bot, cogs_dir, Context
 from .responses import HanalonEmbed
 
 
 @bot.command()
-@is_dev
+@commands.check(lambda ctx: bot.is_owner(ctx.author))
 async def load(ctx: Context, module: str):
     """
     Loads a cog
@@ -18,7 +19,7 @@ async def load(ctx: Context, module: str):
 
 
 @bot.command()
-@is_dev
+@commands.check(lambda ctx: bot.is_owner(ctx.author))
 async def unload(ctx: Context, module: str):
     """
     Unloads a cog
@@ -32,7 +33,7 @@ async def unload(ctx: Context, module: str):
 
 
 @bot.command()
-@is_dev
+@commands.check(lambda ctx: bot.is_owner(ctx.author))
 async def reload(ctx: Context, module: str):
     """
     Reloads a cog
