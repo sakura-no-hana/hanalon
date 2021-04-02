@@ -40,6 +40,8 @@ bot.failure = config["failure"]
 bot.db = pymongo.MongoClient(config["mongo"])
 cogs_dir = pathlib.Path("./cogs")
 
+bot.owner_only = commands.check(lambda ctx: bot.is_owner(ctx.author))
+
 
 def include_cog(bot: Bot, cog: commands.Cog):
     """

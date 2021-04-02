@@ -5,7 +5,7 @@ from .responses import HanalonEmbed
 
 
 @bot.command()
-@commands.check(lambda ctx: bot.is_owner(ctx.author))
+@bot.owner_only
 async def load(ctx: Context, module: str):
     """
     Loads a cog
@@ -19,7 +19,7 @@ async def load(ctx: Context, module: str):
 
 
 @bot.command()
-@commands.check(lambda ctx: bot.is_owner(ctx.author))
+@bot.owner_only
 async def unload(ctx: Context, module: str):
     """
     Unloads a cog
@@ -33,7 +33,7 @@ async def unload(ctx: Context, module: str):
 
 
 @bot.command()
-@commands.check(lambda ctx: bot.is_owner(ctx.author))
+@bot.owner_only
 async def reload(ctx: Context, module: str):
     """
     Reloads a cog

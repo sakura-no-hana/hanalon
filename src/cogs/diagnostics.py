@@ -12,7 +12,7 @@ class Diagnostics(commands.Cog):
         self.bot = bot
 
     @commands.command(aliases=("harakiri",))
-    @commands.check(lambda ctx: bot.is_owner(ctx.author))
+    @bot.owner_only
     async def seppuku(self, ctx: commands.Context):
         """
         Kills the bot.
