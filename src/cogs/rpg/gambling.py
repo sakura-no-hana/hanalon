@@ -9,22 +9,8 @@ from utils.responses import HanalonEmbed, HanalonResponse
 
 
 class Deck:
-    SUITS = ("♥", "♣", "♠", "♦", "🃏")
-    CARDS = (
-        "🇦",
-        "2️⃣",
-        "3️⃣",
-        "4️⃣",
-        "5️⃣",
-        "6️⃣",
-        "7️⃣",
-        "8️⃣",
-        "9️⃣",
-        "🔟",
-        "🇯",
-        "🇶",
-        "🇰",
-    )
+    SUITS = ("♡", "♧", "♤", "♢", "🃏")
+    CARDS = ("A",) + tuple(str(i) for i in range(2, 11)) + ("J", "Q", "K")
 
 
 class Gambling(commands.Cog):
@@ -83,7 +69,7 @@ class Gambling(commands.Cog):
 
         await HanalonEmbed(
             title="Cards",
-            description=card,
+            description=f"**{card}**",
             context=ctx,
         ).respond(True)
 
@@ -115,7 +101,7 @@ class Gambling(commands.Cog):
 
         await HanalonEmbed(
             title="Cards",
-            description=card,
+            description=f"**{card}**",
             context=ctx,
         ).respond()
 
