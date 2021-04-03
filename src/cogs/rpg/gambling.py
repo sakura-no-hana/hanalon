@@ -8,7 +8,7 @@ from utils.bot import include_cog
 from utils.responses import HanalonEmbed, HanalonResponse
 
 
-class Gambling(commands.Cog):
+class Deck:
     SUITS = ("♥", "♣", "♠", "♦", "🃏")
     CARDS = (
         "🇦",
@@ -26,6 +26,8 @@ class Gambling(commands.Cog):
         "🇰",
     )
 
+
+class Gambling(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -68,15 +70,15 @@ class Gambling(commands.Cog):
         """
         if joker:
             card = (
-                Gambling.CARDS[(value := random.randrange(54)) % 13]
-                + Gambling.SUITS[value // 13]
+                Deck.CARDS[(value := random.randrange(54)) % 13]
+                + Deck.SUITS[value // 13]
             )
             if (color := value // 13) == 5:
                 card = ("🟥" if color == 0 else "⬛") + card[1]
         else:
             card = (
-                Gambling.CARDS[(value := random.randrange(52)) % 13]
-                + Gambling.SUITS[value // 13]
+                Deck.CARDS[(value := random.randrange(52)) % 13]
+                + Deck.SUITS[value // 13]
             )
 
         await HanalonEmbed(
@@ -100,15 +102,15 @@ class Gambling(commands.Cog):
         """
         if joker:
             card = (
-                Gambling.CARDS[(value := random.randrange(54)) % 13]
-                + Gambling.SUITS[value // 13]
+                Deck.CARDS[(value := random.randrange(54)) % 13]
+                + Deck.SUITS[value // 13]
             )
             if value // 13 == 5:
                 card = ("🟥" if value % 13 == 0 else "⬛") + card[1]
         else:
             card = (
-                Gambling.CARDS[(value := random.randrange(52)) % 13]
-                + Gambling.SUITS[value // 13]
+                Deck.CARDS[(value := random.randrange(52)) % 13]
+                + Deck.SUITS[value // 13]
             )
 
         await HanalonEmbed(
