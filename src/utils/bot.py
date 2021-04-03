@@ -57,7 +57,7 @@ def load_cogs():
     """
     for root, dirs, files in os.walk(cogs_dir):
         for f in files:
-            if (module := (cogs_dir / f)).suffix == ".py":
+            if (module := cogs_dir / f).suffix == ".py":
                 bot.load_extension(f"{cogs_dir.name}.{module.stem}")
 
 

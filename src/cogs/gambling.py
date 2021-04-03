@@ -103,8 +103,8 @@ class Gambling(commands.Cog):
                 Gambling.CARDS[(value := random.randrange(54)) % 13]
                 + Gambling.SUITS[value // 13]
             )
-            if (color := value // 13) == 5:
-                card = ("🟥" if color == 0 else "⬛") + card[1]
+            if value // 13 == 5:
+                card = ("🟥" if value % 13 == 0 else "⬛") + card[1]
         else:
             card = (
                 Gambling.CARDS[(value := random.randrange(52)) % 13]
