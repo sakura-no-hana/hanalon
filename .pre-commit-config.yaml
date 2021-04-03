@@ -3,10 +3,8 @@ repos:
     rev: 5.8.0
     hooks:
       - id: isort
-        args: [--fss]
   - repo: https://github.com/psf/black
     rev: master
     hooks:
       - id: black
         language_version: python3
-        args: [--fast, --line-length=79]

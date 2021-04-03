@@ -64,15 +64,11 @@ class General(commands.Cog):
                 value="I'm a homunculus made with discord.py!",
                 inline=False,
             )
-            devs = [
-                await self.bot.fetch_user(dev) for dev in self.bot.owner_ids
-            ]
+            devs = [await self.bot.fetch_user(dev) for dev in self.bot.owner_ids]
             e.add_field(
                 name="Developers",
                 value="I loyally serve my masters: "
-                + ", ".join(
-                    [f"{dev.name}#{dev.discriminator}" for dev in devs]
-                ),
+                + ", ".join([f"{dev.name}#{dev.discriminator}" for dev in devs]),
                 inline=False,
             )
             e.add_field(
@@ -88,9 +84,7 @@ class General(commands.Cog):
             await e.respond(True)
 
     @about.command()
-    async def party(
-        self, ctx: commands.Context, user: Optional[discord.Member] = None
-    ):
+    async def party(self, ctx: commands.Context, user: Optional[discord.Member] = None):
         """
         Unimplemented
         """
