@@ -1,11 +1,12 @@
 FROM python:3.9.2-slim
 
 RUN apt-get -y update && apt-get install -y git
+RUN pip install pipenv
 
 WORKDIR /bot
 
-COPY requirements.txt ./
-RUN pip install -r requirements.txt
+COPY Pipfile* ./
+RUN pipenv install --system
 
 COPY config.yaml ./
 
