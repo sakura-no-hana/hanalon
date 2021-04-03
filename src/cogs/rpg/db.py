@@ -17,7 +17,7 @@ class AlreadyRegistered(RPGException):
 
 
 @unique
-class Class(Enum):
+class Job(Enum):
     ROGUE = 0
     BARD = 1
     ASSASSIN = 2
@@ -61,7 +61,7 @@ class Character:
     def register(
         cls, player: discord.User, name: str, job: str, race: Optional[str] = "human"
     ):
-        if job.upper() not in [c.name for c in list(Class)] or race.upper() not in [
+        if job.upper() not in [c.name for c in list(Job)] or race.upper() not in [
             r.name for r in list(Race)
         ]:
             raise ValueError
@@ -70,7 +70,7 @@ class Character:
                 "identifier": uuid(),
                 "owner": bson.Int64(player.id),
                 "name": name,
-                "job": Class[job.upper()],
+                "job": Job[job.upper()],
                 "race": Race[race.upper()],
             }
         )
