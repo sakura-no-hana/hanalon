@@ -4,7 +4,7 @@ from typing import Set, Union
 
 import discord
 from discord.ext import commands, slash
-import pymongo
+from motor.motor_asyncio import AsyncIOMotorClient
 import yaml
 
 Context = Union[commands.Context, slash.Context]
@@ -36,7 +36,7 @@ bot = slash.SlashBot(
 bot.color = config["color"]
 bot.success = config["success"]
 bot.failure = config["failure"]
-bot.db = pymongo.MongoClient(config["mongo"])["hanalon"]
+bot.db = AsyncIOMotorClient(config["mongo"])["hanalon"]
 cogs_dir = pathlib.Path("./cogs")
 
 bot.owner_only = commands.check(lambda ctx: bot.is_owner(ctx.author))
@@ -73,13 +73,13 @@ async def prepare():
     )
 
 
-@bot.listen("on_command_error")
-async def handle(ctx: Context, error: commands.CommandError):
-    """
-    Handles command errors; it currently reacts to them
-    """
-    if not isinstance(error, commands.CommandNotFound):
-        await ctx.message.add_reaction(bot.failure)
+# @bot.listen("on_command_error")
+# async def handle(ctx: Context, error: commands.CommandError):
+#     """
+#     Handles command errors; it currently reacts to them
+#     """
+#     if not isinstance(error, commands.CommandNotFound):
+#         await ctx.message.add_reaction(bot.failure)
 
 
 def run():
