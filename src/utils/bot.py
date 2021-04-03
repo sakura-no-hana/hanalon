@@ -7,7 +7,6 @@ from discord.ext import commands, slash
 import pymongo
 import yaml
 
-
 Context = Union[commands.Context, slash.Context]
 Bot = Union[commands.Bot, slash.SlashBot]
 

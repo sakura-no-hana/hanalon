@@ -1,6 +1,6 @@
 from discord.ext import commands
 
-from .bot import bot, cogs_dir, Context
+from .bot import Context, bot, cogs_dir
 from .responses import HanalonEmbed
 
 

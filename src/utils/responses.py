@@ -3,7 +3,7 @@ from typing import Iterable, Mapping, Optional, Union
 import discord
 from discord.ext import menus, slash
 
-from .bot import bot, Context
+from .bot import Context, bot
 
 
 class HanalonPages(menus.Menu):
@@ -41,10 +41,14 @@ class HanalonPages(menus.Menu):
         """
         Returns a boolean for whether the bot should act on a reaction.
         """
-        if not self.context.channel.permissions_for(self.context.me).manage_messages:
+        if not self.context.channel.permissions_for(
+            self.context.me
+        ).manage_messages:
             return True
         elif payload.event_type == "REACTION_ADD":
-            await self.message.remove_reaction(payload.emoji.name, payload.member)
+            await self.message.remove_reaction(
+                payload.emoji.name, payload.member
+            )
             return True
         return False
 
@@ -90,7 +94,9 @@ class HanalonEmbed(discord.Embed):
         color: Union[discord.Color, int] = bot.color,
         url: Optional[str] = None,
     ):
-        super().__init__(title=title, description=description, color=color, url=url)
+        super().__init__(
+            title=title, description=description, color=color, url=url
+        )
         if isinstance(context, slash.Context):
             self.timestamp = context.created_at
         else:
@@ -117,11 +123,17 @@ class HanalonEmbed(discord.Embed):
                 embed=self, flags=flags, rtype=rtype
             )
         else:
-            response = HanalonResponse(self.context, code, override, destination)
+            response = HanalonResponse(
+                self.context, code, override, destination
+            )
 
-            if self.context.channel.permissions_for(self.context.me).embed_links:
+            if self.context.channel.permissions_for(
+                self.context.me
+            ).embed_links:
                 await response.send(embed=self)
-            elif self.context.channel.permissions_for(self.context.me).manage_webhooks:
+            elif self.context.channel.permissions_for(
+                self.context.me
+            ).manage_webhooks:
                 pfp = await bot.user.avatar_url.read()
                 webhook = await self.context.channel.create_webhook(
                     name=self.context.guild.me.display_name,
@@ -137,14 +149,14 @@ class HanalonEmbed(discord.Embed):
                     await response.send()
                 except discord.Forbidden:
                     pass
-            elif self.context.channel.permissions_for(self.context.me).send_messages:
+            elif self.context.channel.permissions_for(
+                self.context.me
+            ).send_messages:
                 if self.title:
                     title_proxy = f"**{self.title}**"
                 else:
                     title_proxy = ""
-                message = (
-                    f'{title_proxy}\n{self.description if self.description else ""}\n\n'
-                )
+                message = f'{title_proxy}\n{self.description if self.description else ""}\n\n'
                 for field in self.fields:
                     message += f"*{field.name}*\n{field.value}\n\n"
                 try:

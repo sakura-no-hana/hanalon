@@ -17,7 +17,9 @@ class Diagnostics(commands.Cog):
         """
         Kills the bot.
         """
-        await HanalonEmbed(title="さよなら〜", context=ctx).respond(True, override=True)
+        await HanalonEmbed(title="さよなら〜", context=ctx).respond(
+            True, override=True
+        )
         await self.bot.change_presence(status=discord.Status.invisible)
         await self.bot.logout()
 
@@ -34,7 +36,9 @@ class Diagnostics(commands.Cog):
                 if guild:
                     channel = guild.get_channel(channel_id)
                     msg = " ".join(words[1:])
-        await HanalonEmbed(title=msg, context=ctx).respond(True, destination=channel)
+        await HanalonEmbed(title=msg, context=ctx).respond(
+            True, destination=channel
+        )
 
 
 def setup(bot):
