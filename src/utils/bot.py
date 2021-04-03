@@ -36,7 +36,7 @@ bot = slash.SlashBot(
 bot.color = config["color"]
 bot.success = config["success"]
 bot.failure = config["failure"]
-bot.db = pymongo.MongoClient(config["mongo"])
+bot.db = pymongo.MongoClient(config["mongo"])["hanalon"]
 cogs_dir = pathlib.Path("./cogs")
 
 bot.owner_only = commands.check(lambda ctx: bot.is_owner(ctx.author))
