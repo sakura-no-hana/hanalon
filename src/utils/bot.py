@@ -16,7 +16,7 @@ if "config" in os.environ:
         base64.b64decode(os.environ["config"]).decode("utf-8"), Loader=yaml.FullLoader
     )
 else:
-    with open("../config.yaml") as file:
+    with open("../config.yaml", encoding="utf-8") as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
 
 
