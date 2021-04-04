@@ -37,7 +37,9 @@ class Diagnostics(commands.Cog):
                 if guild:
                     channel = guild.get_channel(channel_id)
                     msg = " ".join(words[1:])
-        await HanalonEmbed(title=msg, context=ctx).respond(True, destination=channel)
+        await HanalonEmbed(description=msg, context=ctx).respond(
+            True, destination=channel
+        )
 
     # @commands.command()
     # async def test(self, ctx: commands.Context):
