@@ -1,12 +1,7 @@
-from discord import Embed
-from discord.enums import _is_descriptor
-from discord.ext import commands
 from discord.ext.commands import (
     Bot,
     Cog,
     Command,
-    CommandError,
-    DisabledCommand,
     Group,
     HelpCommand,
 )
@@ -26,7 +21,7 @@ class CustomHelpCommand(HelpCommand):
             if not commands:
                 continue
 
-            title = cog.qualified_name if cog else "Loose Commands"
+            title = cog.qualified_name if cog else "Other"
             commands_txt = ""
             prefix = self.context.prefix
             for command in commands:
@@ -37,6 +32,35 @@ class CustomHelpCommand(HelpCommand):
         embed = HanalonEmbed(self.context, title=title)
         for name, value in msg.items():
             embed.add_field(name=name, value=value)
+        await embed.respond(True)
+
+    async def send_cog_help(self, cog: Cog):
+        name = "Cog Help: " + cog.qualified_name
+        description = cog.description + "\n"
+        commands_text = "**Commands**\n"
+        for c in cog.get_commands():
+            c_name = f"{self.context.prefix}{c.qualified_name}"
+            if c.signature:
+                commands_text += f"`{c_name} {c.signature}`\n"
+            else:
+                commands_text += f"`{c_name}`\n"
+        details = description + commands_text
+        embed = HanalonEmbed(self.context, title=name, description=details)
+        await embed.respond(True)
+
+    async def send_group_help(self, group: Group):
+        name = "Group Help: " + group.qualified_name
+        description = group.help + "\n"
+        commands_text = "**Commands**\n"
+        for c in group.commands:
+            c_name = f"{self.context.prefix}{c.qualified_name}"
+            if c.signature:
+                if c.signature:
+                    commands_text += f"`{c_name} {c.signature}`\n"
+                else:
+                    commands_text += f"`{c_name}`\n"
+        details = description + commands_text
+        embed = HanalonEmbed(self.context, title=name, description=details)
         await embed.respond(True)
 
     async def send_command_help(self, command: Command) -> None:
