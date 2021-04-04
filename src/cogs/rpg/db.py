@@ -1,6 +1,6 @@
 from enum import Enum, unique
 import math
-from typing import Iterable, Optional
+from typing import Iterable, Optional, Union
 from uuid import uuid4 as uuid
 
 import bson
@@ -14,6 +14,10 @@ class RPGException(Exception):
 
 
 class AlreadyRegistered(RPGException):
+    ...
+
+
+class NotRegistered(RPGException):
     ...
 
 
@@ -85,24 +89,34 @@ class Character:
 
     async def get_name(self):
         _ = await bot.characters.find_one({"_id": self.identifier})
+        if not _:
+            raise NotRegistered
         return _["name"]
 
     # no name setter since I don't see the demand + it's trivial for later implementation
 
     async def get_race(self):
         _ = await bot.characters.find_one({"_id": self.identifier})
+        if not _:
+            raise NotRegistered
         return Race(_["race"]).name
 
     # same thing with race
 
     async def get_xp(self):
         _ = await bot.characters.find_one({"_id": self.identifier})
+        if not _:
+            raise NotRegistered
         return _["xp"]
 
     async def set_xp(self, new):
+        if not await bot.characters.find_one({"_id": self.identifier}):
+            raise NotRegistered
         await bot.characters.update_one({"_id": self.identifier}, {"$set": {"xp": new}})
 
     async def inc_xp(self, inc):
+        if not await bot.characters.find_one({"_id": self.identifier}):
+            raise NotRegistered
         await bot.characters.update_one({"_id": self.identifier}, {"$inc": {"xp": inc}})
 
     async def get_level(self):
@@ -111,6 +125,8 @@ class Character:
 
     async def get_jobs(self):
         _ = await bot.characters.find_one({"_id": self.identifier})
+        if not _:
+            raise NotRegistered
         return _["jobs"]
 
     async def get_jobs_dict(self):
@@ -121,17 +137,27 @@ class Character:
         return job_dict
 
     async def set_jobs(self, new):
+        if not await bot.characters.find_one({"_id": self.identifier}):
+            raise NotRegistered
         await bot.characters.update_one(
             {"_id": self.identifier}, {"$set": {"jobs": new}}
         )
 
     async def set_jobs_dict(self, new):
+        if not await bot.characters.find_one({"_id": self.identifier}):
+            raise NotRegistered
         jobs = [0] * 16
         for k, v in new.items():
             jobs[Job(k)] = v
         await bot.characters.update_one(
             {"_id": self.identifier}, {"$set": {"jobs": jobs}}
         )
+
+    async def get_player(self):
+        _ = await bot.characters.find_one({"_id": self.identifier})
+        if not _:
+            raise NotRegistered
+        return await bot.fetch_user(_["player"])
 
 
 class Party:
@@ -153,19 +179,146 @@ class Party:
 
     @classmethod
     async def from_user(cls, user: discord.User):
-        return bot.parties.find_one({"player": bson.Int64(user.id)})
+        _ = await bot.parties.find_one({"player": bson.Int64(user.id)})
+        if not _:
+            raise NotRegistered
+        return cls(_["_id"])
 
     def __init__(self, identifier):
         self.identifier = identifier
 
+    async def add_character(self, char: Character):
+        if not await bot.parties.find_one({"_id": self.identifier}):
+            raise NotRegistered
+        await bot.parties.update_one(
+            {"_id": self.identifier}, {"$push": {"characters": char.identifier}}
+        )
+
+    async def rem_character(self, char: Character):
+        await bot.clans.update_one(
+            {"_id": self.identifier}, {"$pull": {"characters": char.identifier}}
+        )
+
     async def get_characters(self):
         _ = await bot.parties.find_one({"_id": self.identifier})
+        if not _:
+            raise NotRegistered
         return [Character(identifier) for identifier in _["characters"]]
 
     async def set_characters(self, new):
+        if not await bot.parties.find_one({"_id": self.identifier}):
+            raise NotRegistered
         await bot.parties.update_one(
             {"_id": self.identifier},
             {"$set": {"characters": [c.identifier for c in new]}},
+        )
+
+    async def get_player(self):
+        _ = await bot.parties.find_one({"_id": self.identifier})
+        if not _:
+            raise NotRegistered
+        return await bot.fetch_user(_["player"])
+
+
+Player = Union[discord.User, discord.Member, Party]
+
+
+class Clan:
+    @classmethod
+    async def register(cls, player: Player, name: str):
+        exists = await bot.clans.find_one({"members": bson.Int64(player.id)})
+        if exists:
+            raise AlreadyRegistered
+        if isinstance(player, discord.User) or isinstance(player, discord.Member):
+            player = await Party.from_user(player)
+        await bot.clans.insert_one(
+            {
+                "_id": (id := uuid()),
+                "leader": player.identifier,
+                "name": name,
+                "members": [player.identifier],
+            }
+        )
+        return cls(id)
+
+    @classmethod
+    async def from_user(cls, user: Player):
+        if isinstance(user, discord.User) or isinstance(user, discord.Member):
+            user = await Party.from_user(user)
+        _ = await bot.clans.find_one({"members": user.identifier})
+        if not _:
+            raise NotRegistered
+        return cls(_["_id"])
+
+    def __init__(self, identifier):
+        self.identifier = identifier
+
+    async def add_member(self, user: Player):
+        try:
+            await Clan.from_user(user)
+            raise AlreadyRegistered
+        except NotRegistered:
+            if not await bot.clans.find_one({"_id": self.identifier}):
+                raise NotRegistered
+            if isinstance(user, discord.User) or isinstance(user, discord.Member):
+                user = await Party.from_user(user)
+            await bot.clans.update_one(
+                {"_id": self.identifier}, {"$push": {"members": user.identifier}}
+            )
+
+    # might as well use a class method, since there's only one possible clan a user can be in
+
+    @classmethod
+    async def rem_member(self, user: Player):
+        if isinstance(user, discord.User) or isinstance(user, discord.Member):
+            user = await Party.from_user(user)
+        c = await Clan.from_user(user)
+        await bot.clans.update_one(
+            {"_id": c.identifier}, {"$pull": {"members": user.identifier}}
+        )
+
+    async def get_members(self):
+        _ = await bot.clans.find_one({"_id": self.identifier})
+        if not _:
+            raise NotRegistered
+        return [Party(identifier) for identifier in _["members"]]
+
+    async def set_members(self, new: Iterable[Player]):
+        if not await bot.clans.find_one({"_id": self.identifier}):
+            raise NotRegistered
+        await bot.clans.update_one(
+            {"_id": self.identifier},
+            {
+                "$set": {
+                    "characters": [
+                        c.identifier
+                        if isinstance(c, Party)
+                        else await Party.from_user(c)
+                        for c in new
+                    ]
+                }
+            },
+        )
+
+    async def get_name(self):
+        _ = await bot.clans.find_one({"_id": self.identifier})
+        if not _:
+            raise NotRegistered
+        return _["name"]
+
+    async def get_leader(self):
+        _ = await bot.clans.find_one({"_id": self.identifier})
+        if not _:
+            raise NotRegistered
+        return Party(_["leader"])
+
+    async def set_leader(self, user: Player):
+        if not await bot.clans.find_one({"_id": self.identifier}):
+            raise NotRegistered
+        if isinstance(user, discord.User) or isinstance(user, discord.Member):
+            user = Party.from_user(user)
+        await bot.clans.update_one(
+            {"_id": self.identifier}, {"$set": {"leader": user.identifier}}
         )
 
 
