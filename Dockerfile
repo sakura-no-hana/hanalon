@@ -1,11 +1,12 @@
-FROM python:3.9.3-slim
-
-RUN apt-get -y update && apt-get install --no-install-recommends -y git && rm -rf /var/lib/apt/lists/*
+FROM python:3.9.3-alpine
 
 WORKDIR /bot
 
 COPY requirements.txt ./
-RUN pip install -r requirements.txt
+
+RUN apk add --no-cache git gcc musl-dev \
+    && pip install -r requirements.txt \
+    && apk del git gcc musl-dev
 
 COPY config.yaml ./
 
