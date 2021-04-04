@@ -32,7 +32,7 @@ class CustomHelpCommand(HelpCommand):
         for name, value in msg.items():
             embed.add_field(name=name, value=value)
         await embed.respond(True)
-    
+
     async def send_cog_help(self, cog: Cog):
         name = "Cog Help: " + cog.qualified_name
         description = cog.description + "\n"
@@ -46,7 +46,7 @@ class CustomHelpCommand(HelpCommand):
         details = description + commands_text
         embed = HanalonEmbed(self.context, title=name, description=details)
         await embed.respond(True)
-    
+
     async def send_group_help(self, group: Group):
         name = "Group Help: " + group.qualified_name
         description = group.help + "\n"
