@@ -8,8 +8,6 @@ RUN apk add --no-cache git gcc musl-dev \
     && pip install -r requirements.txt \
     && apk del git gcc musl-dev
 
-COPY config.yaml ./
-
 COPY src ./
 
 ENTRYPOINT ["python3", "__main__.py"]

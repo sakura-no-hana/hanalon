@@ -1,3 +1,4 @@
+import base64
 import os
 import pathlib
 from typing import Set, Union
@@ -10,8 +11,13 @@ import yaml
 Context = Union[commands.Context, slash.Context]
 Bot = Union[commands.Bot, slash.SlashBot]
 
-with open("config.yaml") as file:
-    config = yaml.load(file, Loader=yaml.FullLoader)
+if "config" in os.environ:
+    config = yaml.load(
+        base64.b64decode(os.environ["config"]).decode("utf-8"), Loader=yaml.FullLoader
+    )
+else:
+    with open("config.yaml") as file:
+        config = yaml.load(file, Loader=yaml.FullLoader)
 
 
 def prefix(bot: Bot, message: discord.Message) -> Set[str]:
