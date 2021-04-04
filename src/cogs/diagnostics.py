@@ -6,13 +6,13 @@ from discord.ext import commands
 from utils.bot import bot, include_cog
 from utils.responses import HanalonEmbed, HanalonResponse
 
-# from .rpg.db import Character, Party, Clan
+from .rpg.db import Character, Clan, Party
 
 
 class Diagnostics(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        # self.coolio = []
+        self.coolio = []
 
     @commands.command(aliases=("harakiri",))
     @bot.owner_only
@@ -22,7 +22,7 @@ class Diagnostics(commands.Cog):
         """
         await HanalonEmbed(title="さよなら〜", context=ctx).respond(True, override=True)
         await self.bot.change_presence(status=discord.Status.invisible)
-        await self.bot.logout()
+        await self.bot.close()
 
     @commands.command()
     async def echo(self, ctx: commands.Context, *, msg: str):
@@ -40,7 +40,6 @@ class Diagnostics(commands.Cog):
         await HanalonEmbed(title=msg, context=ctx).respond(True, destination=channel)
 
     # @commands.command()
-    # @bot.owner_only
     # async def test(self, ctx: commands.Context):
     #     if self.coolio == []:
     #         await bot.characters.delete_many(dict())

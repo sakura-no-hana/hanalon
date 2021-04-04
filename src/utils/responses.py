@@ -85,10 +85,10 @@ class HanalonEmbed(discord.Embed):
     def __init__(
         self,
         context: Context,
-        title: Optional[str] = None,
-        description: Optional[str] = None,
+        title: str = "",
+        description: str = "",
         color: Union[discord.Color, int] = bot.color,
-        url: Optional[str] = None,
+        url: str = "",
     ):
         super().__init__(title=title, description=description, color=color, url=url)
         if isinstance(context, slash.Context):
@@ -178,7 +178,10 @@ class HanalonResponse:
             if args or kwargs:
                 kwargs["mention_author"] = False
                 try:
-                    if isinstance(self.destination, discord.abc.Messageable):
+                    if (
+                        isinstance(self.destination, discord.abc.Messageable)
+                        and self.destination != self.context.channel
+                    ):
                         await self.destination.send(*args, **kwargs)
                     else:
                         await self.context.reply(*args, **kwargs)
