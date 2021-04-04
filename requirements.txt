@@ -6,10 +6,10 @@ cachetools==4.2.1; python_version ~= '3.5'
 chardet==4.0.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
 d20==1.1.0
 dill==0.3.3
-discord-ext-slash==0.5.0
-discord.py==1.6.0
+discord.py==1.7.0
 dnspython==2.1.0
 git+https://github.com/Rapptz/discord-ext-menus@309c70222eec33acacb8c21bbb0fbe9bc57de661#egg=discord-ext-menus
+git+https://github.com/pyxiis/discord-ext-slash@eecc5a08119fe01f18e2454a678233e3e81928a8#egg=discord-ext-slash
 idna==3.1; python_version >= '3.4'
 lark-parser==0.9.0
 motor==2.3.1

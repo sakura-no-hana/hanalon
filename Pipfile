@@ -7,7 +7,7 @@ verify_ssl = true
 d20 = "*"
 dill = "*"
 discord-ext-menus = {git = "https://github.com/Rapptz/discord-ext-menus"}
-discord-ext-slash = "==0.5.0"
+discord-ext-slash = {git = "https://github.com/pyxiis/discord-ext-slash@patch-1"}
 "discord.py" = "*"
 dnspython = "*"
 PyYAML = "*"
