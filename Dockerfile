@@ -1,11 +1,11 @@
-FROM python:3.9.2-slim
+FROM python:3.9.3-slim
 
-RUN apt-get -y update && apt-get install -y git && rm -rf /var/lib/apt/lists/* && pip install pipenv
+RUN apt-get -y update && apt-get install --no-install-recommends -y git && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /bot
 
-COPY Pipfile* ./
-RUN pipenv install --system
+COPY requirements.txt ./
+RUN pip install -r requirements.txt
 
 COPY config.yaml ./
 

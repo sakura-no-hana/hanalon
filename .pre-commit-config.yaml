@@ -8,3 +8,9 @@ repos:
     hooks:
       - id: black
         language_version: python3
+  - repo: local
+    hooks:
+      - id: pipenv-lock
+        name: pipenv-lock
+        entry: bash -c 'pipenv lock -r > requirements.txt'
+        language: system
