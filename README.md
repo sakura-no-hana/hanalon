@@ -8,7 +8,7 @@ Hanalon is an RPG Discord bot.
 - Bash [(?)](https://www.gnu.org/software/bash/manual/html_node/Installing-Bash.html)
 - Docker [(?)](https://docs.docker.com/get-docker/) *
 
-\* You don't need Docker, but it makes setting stuff up easier.
+\* You don't *need* Docker, but it makes setting stuff up easier.
 ## Usage
 There are a few steps to set up this Discord bot locally.
 - Register a Discord bot.
@@ -31,11 +31,24 @@ hanalon
     └── utils
         ⋮
 ```
-Docker:
+
+**Docker:**
 - Run `run.sh`. You may need to `chmod` to be able to run it. Alternatively, you can paste the commands into your console.
 
-No Docker:
+**No Docker:**
 - Depending on what kind of environment you have, either run `pipenv install` or `pip install -r requirements.txt`.
-- Run `python3 src/__main__.py`.
+- `cd` into the parent directory of `src/`. This directory should look something like this:
+```
+src
+├── __main__.py
+├── cogs
+│   ⋮
+│
+└── utils
+    ⋮
+```
+- Run `python3 __main__.py`.
 ## Contributing
-Pull requests are always welcome. Please open an issue so that other contributors may fix an issue if you are unable to fix it yourself. For feature requests and the like, please open issues. Testing is not required (testing with an external service is a pain), but it would be nice to have.
+Pull requests are always welcome. Please open an issue so that other contributors may fix an issue if you are unable to fix it yourself. For feature requests and the like, please open issues.
+
+Keep in mind that even as a side-project, we have standards here. Thus, we've set up a pre-commit config file for your use. We currently only run a check with `black`, but the pre-commit hook makes sure that your code has sorted imports, is black compliant, and that your requirements.txt matches your Pipfile.lock. Testing is preferable to no testing, but we understand that it can be difficult to automate testing with a primarily visual application.
