@@ -1,12 +1,12 @@
-FROM python:3.9.2-slim
-
-RUN apt-get -y update && apt-get install -y git
-RUN pip install pipenv
+FROM python:3.9.3-alpine
 
 WORKDIR /bot
 
-COPY Pipfile* ./
-RUN pipenv install --system
+COPY requirements.txt ./
+
+RUN apk add --no-cache git gcc musl-dev \
+    && pip install -r requirements.txt \
+    && apk del git gcc musl-dev
 
 COPY config.yaml ./
 
