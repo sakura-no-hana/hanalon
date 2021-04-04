@@ -1,17 +1,23 @@
+import base64
 import os
 import pathlib
 from typing import Set, Union
 
 import discord
 from discord.ext import commands, slash
-import pymongo
+from motor.motor_asyncio import AsyncIOMotorClient
 import yaml
 
 Context = Union[commands.Context, slash.Context]
 Bot = Union[commands.Bot, slash.SlashBot]
 
-with open("config.yaml") as file:
-    config = yaml.load(file, Loader=yaml.FullLoader)
+if "config" in os.environ:
+    config = yaml.load(
+        base64.b64decode(os.environ["config"]).decode("utf-8"), Loader=yaml.FullLoader
+    )
+else:
+    with open("../config.yaml") as file:
+        config = yaml.load(file, Loader=yaml.FullLoader)
 
 
 def prefix(bot: Bot, message: discord.Message) -> Set[str]:
@@ -36,7 +42,7 @@ bot = slash.SlashBot(
 bot.color = config["color"]
 bot.success = config["success"]
 bot.failure = config["failure"]
-bot.db = pymongo.MongoClient(config["mongo"])
+bot.db = AsyncIOMotorClient(config["mongo"])["hanalon"]
 cogs_dir = pathlib.Path("./cogs")
 
 bot.owner_only = commands.check(lambda ctx: bot.is_owner(ctx.author))
@@ -57,7 +63,7 @@ def load_cogs():
     for root, dirs, files in os.walk(cogs_dir):
         for f in files:
             if (module := cogs_dir / f).suffix == ".py":
-                bot.load_extension(f"{cogs_dir.name}.{module.stem}")
+                bot.load_extension(f"{'.'.join(root.split('/'))}.{module.stem}")
 
 
 @bot.listen("on_ready")
@@ -73,13 +79,13 @@ async def prepare():
     )
 
 
-@bot.listen("on_command_error")
-async def handle(ctx: Context, error: commands.CommandError):
-    """
-    Handles command errors; it currently reacts to them
-    """
-    if not isinstance(error, commands.CommandNotFound):
-        await ctx.message.add_reaction(bot.failure)
+# @bot.listen("on_command_error")
+# async def handle(ctx: Context, error: commands.CommandError):
+#     """
+#     Handles command errors; it currently reacts to them
+#     """
+#     if not isinstance(error, commands.CommandNotFound):
+#         await ctx.message.add_reaction(bot.failure)
 
 
 def run():

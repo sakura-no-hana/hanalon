@@ -8,24 +8,12 @@ from utils.bot import include_cog
 from utils.responses import HanalonEmbed, HanalonResponse
 
 
-class Gambling(commands.Cog):
-    SUITS = ("♥", "♣", "♠", "♦", "🃏")
-    CARDS = (
-        "🇦",
-        "2️⃣",
-        "3️⃣",
-        "4️⃣",
-        "5️⃣",
-        "6️⃣",
-        "7️⃣",
-        "8️⃣",
-        "9️⃣",
-        "🔟",
-        "🇯",
-        "🇶",
-        "🇰",
-    )
+class Deck:
+    SUITS = ("♡", "♧", "♤", "♢", "🃏")
+    CARDS = ("A",) + tuple(str(i) for i in range(2, 11)) + ("J", "Q", "K")
 
+
+class Gambling(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -68,20 +56,20 @@ class Gambling(commands.Cog):
         """
         if joker:
             card = (
-                Gambling.CARDS[(value := random.randrange(54)) % 13]
-                + Gambling.SUITS[value // 13]
+                Deck.CARDS[(value := random.randrange(54)) % 13]
+                + Deck.SUITS[value // 13]
             )
             if (color := value // 13) == 5:
                 card = ("🟥" if color == 0 else "⬛") + card[1]
         else:
             card = (
-                Gambling.CARDS[(value := random.randrange(52)) % 13]
-                + Gambling.SUITS[value // 13]
+                Deck.CARDS[(value := random.randrange(52)) % 13]
+                + Deck.SUITS[value // 13]
             )
 
         await HanalonEmbed(
             title="Cards",
-            description=card,
+            description=f"**{card}**",
             context=ctx,
         ).respond(True)
 
@@ -100,20 +88,20 @@ class Gambling(commands.Cog):
         """
         if joker:
             card = (
-                Gambling.CARDS[(value := random.randrange(54)) % 13]
-                + Gambling.SUITS[value // 13]
+                Deck.CARDS[(value := random.randrange(54)) % 13]
+                + Deck.SUITS[value // 13]
             )
             if value // 13 == 5:
                 card = ("🟥" if value % 13 == 0 else "⬛") + card[1]
         else:
             card = (
-                Gambling.CARDS[(value := random.randrange(52)) % 13]
-                + Gambling.SUITS[value // 13]
+                Deck.CARDS[(value := random.randrange(52)) % 13]
+                + Deck.SUITS[value // 13]
             )
 
         await HanalonEmbed(
             title="Cards",
-            description=card,
+            description=f"**{card}**",
             context=ctx,
         ).respond()
 
