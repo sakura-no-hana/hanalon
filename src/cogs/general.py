@@ -56,7 +56,7 @@ class General(commands.Cog):
             e.set_thumbnail(url=self.bot.user.avatar_url)
             e.add_field(
                 name="Version",
-                value="I'm still in my infancy… teehee~!",
+                value="I'm not that mature yet… only v0.0.1…",
                 inline=False,
             )
             e.add_field(
