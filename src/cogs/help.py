@@ -18,7 +18,7 @@ class CustomHelpCommand(HelpCommand):
     """
 
     async def can_run(self, command) -> bool:
-        '''Test if the command can be run by the user'''
+        """Test if the command can be run by the user"""
         try:
             if not await command.can_run(self.context):
                 return False
@@ -42,7 +42,7 @@ class CustomHelpCommand(HelpCommand):
             for command in commands:
                 c_txt = f"`{prefix}{command.name}`"
                 if not await self.can_run(command):
-                    commands_txt += f'~~{c_txt}~~\n'
+                    commands_txt += f"~~{c_txt}~~\n"
                 else:
                     commands_txt += c_txt + "\n"
 
@@ -66,7 +66,7 @@ class CustomHelpCommand(HelpCommand):
             if await self.can_run(c):
                 commands_text += c_name
             else:
-                commands_text += f'~~{c_name}~~'
+                commands_text += f"~~{c_name}~~"
         details = description + commands_text
         embed = HanalonEmbed(self.context, title=name, description=details)
         await embed.respond(True)
@@ -84,7 +84,7 @@ class CustomHelpCommand(HelpCommand):
             if await self.can_run(c):
                 commands_text += c_name
             else:
-                commands_text += f'~~{c_name}~~'
+                commands_text += f"~~{c_name}~~"
         details = description + commands_text
         embed = HanalonEmbed(self.context, title=name, description=details)
         await embed.respond(True)
