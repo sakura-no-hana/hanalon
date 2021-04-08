@@ -32,12 +32,14 @@ class Diagnostics(commands.Cog):
         guild = ctx.guild
         channel = ctx.channel
         if len(words := msg.split()) > 1:
-            if match := re.match(r"<#([0-9]+)>$", words[0]):
+            if match := re.match(r"^<#([0-9]+)>$", words[0]):
                 channel_id = int(match.group(1))
                 if guild:
                     channel = guild.get_channel(channel_id)
                     msg = " ".join(words[1:])
-        await HanalonEmbed(title=msg, context=ctx).respond(True, destination=channel)
+        await HanalonEmbed(description=msg, context=ctx).respond(
+            True, destination=channel
+        )
 
     # @commands.command()
     # async def test(self, ctx: commands.Context):

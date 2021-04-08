@@ -24,7 +24,7 @@ class Gambling(commands.Cog):
         """
         result = d20.roll(expr)
         await HanalonEmbed(
-            title="Dice",
+            title="Dice 🎲",
             description=str(result),
             context=ctx,
         ).respond(True)
@@ -44,7 +44,7 @@ class Gambling(commands.Cog):
         """
         result = d20.roll(expr)
         await HanalonEmbed(
-            title="Dice",
+            title="Dice 🎲",
             description=str(result),
             context=ctx,
         ).respond()
@@ -68,7 +68,7 @@ class Gambling(commands.Cog):
             )
 
         await HanalonEmbed(
-            title="Cards",
+            title="Cards 🎴",
             description=f"**{card}**",
             context=ctx,
         ).respond(True)
@@ -100,7 +100,7 @@ class Gambling(commands.Cog):
             )
 
         await HanalonEmbed(
-            title="Cards",
+            title="Cards 🎴",
             description=f"**{card}**",
             context=ctx,
         ).respond()

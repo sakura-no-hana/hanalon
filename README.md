@@ -5,7 +5,6 @@
 
 Hanalon is an RPG Discord bot.
 ## Requirements
-- Bash [(?)](https://www.gnu.org/software/bash/manual/html_node/Installing-Bash.html)
 - Docker [(?)](https://docs.docker.com/get-docker/) *
 
 \* You don't *need* Docker, but it makes setting stuff up easier.
