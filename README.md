@@ -20,8 +20,9 @@ hanalon
 ├── Pipfile
 ├── config.yaml
 ├── requirements.txt
-├── run.sh
-⋮
+├── scripts
+│   ⋮
+⋮   └── run.sh
 └── src
     ├── __main__.py
     ├── cogs
