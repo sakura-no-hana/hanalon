@@ -79,13 +79,14 @@ async def prepare():
     )
 
 
-# @bot.listen("on_command_error")
-# async def handle(ctx: Context, error: commands.CommandError):
-#     """
-#     Handles command errors; it currently reacts to them
-#     """
-#     if not isinstance(error, commands.CommandNotFound):
-#         await ctx.message.add_reaction(bot.failure)
+@bot.listen("on_command_error")
+async def handle(ctx: Context, error: commands.CommandError):
+    """
+    Handles command errors; it currently reacts to them
+    """
+    if not isinstance(error, commands.CommandNotFound):
+        await ctx.message.add_reaction(bot.failure)
+    raise error
 
 
 def run():
