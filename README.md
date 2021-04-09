@@ -3,6 +3,10 @@
 [![made-with-python](https://img.shields.io/badge/Python-3.9.3-blue.svg)](https://www.python.org/)
 [![Discord](https://img.shields.io/discord/715607808028049459.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/wKqGrKN)  
 Hanalon is an RPG Discord bot.
+## Requirements
+- [Docker](https://docs.docker.com/get-docker/) *
+
+\* Without Docker, you must have [Python 3.9](https://www.python.org/downloads/) installed.
 ## Usage
 There are a few steps to set up this Discord bot locally.
 - Modify the `config.yaml` file. `token` is your bot token, `mongo` is your MongoDB connection URI, `guild` is the guild ID you plan on testing with, `devs` is a list of the developers' user IDs.
