@@ -138,7 +138,7 @@ class Character:
 
     async def get_level(self):
         xp = await self.get_xp()
-        return math.ceil(math.log(xp/5 + math.e))
+        return math.ceil(math.log(xp / 5 + math.e))
 
     async def get_jobs(self):
         _ = await bot.characters.find_one({"_id": self.identifier})
