@@ -1,6 +1,7 @@
 from typing import Iterable, Mapping, Optional, Union
 
 import discord
+from discord.embeds import EmptyEmbed
 from discord.ext import menus, slash
 
 from .bot import Context, bot
@@ -85,10 +86,10 @@ class HanalonEmbed(discord.Embed):
     def __init__(
         self,
         context: Context,
-        title: str = discord.EmptyEmbed,
-        description: str = discord.EmptyEmbed,
+        title: str = EmptyEmbed,
+        description: str = EmptyEmbed,
         color: Union[discord.Color, int] = bot.color,
-        url: str = discord.EmptyEmbed,
+        url: str = EmptyEmbed,
     ):
         super().__init__(title=title, description=description, color=color, url=url)
         if isinstance(context, slash.Context):
