@@ -4,7 +4,7 @@ from discord.ext import commands, slash
 from utils.bot import bot, include_cog
 from utils.responses import HanalonEmbed, HanalonResponse
 
-from .db import Character, Clan, Party
+from .db import Character, Clan, Job, Party, Race
 
 
 class GuildOps(commands.Cog):
@@ -31,6 +31,35 @@ class GuildOps(commands.Cog):
             ctx,
             title=f"Welcome, {ctx.author.name}!",
             description="You have successfully registered yourself with the Adventurers' Guild!",
+        ).respond(True)
+
+    @register.command(name="character")
+    async def _character(self, ctx: commands.Context, *, name: str):
+        class_query = HanalonEmbed(
+            ctx,
+            description=f"Please choose a class: {', '.join([job.name.lower() for job in Job])}.",
+        )
+        await class_query.respond()
+        j = await bot.wait_for(
+            "message",
+            check=lambda message: message.reference.message_id
+            == class_query.response.reply.id,
+        )
+        race_query = HanalonEmbed(
+            ctx,
+            description=f"Please choose a race: {', '.join([race.name.lower() for race in Race])}.",
+        )
+        await race_query.respond()
+        r = await bot.wait_for(
+            "message",
+            check=lambda message: message.reference.message_id
+            == race_query.response.reply.id,
+        )
+        await Character.register(ctx.author, name, j.content, r.content)
+        await HanalonEmbed(
+            ctx,
+            title=f"Welcome, {name}!",
+            description=f"{name} has successfully been registered as a character!",
         ).respond(True)
 
 

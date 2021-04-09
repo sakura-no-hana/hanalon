@@ -101,6 +101,7 @@ class HanalonEmbed(discord.Embed):
             icon_url=context.author.avatar_url,
         )
         self.context = context
+        self.response = None
 
     async def respond(
         self,
@@ -114,14 +115,13 @@ class HanalonEmbed(discord.Embed):
         Sends a response; this deals with replies and reactions, which most bot messages will use.
         """
         if isinstance(self.context, slash.Context):
-            await HanalonResponse(self.context).send(
-                embed=self, flags=flags, rtype=rtype
-            )
+            self.response = HanalonResponse(self.context)
+            await self.response.send(embed=self, flags=flags, rtype=rtype)
         else:
-            response = HanalonResponse(self.context, code, override, destination)
+            self.response = HanalonResponse(self.context, code, override, destination)
 
             if self.context.channel.permissions_for(self.context.me).embed_links:
-                await response.send(embed=self)
+                await self.response.send(embed=self)
             elif self.context.channel.permissions_for(self.context.me).manage_webhooks:
                 pfp = await bot.user.avatar_url.read()
                 webhook = await self.context.channel.create_webhook(
@@ -135,7 +135,7 @@ class HanalonEmbed(discord.Embed):
                 # can't be bothered to deal with reaction logic. try/except is the simplest way to
                 # handle reactions.
                 try:
-                    await response.send()
+                    await self.response.send()
                 except discord.Forbidden:
                     pass
             elif self.context.channel.permissions_for(self.context.me).send_messages:
@@ -149,7 +149,7 @@ class HanalonEmbed(discord.Embed):
                 for field in self.fields:
                     message += f"*{field.name}*\n{field.value}\n\n"
                 try:
-                    await response.send(message)
+                    await self.response.send(message)
                 except discord.Forbidden:
                     pass
             else:
@@ -168,13 +168,14 @@ class HanalonResponse:
         self.success = success
         self.override = override_success
         self.destination = destination
+        self.reply = None
 
     async def send(self, *args, **kwargs):
         """
         Sends a response; this deals with replies and reactions, which most bot messages will use.
         """
         if isinstance(self.context, slash.Context):
-            await self.context.respond(*args, **kwargs)
+            self.reply = await self.context.respond(*args, **kwargs)
         else:
             if args or kwargs:
                 kwargs["mention_author"] = False
@@ -183,9 +184,9 @@ class HanalonResponse:
                         isinstance(self.destination, discord.abc.Messageable)
                         and self.destination != self.context.channel
                     ):
-                        await self.destination.send(*args, **kwargs)
+                        self.reply = await self.destination.send(*args, **kwargs)
                     else:
-                        await self.context.reply(*args, **kwargs)
+                        self.reply = await self.context.reply(*args, **kwargs)
                 except Exception as err:
                     if not self.override:
                         raise err
