@@ -244,7 +244,8 @@ class Clan:
     @classmethod
     async def register(cls, player: Player, name: str):
         exists = await bot.clans.find_one({"members": bson.Int64(player.id)})
-        if exists:
+        duplicate_name = await bot.clans.find_one({"name": name})
+        if exists or duplicate_name:
             raise AlreadyRegistered
         if isinstance(player, discord.User) or isinstance(player, discord.Member):
             player = await Party.from_user(player)
