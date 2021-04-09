@@ -85,10 +85,10 @@ class HanalonEmbed(discord.Embed):
     def __init__(
         self,
         context: Context,
-        title: str = "",
-        description: str = "",
+        title: str = discord.EmptyEmbed,
+        description: str = discord.EmptyEmbed,
         color: Union[discord.Color, int] = bot.color,
-        url: str = "",
+        url: str = discord.EmptyEmbed,
     ):
         super().__init__(title=title, description=description, color=color, url=url)
         if isinstance(context, slash.Context):
