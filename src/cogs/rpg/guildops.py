@@ -43,7 +43,8 @@ class GuildOps(commands.Cog):
         j = await bot.wait_for(
             "message",
             check=lambda message: message.reference.message_id
-            == class_query.response.reply.id,
+            == class_query.response.reply.id
+            and message.author == ctx.author,
         )
         race_query = HanalonEmbed(
             ctx,
@@ -53,9 +54,18 @@ class GuildOps(commands.Cog):
         r = await bot.wait_for(
             "message",
             check=lambda message: message.reference.message_id
-            == race_query.response.reply.id,
+            == race_query.response.reply.id
+            and message.author == ctx.author,
         )
-        await Character.register(ctx.author, name, j.content, r.content)
+        try:
+            await Character.register(ctx.author, name, j.content, r.content)
+        except ValueError as e:
+            await HanalonEmbed(
+                ctx,
+                title=f"Registration failed!",
+                description=f"Perhaps your class or race was entered incorrectly?",
+            ).respond(False)
+            raise e
         await HanalonEmbed(
             ctx,
             title=f"Welcome, {name}!",
