@@ -10,7 +10,7 @@ repos:
         language_version: python3
   - repo: local
     hooks:
-      - id: pipenv-lock
-        name: pipenv-lock
-        entry: bash -c 'pipenv lock -r > requirements.txt'
+      - id: poetry-lock
+        name: poetry-lock
+        entry: bash -c 'poetry export -o requirements.txt --without-hashes'
         language: system
