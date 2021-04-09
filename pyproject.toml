@@ -18,7 +18,7 @@ motor = "*"
 [tool.poetry.dev-dependencies]
 black = "*"
 isort = "*"
-"pre-commit" = "*"
+pre-commit = "*"
 
 [tool.isort]
 profile = "black"
