@@ -1,5 +1,6 @@
 #!/bin/bash
 
-pipenv install || pip3 install -r requirements.txt
+pip3 install poetry
+poetry install
 cd src
 python3 __main__.py
