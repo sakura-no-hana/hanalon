@@ -72,6 +72,15 @@ class GuildOps(commands.Cog):
             description=f"{name} has successfully been registered as a character!",
         ).respond(True)
 
+    @register.command(name="clan")
+    async def _clan(self, ctx: commands.Context, *, name: str):
+        await Clan.register(ctx.author, name)
+        await HanalonEmbed(
+            ctx,
+            title=f"Welcome, {name}!",
+            description=f"{name} has successfully been registered as a clan!",
+        ).respond(True)
+
 
 def setup(bot):
     include_cog(bot, GuildOps)
