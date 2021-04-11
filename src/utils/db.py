@@ -105,26 +105,23 @@ class Character:
         self.identifier = identifier
 
     async def get_name(self):
-        _ = await bot.characters.find_one({"_id": self.identifier})
-        if not _:
+        if not (char := await bot.characters.find_one({"_id": self.identifier})):
             raise NotRegistered
-        return _["name"]
+        return char["name"]
 
     # no name setter since I don't see the demand + it's trivial for later implementation
 
     async def get_race(self):
-        _ = await bot.characters.find_one({"_id": self.identifier})
-        if not _:
+        if not (char := await bot.characters.find_one({"_id": self.identifier})):
             raise NotRegistered
-        return Race(_["race"]).name
+        return Race(char["race"]).name
 
     # same thing with race
 
     async def get_xp(self):
-        _ = await bot.characters.find_one({"_id": self.identifier})
-        if not _:
+        if not (char := await bot.characters.find_one({"_id": self.identifier})):
             raise NotRegistered
-        return _["xp"]
+        return char["xp"]
 
     async def set_xp(self, new):
         if not await bot.characters.find_one({"_id": self.identifier}):
@@ -141,10 +138,9 @@ class Character:
         return math.ceil(math.log(xp / 5 + math.e))
 
     async def get_jobs(self):
-        _ = await bot.characters.find_one({"_id": self.identifier})
-        if not _:
+        if not (char := await bot.characters.find_one({"_id": self.identifier})):
             raise NotRegistered
-        return _["jobs"]
+        return char["jobs"]
 
     async def get_jobs_dict(self):
         jobs = await self.get_jobs()
@@ -171,10 +167,9 @@ class Character:
         )
 
     async def get_player(self):
-        _ = await bot.characters.find_one({"_id": self.identifier})
-        if not _:
+        if not (char := await bot.characters.find_one({"_id": self.identifier})):
             raise NotRegistered
-        return await bot.fetch_user(_["player"])
+        return await bot.fetch_user(char["player"])
 
 
 class Party:
@@ -196,10 +191,9 @@ class Party:
 
     @classmethod
     async def from_user(cls, user: discord.User):
-        _ = await bot.parties.find_one({"player": bson.Int64(user.id)})
-        if not _:
+        if not (party := await bot.parties.find_one({"player": bson.Int64(user.id)})):
             raise NotRegistered
-        return cls(_["_id"])
+        return cls(party["_id"])
 
     def __init__(self, identifier):
         self.identifier = identifier
@@ -217,10 +211,9 @@ class Party:
         )
 
     async def get_characters(self):
-        _ = await bot.parties.find_one({"_id": self.identifier})
-        if not _:
+        if not (party := await bot.parties.find_one({"_id": self.identifier})):
             raise NotRegistered
-        return [Character(identifier) for identifier in _["characters"]]
+        return [Character(identifier) for identifier in party["characters"]]
 
     async def set_characters(self, new):
         if not await bot.parties.find_one({"_id": self.identifier}):
@@ -231,10 +224,9 @@ class Party:
         )
 
     async def get_player(self):
-        _ = await bot.parties.find_one({"_id": self.identifier})
-        if not _:
+        if not (party := await bot.parties.find_one({"_id": self.identifier})):
             raise NotRegistered
-        return await bot.fetch_user(_["player"])
+        return await bot.fetch_user(party["player"])
 
 
 Player = Union[discord.User, discord.Member, Party]
@@ -263,10 +255,9 @@ class Clan:
     async def from_user(cls, user: Player):
         if isinstance(user, discord.User) or isinstance(user, discord.Member):
             user = await Party.from_user(user)
-        _ = await bot.clans.find_one({"members": user.identifier})
-        if not _:
+        if not (clan := await bot.clans.find_one({"members": user.identifier})):
             raise NotRegistered
-        return cls(_["_id"])
+        return cls(clan["_id"])
 
     def __init__(self, identifier):
         self.identifier = identifier
@@ -296,10 +287,9 @@ class Clan:
         )
 
     async def get_members(self):
-        _ = await bot.clans.find_one({"_id": self.identifier})
-        if not _:
+        if not (clan := await bot.clans.find_one({"_id": self.identifier})):
             raise NotRegistered
-        return [Party(identifier) for identifier in _["members"]]
+        return [Party(identifier) for identifier in clan["members"]]
 
     async def set_members(self, new: Iterable[Player]):
         if not await bot.clans.find_one({"_id": self.identifier}):
@@ -319,16 +309,14 @@ class Clan:
         )
 
     async def get_name(self):
-        _ = await bot.clans.find_one({"_id": self.identifier})
-        if not _:
+        if not (clan := await bot.clans.find_one({"_id": self.identifier})):
             raise NotRegistered
-        return _["name"]
+        return clan["name"]
 
     async def get_leader(self):
-        _ = await bot.clans.find_one({"_id": self.identifier})
-        if not _:
+        if not (clan := await bot.clans.find_one({"_id": self.identifier})):
             raise NotRegistered
-        return Party(_["leader"])
+        return Party(clan["leader"])
 
     async def set_leader(self, user: Player):
         if not await bot.clans.find_one({"_id": self.identifier}):

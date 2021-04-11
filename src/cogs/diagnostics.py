@@ -4,6 +4,7 @@ import discord
 from discord.ext import commands
 
 from utils.bot import bot, include_cog
+from utils.db import Character, Clan, Job, Party, Race
 from utils.responses import HanalonEmbed
 
 
