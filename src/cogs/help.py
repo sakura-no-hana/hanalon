@@ -48,7 +48,7 @@ class CustomHelpCommand(HelpCommand):
 
             msg[title] = commands_txt
 
-        embed = HanalonEmbed(self.context, title=title)
+        embed = HanalonEmbed(self.context, title="Help")
         for name, value in msg.items():
             embed.add_field(name=name, value=value)
         await embed.respond(True)
