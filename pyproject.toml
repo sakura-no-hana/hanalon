@@ -17,8 +17,10 @@ motor = "*"
 
 [tool.poetry.dev-dependencies]
 black = "*"
+distest = "*"
 isort = "*"
 pre-commit = "*"
+pytest = "*"
 
 [tool.isort]
 profile = "black"

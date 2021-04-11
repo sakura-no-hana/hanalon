@@ -1,6 +1,6 @@
 #!/bin/bash
 
-pip3 install poetry
+curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
 poetry install
 cd src
-python3 __main__.py
+poetry run python __main__.py

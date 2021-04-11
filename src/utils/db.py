@@ -61,6 +61,23 @@ class Race(Enum):
     DHAMPIR = 15
 
 
+@unique
+class Damage(Enum):
+    ACID = 0
+    BLUDGEONING = 1
+    COLD = 2
+    FIRE = 3
+    FORCE = 4
+    LIGHTNING = 5
+    NECROTIC = 6
+    PIERCING = 7
+    POISON = 8
+    PSYCHIC = 9
+    RADIANT = 10
+    SLASHING = 11
+    THUNDER = 12
+
+
 class Character:
     @classmethod
     async def register(
@@ -121,7 +138,7 @@ class Character:
 
     async def get_level(self):
         xp = await self.get_xp()
-        return math.ceil(math.log(xp + math.e))
+        return math.ceil(math.log(xp / 5 + math.e))
 
     async def get_jobs(self):
         _ = await bot.characters.find_one({"_id": self.identifier})
@@ -227,7 +244,8 @@ class Clan:
     @classmethod
     async def register(cls, player: Player, name: str):
         exists = await bot.clans.find_one({"members": bson.Int64(player.id)})
-        if exists:
+        duplicate_name = await bot.clans.find_one({"name": name})
+        if exists or duplicate_name:
             raise AlreadyRegistered
         if isinstance(player, discord.User) or isinstance(player, discord.Member):
             player = await Party.from_user(player)
@@ -320,10 +338,3 @@ class Clan:
         await bot.clans.update_one(
             {"_id": self.identifier}, {"$set": {"leader": user.identifier}}
         )
-
-
-def setup(bot):
-    bot.characters = bot.db["character"]
-    bot.parties = bot.db["party"]
-    bot.clans = bot.db["clan"]
-    bot.shop = bot.db["shop"]

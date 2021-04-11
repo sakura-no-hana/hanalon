@@ -48,12 +48,12 @@ cogs_dir = pathlib.Path("./cogs")
 bot.owner_only = commands.check(lambda ctx: bot.is_owner(ctx.author))
 
 
-def include_cog(bot: Bot, cog: commands.Cog):
+def include_cog(cog: commands.Cog):
     """
     Loads a cog for both commands and slash
     """
-    bot.add_cog(cog(bot))
-    bot.add_slash_cog(cog(bot))
+    bot.add_cog(cog())
+    bot.add_slash_cog(cog())
 
 
 def load_cogs():
@@ -63,7 +63,19 @@ def load_cogs():
     for root, dirs, files in os.walk(cogs_dir):
         for f in files:
             if (module := cogs_dir / f).suffix == ".py":
-                bot.load_extension(f"{'.'.join(root.split('/'))}.{module.stem}")
+                bot.load_extension(
+                    f"{'.'.join(pathlib.Path(root).parts)}.{module.stem}"
+                )
+
+
+def is_response(ctx, message, response):
+    try:
+        return (
+            message.reference.message_id == response.reply.id
+            and message.author == ctx.author
+        )
+    except AttributeError:
+        return False
 
 
 @bot.listen("on_ready")
@@ -79,13 +91,14 @@ async def prepare():
     )
 
 
-# @bot.listen("on_command_error")
-# async def handle(ctx: Context, error: commands.CommandError):
-#     """
-#     Handles command errors; it currently reacts to them
-#     """
-#     if not isinstance(error, commands.CommandNotFound):
-#         await ctx.message.add_reaction(bot.failure)
+@bot.listen("on_command_error")
+async def handle(ctx: Context, error: commands.CommandError):
+    """
+    Handles command errors; it currently reacts to them
+    """
+    if not isinstance(error, commands.CommandNotFound):
+        await ctx.message.add_reaction(bot.failure)
+    raise error
 
 
 def run():

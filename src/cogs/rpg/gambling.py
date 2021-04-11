@@ -14,9 +14,6 @@ class Deck:
 
 
 class Gambling(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-
     @commands.command()
     async def roll(self, ctx: commands.Context, *, expr: str = "1d6"):
         """
@@ -106,5 +103,5 @@ class Gambling(commands.Cog):
         ).respond()
 
 
-def setup(bot):
-    include_cog(bot, Gambling)
+def setup(_):
+    include_cog(Gambling)

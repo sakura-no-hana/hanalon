@@ -4,16 +4,10 @@ import discord
 from discord.ext import commands
 
 from utils.bot import bot, include_cog
-from utils.responses import HanalonEmbed, HanalonResponse
-
-from .rpg.db import Character, Clan, Party
+from utils.responses import HanalonEmbed
 
 
 class Diagnostics(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-        self.coolio = []
-
     @commands.command(aliases=("harakiri",))
     @bot.owner_only
     async def seppuku(self, ctx: commands.Context):
@@ -21,8 +15,8 @@ class Diagnostics(commands.Cog):
         Kills the bot.
         """
         await HanalonEmbed(title="さよなら〜", context=ctx).respond(True, override=True)
-        await self.bot.change_presence(status=discord.Status.invisible)
-        await self.bot.close()
+        await bot.change_presence(status=discord.Status.invisible)
+        await bot.close()
 
     @commands.command()
     async def echo(self, ctx: commands.Context, *, msg: str):
@@ -75,5 +69,5 @@ class Diagnostics(commands.Cog):
     #
 
 
-def setup(bot):
-    include_cog(bot, Diagnostics)
+def setup(_):
+    include_cog(Diagnostics)
