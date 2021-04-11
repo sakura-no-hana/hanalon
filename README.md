@@ -14,7 +14,7 @@ There are a few steps to set up this Discord bot locally.
     ```
     hanalon
     ├── Dockerfile
-    ├── Pipfile
+    ├── pyproject.toml
     ├── config.yaml
     ├── requirements.txt
     ├── scripts
