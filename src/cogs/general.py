@@ -3,14 +3,11 @@ from typing import Optional
 import discord
 from discord.ext import commands, slash
 
-from utils.bot import include_cog
+from utils.bot import bot, include_cog
 from utils.responses import HanalonEmbed, HanalonResponse
 
 
 class General(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-
     @commands.command()
     async def ping(self, ctx: commands.Context, precision: int = 4):
         """
@@ -18,7 +15,7 @@ class General(commands.Cog):
         """
         await HanalonEmbed(
             title="🏓 Pong!",
-            description=f'{("%." + str(precision) + "f") % self.bot.latency} seconds!',
+            description=f'{("%." + str(precision) + "f") % bot.latency} seconds!',
             context=ctx,
         ).respond(True)
 
@@ -38,7 +35,7 @@ class General(commands.Cog):
         """
         await HanalonEmbed(
             title="🏓 Pong!",
-            description=f'{("%." + str(precision) + "f") % self.bot.latency} seconds!',
+            description=f'{("%." + str(precision) + "f") % bot.latency} seconds!',
             context=ctx,
         ).respond()
 
@@ -53,7 +50,7 @@ class General(commands.Cog):
                 title="About me",
                 description="Hello! I'm Hanalon, your friendly Adventurers' Guild receptionist! Don't hesitate to consult me if you need anything!",
             )
-            e.set_thumbnail(url=self.bot.user.avatar_url)
+            e.set_thumbnail(url=bot.user.avatar_url)
             e.add_field(
                 name="Version",
                 value="I'm not that mature yet… only v0.0.1…",
@@ -64,7 +61,7 @@ class General(commands.Cog):
                 value="I'm a homunculus made with discord.py!",
                 inline=False,
             )
-            devs = [await self.bot.fetch_user(dev) for dev in self.bot.owner_ids]
+            devs = [await bot.fetch_user(dev) for dev in bot.owner_ids]
             e.add_field(
                 name="Developers",
                 value="I loyally serve my masters: "
@@ -73,12 +70,12 @@ class General(commands.Cog):
             )
             e.add_field(
                 name="Servers",
-                value=f"I proudly serve {len(self.bot.guilds)} Guild branches!",
+                value=f"I proudly serve {len(bot.guilds)} Guild branches!",
                 inline=False,
             )
             e.add_field(
                 name="Users",
-                value=f"I am the receptionist for {len(self.bot.users)} parties!",
+                value=f"I am the receptionist for {len(bot.users)} parties!",
                 inline=False,
             )
             await e.respond(True)
@@ -100,5 +97,5 @@ class General(commands.Cog):
         await ctx.send(ctx.message.guild.name)
 
 
-def setup(bot):
-    include_cog(bot, General)
+def setup(_):
+    include_cog(General)

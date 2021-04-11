@@ -1,16 +1,11 @@
-import discord
-from discord.ext import commands, slash
+from discord.ext import commands
 
-from utils.bot import bot, include_cog
-from utils.responses import HanalonEmbed, HanalonResponse
-
-from .db import Character, Clan, Job, Party, Race
+from utils.bot import bot, include_cog, is_response
+from utils.db import Character, Clan, Job, Party, Race
+from utils.responses import HanalonEmbed
 
 
 class GuildOps(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-
     @commands.command()
     @bot.owner_only
     async def clear(self, ctx: commands.Context):
@@ -22,7 +17,7 @@ class GuildOps(commands.Cog):
     @commands.group()
     async def register(self, ctx: commands.Context):
         if ctx.invoked_subcommand is None:
-            await ctx.invoke(self.bot.get_command("register party"))
+            await ctx.invoke(bot.get_command("register party"))
 
     @register.command(name="party")
     async def _party(self, ctx: commands.Context):
@@ -42,9 +37,7 @@ class GuildOps(commands.Cog):
         await class_query.respond()
         j = await bot.wait_for(
             "message",
-            check=lambda message: message.reference.message_id
-            == class_query.response.reply.id
-            and message.author == ctx.author,
+            check=lambda message: is_response(ctx, message, class_query.response),
         )
         race_query = HanalonEmbed(
             ctx,
@@ -53,9 +46,7 @@ class GuildOps(commands.Cog):
         await race_query.respond()
         r = await bot.wait_for(
             "message",
-            check=lambda message: message.reference.message_id
-            == race_query.response.reply.id
-            and message.author == ctx.author,
+            check=lambda message: is_response(ctx, message, race_query.response),
         )
         try:
             await Character.register(ctx.author, name, j.content, r.content)
@@ -82,5 +73,9 @@ class GuildOps(commands.Cog):
         ).respond(True)
 
 
-def setup(bot):
-    include_cog(bot, GuildOps)
+def setup(_):
+    include_cog(GuildOps)
+    bot.characters = bot.db["character"]
+    bot.parties = bot.db["party"]
+    bot.clans = bot.db["clan"]
+    bot.shop = bot.db["shop"]

@@ -338,10 +338,3 @@ class Clan:
         await bot.clans.update_one(
             {"_id": self.identifier}, {"$set": {"leader": user.identifier}}
         )
-
-
-def setup(bot):
-    bot.characters = bot.db["character"]
-    bot.parties = bot.db["party"]
-    bot.clans = bot.db["clan"]
-    bot.shop = bot.db["shop"]

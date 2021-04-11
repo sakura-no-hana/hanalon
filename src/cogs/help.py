@@ -9,6 +9,7 @@ from discord.ext.commands import (
     HelpCommand,
 )
 
+from utils.bot import bot
 from utils.responses import HanalonEmbed
 
 
@@ -120,8 +121,7 @@ class CustomHelpCommand(HelpCommand):
 class Help(Cog):
     """A cog to implement the help command"""
 
-    def __init__(self, bot: Bot) -> None:
-        self.bot = bot
+    def __init__(self) -> None:
         self.old_help = bot.help_command
         bot.help_command = CustomHelpCommand()
         bot.help_command.cog = self
@@ -132,4 +132,4 @@ class Help(Cog):
 
 
 def setup(bot):
-    bot.add_cog(Help(bot))
+    bot.add_cog(Help())

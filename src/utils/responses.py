@@ -170,26 +170,26 @@ class HanalonResponse:
         self.destination = destination
         self.reply = None
 
-    async def send(self, *args, **kwargs):
+    async def send(self, **kwargs):
         """
         Sends a response; this deals with replies and reactions, which most bot messages will use.
         """
         if isinstance(self.context, slash.Context):
-            self.reply = await self.context.respond(*args, **kwargs)
+            self.reply = await self.context.respond(**kwargs)
         else:
-            if args or kwargs:
+            if "mention_author" not in kwargs:
                 kwargs["mention_author"] = False
-                try:
-                    if (
-                        isinstance(self.destination, discord.abc.Messageable)
-                        and self.destination != self.context.channel
-                    ):
-                        self.reply = await self.destination.send(*args, **kwargs)
-                    else:
-                        self.reply = await self.context.reply(*args, **kwargs)
-                except Exception as err:
-                    if not self.override:
-                        raise err
+            try:
+                if (
+                    isinstance(self.destination, discord.abc.Messageable)
+                    and self.destination != self.context.channel
+                ):
+                    self.reply = await self.destination.send(**kwargs)
+                else:
+                    self.reply = await self.context.reply(**kwargs)
+            except Exception:
+                if not self.override:
+                    raise
             if self.success:
                 await self.context.message.add_reaction(bot.success)
             elif self.success is not None:

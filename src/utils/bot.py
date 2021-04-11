@@ -48,12 +48,12 @@ cogs_dir = pathlib.Path("./cogs")
 bot.owner_only = commands.check(lambda ctx: bot.is_owner(ctx.author))
 
 
-def include_cog(bot: Bot, cog: commands.Cog):
+def include_cog(cog: commands.Cog):
     """
     Loads a cog for both commands and slash
     """
-    bot.add_cog(cog(bot))
-    bot.add_slash_cog(cog(bot))
+    bot.add_cog(cog())
+    bot.add_slash_cog(cog())
 
 
 def load_cogs():
@@ -66,6 +66,16 @@ def load_cogs():
                 bot.load_extension(
                     f"{'.'.join(pathlib.Path(root).parts)}.{module.stem}"
                 )
+
+
+def is_response(ctx, message, response):
+    try:
+        return (
+            message.reference.message_id == response.reply.id
+            and message.author == ctx.author
+        )
+    except AttributeError:
+        return False
 
 
 @bot.listen("on_ready")
