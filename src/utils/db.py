@@ -35,7 +35,7 @@ class Job(Enum):
     MAGE = 9
     WARLOCK = 10
     CLERIC = 11
-    SPELLSWORD = 12
+    BLADESINGER = 12
     PALADIN = 13
     KNIGHT = 14
     WARRIOR = 15
@@ -53,7 +53,7 @@ class Race(Enum):
     DOGFOLK = 7
     BIRDFOLK = 8
     RABBITFOLK = 9
-    LIZARDFOLK = 10
+    DRAGONBORN = 10
     SIREN = 11
     AMAZON = 12
     TIEFLING = 13
