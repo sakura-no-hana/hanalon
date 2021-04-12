@@ -1,5 +1,5 @@
 class Piece:
-    def __init__(self, x, y, z, emoji="⬛", move_cost=0):
+    def __init__(self, x, y, z, emoji=[["⬛"]], move_cost=0):
         self.loc = (x, y, z)
         self.emoji = emoji
         self.move_cost = move_cost
@@ -9,7 +9,7 @@ class Piece:
 
 
 class Wall(Piece):
-    def __init__(self, x, y, emoji="⬛"):
+    def __init__(self, x, y, emoji=[["⬛"]]):
         super().__init__(x, y, 0, emoji)
 
     def on_move(self, vector, piece=None):
@@ -18,7 +18,7 @@ class Wall(Piece):
 
 
 class Tile(Piece):
-    def __init__(self, x, y, emoji="🟫"):
+    def __init__(self, x, y, emoji=[["🟫"]]):
         super().__init__(x, y, 0, emoji)
 
     def on_move(self, vector, piece=None):
