@@ -83,6 +83,7 @@ async def prepare():
     """
     Prepares the bot; it currently changes its presence
     """
+    print(f'Logged on as {bot.user.name}#{bot.user.discriminator}')
     await bot.change_presence(
         status=discord.Status.idle,
         activity=discord.Activity(
