@@ -72,8 +72,7 @@ class GameAction(commands.Cog):
             ty = floor(y)
             # Check out of bounds
             if ty >= len(self.board) or ty < 0 or tx >= len(self.board[0]) or tx < 0:
-                x -= dx
-                y -= dy
+                x, y = x - dx, y - dy
                 code = 2
                 break
             # Check collision of 8 surrounding tiles from (tx, ty)
@@ -105,8 +104,8 @@ class GameAction(commands.Cog):
         # If out of bounds or collision, cancel movement and round player
         # position.
         tx, ty = round(x), round(y)
-        self.board[ty][tx] = 4
         self.board[oy][ox] = 0
+        self.board[ty][tx] = 4
         # Act on code: send a message if collision or out of bounds
         if code == 1:
             await ctx.send('Collision')
