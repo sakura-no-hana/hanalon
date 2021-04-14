@@ -68,8 +68,8 @@ class GameAction(commands.Cog):
             # Move a bit at a time
             dd = (dx ** 2 + dy ** 2) ** 0.5
             x, y = round(x + dx, 3), round(y + dy, 3)
-            tx = floor(x)
-            ty = floor(y)
+            tx = round(x)
+            ty = round(y)
             # Check out of bounds
             if ty >= len(self.board) or ty < 0 or tx >= len(self.board[0]) or tx < 0:
                 x, y = x - dx, y - dy
