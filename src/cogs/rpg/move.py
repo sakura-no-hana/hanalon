@@ -8,8 +8,8 @@ class GameAction(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.chara = Being(0, 0, skin=[["<:yuniwant:828629768651014195>"]])
-        self.chara.speed = 3
-        self.chara.max_speed = 3
+        self.chara.speed = 10
+        self.chara.max_speed = 10
         self.dungeon = Dungeon(
             [
                 [
