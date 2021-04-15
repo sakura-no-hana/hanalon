@@ -74,6 +74,9 @@ class Dungeon:
         test = numpy.copy(movement.vector)
         mag = numpy.linalg.norm(test)
 
+        if mag > movement.piece.speed:
+            raise InsufficientSpeed
+
         test /= 2 * mag
 
         origin = numpy.copy(movement.piece.loc)
