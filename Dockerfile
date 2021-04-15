@@ -1,12 +1,13 @@
-FROM python:3.9.4-alpine
+FROM python:3.9.4-slim
 
 WORKDIR /bot
 
 COPY requirements.txt ./
 
-RUN apk add --no-cache git gcc musl-dev \
-    && pip install -r requirements.txt \
-    && apk del git gcc musl-dev
+RUN apt -y update \
+    && apt -y install git \
+    && pip install --no-cache -r requirements.txt \
+    && apt -y remove git && apt -y clean
 
 COPY src ./
 

@@ -1,19 +1,14 @@
-from discord.ext import commands
 from math import floor
 
+from discord.ext import commands
 
 MAX_DIST = 3
+
 
 class GameAction(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.mapping = {
-            0: 'EMPTY',
-            1: 'EMPTY',
-            2: 'EMPTY',
-            3: 'WALL',
-            4: 'PLAYER'
-        }
+        self.mapping = {0: "EMPTY", 1: "EMPTY", 2: "EMPTY", 3: "WALL", 4: "PLAYER"}
         self.board = [
             [0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0],
@@ -23,30 +18,31 @@ class GameAction(commands.Cog):
         ]
 
     def print_board(self) -> str:
-        _r = ''
+        _r = ""
         for col in self.board:
             for tile in col:
                 if tile == 0:
-                    _r += '🟫'
+                    _r += "🟫"
                 elif tile == 3:
-                    _r += '⬛'
+                    _r += "⬛"
                 elif tile == 4:
-                    _r += '🟦'
-            _r += '\n'
+                    _r += "🟦"
+            _r += "\n"
         return _r
-    
+
     @commands.command()
     async def show_board(self, ctx) -> None:
-        '''Test command?'''
-        await ctx.send(f'{self.print_board()}')
+        """Test command?"""
+        await ctx.send(f"{self.print_board()}")
 
     @commands.command()
     async def move(self, ctx, delta_x: int, delta_y: int) -> None:
-        '''First attempt at a movement command. The player will
+        """First attempt at a movement command. The player will
         move in a straight line with a coordinate change of
         (delta_x, delta_y). This does attempt to include diagonals
         as it also checks for out-of-bounds movements and wall
-        collision'''
+        collision"""
+
         def find_player(board):
             for y in range(len(board)):
                 for x in range(len(board[y])):
@@ -76,7 +72,17 @@ class GameAction(commands.Cog):
                 code = 2
                 break
             # Check collision of 8 surrounding tiles from (tx, ty)
-            c = [(1, 0), (1, 1), (1, -1), (0, 0), (0, 1), (0, -1), (-1, 0), (-1, 1), (-1, -1)]
+            c = [
+                (1, 0),
+                (1, 1),
+                (1, -1),
+                (0, 0),
+                (0, 1),
+                (0, -1),
+                (-1, 0),
+                (-1, 1),
+                (-1, -1),
+            ]
             for fx, fy in c:
                 try:
                     wx = tx + fx
@@ -84,16 +90,10 @@ class GameAction(commands.Cog):
                     if self.board[wy][wx] == 3:  # 'WALL'
                         # Do a collision check:
                         s = 1
-                        if all([
-                            wx < x + s,
-                            wx + s > x,
-                            
-                            wy < y + s,
-                            wy + s > y
-                        ]):
+                        if all([wx < x + s, wx + s > x, wy < y + s, wy + s > y]):
                             code = 1
                             break
-                except IndexError:  
+                except IndexError:
                     # Out of bounds check: no matter
                     pass
             if code == 1:
@@ -108,12 +108,12 @@ class GameAction(commands.Cog):
         self.board[ty][tx] = 4
         # Act on code: send a message if collision or out of bounds
         if code == 1:
-            await ctx.send('Collision')
+            await ctx.send("Collision")
         if code == 2:
-            await ctx.send('Out of bounds')
+            await ctx.send("Out of bounds")
         # Also add in the distance
         await ctx.send(t)
-        await ctx.send(f'{self.print_board()}')
+        await ctx.send(f"{self.print_board()}")
 
 
 def setup(bot):

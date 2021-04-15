@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "hanalon"
-version = "0.0.2"
+version = "0.1.1"
 description = "An RPG Discord bot."
-authors = ["pyxiis", "Noyx46", "AlankarSovani", "DiggetyDoo"]
+authors = ["pyxiis", "Noyx46", "DiggetyDoo", "AlankarSovani"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
@@ -12,15 +12,15 @@ discord-ext-menus = {git = "https://github.com/Rapptz/discord-ext-menus"}
 discord-ext-slash = "*"
 "discord.py" = "*"
 dnspython = "*"
-PyYAML = "*"
 motor = "*"
+numpy = "*"
+PyYAML = "*"
+shapely = "*"
 
 [tool.poetry.dev-dependencies]
 black = "*"
-distest = "*"
 isort = "*"
 pre-commit = "*"
-pytest = "*"
 
 [tool.isort]
 profile = "black"
