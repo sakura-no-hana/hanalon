@@ -2,6 +2,16 @@ import numpy
 from shapely import affinity
 from shapely.geometry import Polygon
 
+from utils.rpg.db import RPGException
+
+
+class ObstructedPath(RPGException):
+    ...
+
+
+class InsufficientSpeed(RPGException):
+    ...
+
 
 class Piece:
     def __init__(
@@ -14,7 +24,7 @@ class Piece:
         data=None,
     ):
         self.loc = numpy.array([float(x), float(y)])
-        self._speed = speed
+        self.max_speed = speed
         self.hitbox = hitbox
 
         # note that the skin is rendered upside-down, so we must reverse it
@@ -59,20 +69,29 @@ class Dungeon:
         return collided
 
     def move(self, movement):
+        movement.piece.speed = movement.piece.max_speed
+
         test = numpy.copy(movement.vector)
         mag = numpy.linalg.norm(test)
+
         test /= 2 * mag
 
         origin = numpy.copy(movement.piece.loc)
 
-        while (movement.piece.loc - origin < movement.vector)[
-            0
-        ] and movement.piece.speed > 0:
+        while numpy.linalg.norm(movement.piece.loc - origin) < numpy.linalg.norm(
+            movement.vector
+        ):
             if self.collide(movement):
                 movement.piece.loc = origin
+                raise ObstructedPath
 
             movement.piece.loc += test
-            movement.piece.speed -= mag
+            movement.piece.speed -= 0.5
+
+        movement.piece.loc = origin
+
+        if movement.piece.speed < 0:
+            raise InsufficientSpeed
 
         movement.piece.on_move(movement)
 
