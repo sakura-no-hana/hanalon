@@ -88,8 +88,12 @@ class Dungeon:
 
                 for i, row in enumerate(obj.skin):
                     for j, px in enumerate(row):
-                        if px:
-                            out[round(coords[1] - y + i)][round(coords[0] - x + j)] = px
+                        if (
+                            px
+                            and 0 <= (vertical := round(coords[1] - y + i)) < height
+                            and 0 <= (horizontal := round(coords[0] - x + j)) < width
+                        ):
+                            out[vertical][horizontal] = px
 
         for i, row in enumerate(out):
             for j, px in enumerate(row):
