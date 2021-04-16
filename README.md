@@ -18,23 +18,23 @@ There are a few steps to set up this Discord bot locally.
 - Modify the `config.yaml` file. `token` is your bot token, `mongo` is your MongoDB connection URI, `guild` is the guild ID you plan on testing with, `devs` is a list of the developers' user IDs.
 - `cd` into the parent directory of `src/`. This directory should look something like this:
 
-    ```txt
-    hanalon
-    ├── Dockerfile
-    ├── config.yaml
-    ├── pyproject.toml
-    ├── requirements.txt
-    ├── scripts
-    │   ⋮
-    ⋮   └── run.sh
-    └── src
-        ├── __main__.py
-        ├── cogs
-        │   ⋮
-        │
-        └── utils
-            ⋮
-    ```
+  ```txt
+  hanalon
+  ├── Dockerfile
+  ├── config.yaml
+  ├── pyproject.toml
+  ├── requirements.txt
+  ├── scripts
+  │   ⋮
+  ⋮   └── run.sh
+  └── src
+      ├── __main__.py
+      ├── cogs
+      │   ⋮
+      │
+      └── utils
+          ⋮
+  ```
 
 - Run the bot
   - With Docker: `bash scripts/run.sh`

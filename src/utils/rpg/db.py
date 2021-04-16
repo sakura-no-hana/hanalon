@@ -176,7 +176,7 @@ class Character:
 class Party:
     @classmethod
     async def register(
-        cls, player: discord.User, characters: Optional[Iterable[Character]] = set()
+        cls, player: discord.User, characters: Optional[Iterable[Character]] = tuple()
     ):
         exists = await bot.parties.find_one({"player": bson.Int64(player.id)})
         if exists:

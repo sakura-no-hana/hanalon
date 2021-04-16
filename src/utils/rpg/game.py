@@ -20,7 +20,7 @@ class Piece:
         y,
         speed=0.0,
         hitbox=Polygon([(0.0, 0.0), (0.0, 1.0), (1.0, 1.0), (1.0, 0.0)]),
-        skin={{"⬛"}},
+        skin=(("⬛",),),
         data=None,
     ):
         """Initializes a piece with the given parameters."""

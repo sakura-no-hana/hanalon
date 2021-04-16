@@ -4,7 +4,7 @@ import d20
 from discord.ext import commands
 
 from utils.bot import include_cog
-from utils.responses import HanalonEmbed, HanalonResponse
+from utils.responses import HanalonEmbed
 
 
 class Deck:

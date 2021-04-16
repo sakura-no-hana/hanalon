@@ -9,6 +9,7 @@ from .bot import Context, bot
 
 class HanalonPages(menus.Menu):
     def __init__(self, context: Context, pages: Iterable[Mapping]):
+        """Creates an interactive list of pages."""
         super().__init__()
         self.context = context
         self.pages = pages
@@ -77,6 +78,7 @@ class HanalonEmbed(discord.Embed):
         color: Union[discord.Color, int] = bot.color,
         url: str = EmptyEmbed,
     ):
+        """Creates an embed with prettifying and permissions taken care of."""
         super().__init__(title=title, description=description, color=color, url=url)
         if isinstance(context, slash.Context):
             self.timestamp = context.created_at
@@ -148,6 +150,7 @@ class HanalonResponse:
         override_success: bool = False,
         destination: Optional[discord.abc.Messageable] = None,
     ):
+        """Creates a response to a message."""
         self.context = context
         self.success = success
         self.override = override_success

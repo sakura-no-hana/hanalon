@@ -116,6 +116,7 @@ class CustomHelpCommand(HelpCommand):
 
 
 class Help(Cog):
+
     """A cog to implement the help command."""
 
     def __init__(self) -> None:

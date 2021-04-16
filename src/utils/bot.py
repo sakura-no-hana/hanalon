@@ -66,7 +66,7 @@ def include_cog(cog: commands.Cog):
 
 def load_cogs():
     """Loads all cogs."""
-    for root, dirs, files in os.walk(cogs_dir):
+    for root, _, files in os.walk(cogs_dir):
         for f in files:
             if (module := cogs_dir / f).suffix == ".py":
                 bot.load_extension(
