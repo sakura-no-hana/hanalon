@@ -17,7 +17,7 @@ config_file = pathlib.Path("../config.yaml")
 
 if "config" in os.environ:
     config = yaml.load(
-        base64.b64decode(os.environ["config"]).decode("utf-8"), Loader=yaml.FullLoader
+        base64.b64decode(os.environ["config"]).decode("utf-8"), Loader=yaml.CSafeLoader
     )
 else:
     try:
