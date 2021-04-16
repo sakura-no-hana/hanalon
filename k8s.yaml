@@ -2,12 +2,12 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: hanalon-bot
-  namespace: default
+  namespace: hanalon
   annotations:
     seccomp.security.alpha.kubernetes.io/pod: "docker/default"
 spec:
-  replicas: 1
-  serviceName: "hanalon-bot"
+  replicas: 4
+  serviceName: bot
   selector:
     matchLabels:
       hanalon: bot
@@ -28,6 +28,8 @@ spec:
                 secretKeyRef:
                   name: hanalon-secret
                   key: config
+            - name: shard_count
+              value: "4"
             - name: pod_name
               valueFrom:
                 fieldRef:
@@ -49,4 +51,3 @@ spec:
                 - NET_RAW
                 - ALL
       automountServiceAccountToken: false
-

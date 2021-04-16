@@ -2,7 +2,6 @@ import base64
 import logging
 import os
 import pathlib
-import sys
 from typing import Set, Union
 
 import discord
@@ -23,10 +22,6 @@ else:
     try:
         with open(config_file, encoding="utf-8") as file:
             config = yaml.load(file, Loader=yaml.CSafeLoader)
-        if sys.argv[-1] == "docker":
-            logging.warning(
-                "Insecure input: do not pass `config.yaml` into the Docker container!"
-            )
     except FileNotFoundError:
         logging.critical("No configuration found; bot cannot start.")
         raise
@@ -104,7 +99,10 @@ async def handle(ctx: Context, error: commands.CommandError):
     raise error
 
 
-def run():
+def run(shard_id, shard_total):
     """Starts the bot."""
     load_cogs()
+    if shard_id != -1:
+        bot.shard_count = shard_total
+        bot.shard_ids = [shard_id]
     bot.run(config["token"])
