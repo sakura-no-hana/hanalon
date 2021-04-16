@@ -2,7 +2,7 @@
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![made-with-python](https://img.shields.io/badge/Python-3.8&#8201;|&#8201;3.9&#8201;|&#8201;3.10-blue.svg)](https://www.python.org/)
-[![Discord](https://img.shields.io/discord/715607808028049459.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/wKqGrKN)  
+[![Discord](https://img.shields.io/discord/715607808028049459.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/wKqGrKN)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/34ef29ce098648089ecae0f460917353)](https://www.codacy.com/gh/sakura-no-hana/hanalon/dashboard)
 
 Hanalon is an RPG Discord bot.
