@@ -73,12 +73,15 @@ docs/_build/
 target/
 
 # Virtual environment
-# .env/
+.env/
 .venv/
 venv/
 
 # PyCharm
 .idea
+
+# VSCode
+.vscode/
 
 # Python mode for VIM
 .ropeproject
