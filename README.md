@@ -40,9 +40,7 @@ There are a few steps to set up this Discord bot locally.
 - Run the bot
 
   - With Docker: `bash scripts/run.sh`
-
   - With Kubernetes: `bash scripts/run-kube.sh`
-  
   - Without Docker: `bash scripts/run-nodocker.sh`
 
 ## Contributing
