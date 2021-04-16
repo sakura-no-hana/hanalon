@@ -1,5 +1,6 @@
 from discord.ext import commands
 
+from utils.responses import HanalonEmbed
 from utils.rpg.game import Dungeon, InsufficientSpeed, Movement, ObstructedPath
 from utils.rpg.pieces import Being, Wall
 
@@ -7,7 +8,7 @@ from utils.rpg.pieces import Being, Wall
 class GameAction(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.chara = Being(0, 0, skin=[["<:yuniwant:828629768651014195>"]])
+        self.chara = Being(0, 0, skin=[["<:__:828630739871858719>"]])
         self.chara.speed = 10
         self.chara.max_speed = 10
         self.dungeon = Dungeon(
@@ -29,17 +30,32 @@ class GameAction(commands.Cog):
     @commands.command()
     async def show(self, ctx) -> None:
         """Test command?"""
-        await ctx.send(f"{self.board()}")
+        embed = HanalonEmbed(ctx)
+        embed.add_field(name="View", value=self.board())
+        await embed.respond(True)
 
     @commands.command()
     async def move(self, ctx, delta_x: int, delta_y: int) -> None:
+        error = True
+        embed = HanalonEmbed(ctx)
         try:
             self.dungeon.move(Movement(delta_x, delta_y, self.chara, "walk"))
+            error = False
         except ObstructedPath:
-            await ctx.send("There's something in the way!")
+            embed.add_field(
+                name="Notice", value="There's something in the way!", inline=False
+            )
         except InsufficientSpeed:
-            await ctx.send("The destination is too far!")
-        await ctx.send(f"{self.board()}")
+            embed.add_field(
+                name="Notice", value="The destination is too far!", inline=False
+            )
+
+        embed.add_field(name="View", value=self.board())
+
+        if error:
+            await embed.respond(False)
+        else:
+            await embed.respond(True, override=True)
 
 
 def setup(bot):
