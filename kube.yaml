@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hanalon-bot
+  namespace: default
+spec:
+  replicas: 1
+  serviceName: "hanalon-bot"
+  selector:
+    matchLabels:
+      hanalon: bot
+  template:
+    metadata:
+      labels:
+        hanalon: bot
+    spec:
+      dnsPolicy: Default
+      containers:
+        - name: bot
+          image: hanalon/bot
+          env:
+            - name: config
+              valueFrom:
+                secretKeyRef:
+                  name: hanalon-secret
+                  key: config
+            - name: pod_name
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "250m"

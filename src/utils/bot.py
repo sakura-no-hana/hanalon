@@ -45,7 +45,7 @@ intents.members = True
 intents.messages = True
 intents.reactions = True
 
-bot = slash.SlashBot(
+bot = commands.AutoShardedBot(
     command_prefix=prefix,
     intents=intents,
     debug_guild=config["guild"],
@@ -65,7 +65,7 @@ def include_cog(cog: commands.Cog):
     Loads a cog for both commands and slash
     """
     bot.add_cog(cog())
-    bot.add_slash_cog(cog())
+    # bot.add_slash_cog(cog())
 
 
 def load_cogs():

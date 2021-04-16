@@ -1,7 +1,7 @@
 from typing import Optional
 
 import discord
-from discord.ext import commands, slash
+from discord.ext import commands
 
 from utils.bot import bot, include_cog
 from utils.responses import HanalonEmbed, HanalonResponse
@@ -18,26 +18,6 @@ class General(commands.Cog):
             description=f'{("%." + str(precision) + "f") % bot.latency} seconds!',
             context=ctx,
         ).respond(True)
-
-    @slash.cmd(name="ping")
-    async def _ping(
-        self,
-        ctx: slash.Context,
-        precision: slash.Option(
-            description="precision",
-            required=False,
-            type=slash.ApplicationCommandOptionType.INTEGER,
-        ) = 4,
-    ):
-
-        """
-        Returns the ping to a specified precision. Defaults to nearest 10⁻⁴ seconds.
-        """
-        await HanalonEmbed(
-            title="🏓 Pong!",
-            description=f'{("%." + str(precision) + "f") % bot.latency} seconds!',
-            context=ctx,
-        ).respond()
 
     @commands.group()
     async def about(self, ctx: commands.Context):
