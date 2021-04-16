@@ -13,6 +13,7 @@ from utils.responses import HanalonEmbed
 
 
 class CustomHelpCommand(HelpCommand):
+
     """A help command."""
 
     async def can_run(self, command) -> bool:

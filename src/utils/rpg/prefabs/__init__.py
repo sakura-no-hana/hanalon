@@ -1,4 +1,4 @@
-"""This is the directory for items, characters, etc."""
+"""Directory for items, characters, etc. Anything prefabricated belongs here."""
 
 import glob
 from os.path import basename, dirname, isfile, join

@@ -91,7 +91,7 @@ class Character:
         jobs[Job[job.upper()].value] = 1
         await bot.characters.insert_one(
             {
-                "_id": (id := uuid()),
+                "_id": (identifier := uuid()),
                 "player": bson.Int64(player.id),
                 "name": name,
                 "jobs": jobs,
@@ -99,7 +99,7 @@ class Character:
                 "xp": 0,
             }
         )
-        return cls(id)
+        return cls(identifier)
 
     def __init__(self, identifier):
         """Creates a character with the given ID."""
@@ -183,12 +183,12 @@ class Party:
             raise AlreadyRegistered
         await bot.parties.insert_one(
             {
-                "_id": (id := uuid()),
+                "_id": (identifier := uuid()),
                 "player": bson.Int64(player.id),
                 "characters": [c.identifier for c in characters],
             }
         )
-        return cls(id)
+        return cls(identifier)
 
     @classmethod
     async def from_user(cls, user: discord.User):
@@ -245,13 +245,13 @@ class Clan:
             player = await Party.from_user(player)
         await bot.clans.insert_one(
             {
-                "_id": (id := uuid()),
+                "_id": (identifier := uuid()),
                 "leader": player.identifier,
                 "name": name,
                 "members": [player.identifier],
             }
         )
-        return cls(id)
+        return cls(identifier)
 
     @classmethod
     async def from_user(cls, user: Player):
