@@ -15,9 +15,7 @@ class Deck:
 class Gambling(commands.Cog):
     @commands.command()
     async def roll(self, ctx: commands.Context, *, expr: str = "1d6"):
-        """
-        Rolls dice based on the expression given.
-        """
+        """Rolls dice based on the expression given."""
         result = d20.roll(expr)
         await HanalonEmbed(
             title="Dice 🎲",
@@ -27,9 +25,7 @@ class Gambling(commands.Cog):
 
     @commands.command()
     async def draw(self, ctx: commands.Context, joker: bool = False):
-        """
-        Draws a card.
-        """
+        """Draws a card."""
         if joker:
             card = (
                 Deck.CARDS[(value := random.randrange(54)) % 13]

@@ -16,7 +16,6 @@ class MongoLog(logging.Handler):
 
 
 if __name__ == "__main__":
-
     logger = logging.getLogger("discord")
     logger.setLevel(logging.DEBUG)
 

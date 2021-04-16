@@ -12,9 +12,7 @@ class Cogs(commands.Cog):
     @commands.command()
     @bot.owner_only
     async def load(self, ctx: Context, module: str):
-        """
-        Loads a cog
-        """
+        """Loads a cog."""
         bot.load_extension(f"{cogs_dir.name}.{module}")
         await HanalonEmbed(
             title="Module loaded!",
@@ -25,9 +23,7 @@ class Cogs(commands.Cog):
     @commands.command()
     @bot.owner_only
     async def unload(self, ctx: Context, module: str):
-        """
-        Unloads a cog
-        """
+        """Unloads a cog."""
         bot.unload_extension(f"{cogs_dir.name}.{module}")
         if type(self).__name__ not in [type(cog).__name__ for cog in bot.cogs.values()]:
             bot.load_extension(f"{cogs_dir.name}.{module}")
@@ -42,9 +38,7 @@ class Cogs(commands.Cog):
     @commands.command()
     @bot.owner_only
     async def reload(self, ctx: Context, module: str):
-        """
-        Reloads a cog
-        """
+        """Reloads a cog."""
         bot.reload_extension(f"{cogs_dir.name}.{module}")
         await HanalonEmbed(
             title="Module reloaded!",

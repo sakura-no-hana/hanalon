@@ -10,6 +10,7 @@ class Immovable(RPGException):
 
 class Wall(Piece):
     def on_coincide(self, movement):
+        """Creates a piece for a wall."""
         movement.piece.speed -= float("inf")
 
     def on_move(self, movement):
@@ -18,6 +19,7 @@ class Wall(Piece):
 
 class Being(Piece):
     def __init__(self, *args, **kwargs):
+        """Creates a piece for a living creature."""
         super().__init__(*args, **kwargs)
         self.hitbox = Point(0.5, 0.5).buffer(0.125)
 

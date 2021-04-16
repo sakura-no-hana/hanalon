@@ -13,12 +13,10 @@ from utils.responses import HanalonEmbed
 
 
 class CustomHelpCommand(HelpCommand):
-    """
-    A help command.
-    """
+    """A help command."""
 
     async def can_run(self, command) -> bool:
-        """Test if the command can be run by the user"""
+        """Test if the command can be run by the user."""
         try:
             if not await command.can_run(self.context):
                 return False
@@ -118,7 +116,7 @@ class CustomHelpCommand(HelpCommand):
 
 
 class Help(Cog):
-    """A cog to implement the help command"""
+    """A cog to implement the help command."""
 
     def __init__(self) -> None:
         """Initializes the help command cog."""

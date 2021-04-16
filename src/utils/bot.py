@@ -33,9 +33,7 @@ else:
 
 
 def prefix(bot: Bot, message: discord.Message) -> Set[str]:
-    """
-    Returns the set of prefixes the bot accepts
-    """
+    """Returns the set of prefixes the bot accepts."""
     return {"$", f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "}
 
 
@@ -61,17 +59,13 @@ bot.owner_only = commands.check(lambda ctx: bot.is_owner(ctx.author))
 
 
 def include_cog(cog: commands.Cog):
-    """
-    Loads a cog for both commands and slash
-    """
+    """Loads a cog."""
     bot.add_cog(cog())
     # bot.add_slash_cog(cog())
 
 
 def load_cogs():
-    """
-    Loads all cogs
-    """
+    """Loads all cogs."""
     for root, dirs, files in os.walk(cogs_dir):
         for f in files:
             if (module := cogs_dir / f).suffix == ".py":
@@ -92,9 +86,7 @@ def is_response(ctx, message, response):
 
 @bot.listen("on_ready")
 async def prepare():
-    """
-    Prepares the bot; it currently changes its presence
-    """
+    """Prepares the bot; it currently changes its presence."""
     print(f"Logged on as {bot.user.name}#{bot.user.discriminator}")
     await bot.change_presence(
         status=discord.Status.idle,
@@ -106,17 +98,13 @@ async def prepare():
 
 @bot.listen("on_command_error")
 async def handle(ctx: Context, error: commands.CommandError):
-    """
-    Handles command errors; it currently reacts to them
-    """
+    """Handles command errors; it currently reacts to them."""
     if not isinstance(error, commands.CommandNotFound):
         await ctx.message.add_reaction(bot.failure)
     raise error
 
 
 def run():
-    """
-    Starts the bot
-    """
+    """Starts the bot."""
     load_cogs()
     bot.run(config["token"])

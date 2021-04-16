@@ -10,9 +10,7 @@ from utils.responses import HanalonEmbed
 class General(commands.Cog):
     @commands.command()
     async def ping(self, ctx: commands.Context, precision: int = 4):
-        """
-        Returns the ping to a specified precision. Defaults to nearest 10⁻⁴ seconds.
-        """
+        """Returns the ping to a specified precision. Defaults to nearest 10⁻⁴ seconds."""
         await HanalonEmbed(
             title="🏓 Pong!",
             description=f'{("%." + str(precision) + "f") % bot.latency} seconds!',
@@ -21,9 +19,7 @@ class General(commands.Cog):
 
     @commands.group()
     async def about(self, ctx: commands.Context):
-        """
-        Shows information about things. Without any subcommands, it shows the bot's information.
-        """
+        """Shows information about things. Without any subcommands, it shows the bot's information."""
         if ctx.invoked_subcommand is None:
             e = HanalonEmbed(
                 ctx,
@@ -62,18 +58,14 @@ class General(commands.Cog):
 
     @about.command()
     async def party(self, ctx: commands.Context, user: Optional[discord.Member] = None):
-        """
-        Unimplemented
-        """
+        """Unimplemented."""
         if user is None:
             user = ctx.message.author
         await ctx.send(user.name)
 
     @about.command()
     async def guild(self, ctx: commands.Context):
-        """
-        Unimplemented
-        """
+        """Unimplemented."""
         await ctx.send(ctx.message.guild.name)
 
 
