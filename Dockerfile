@@ -11,4 +11,4 @@ RUN apt -y update \
 
 COPY src ./
 
-ENTRYPOINT ["python3", "__main__.py"]
+ENTRYPOINT ["python3", "__main__.py", "docker"]

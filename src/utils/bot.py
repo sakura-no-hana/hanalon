@@ -1,6 +1,8 @@
 import base64
+import logging
 import os
 import pathlib
+import sys
 from typing import Set, Union
 
 import discord
@@ -11,13 +13,23 @@ import yaml
 Context = Union[commands.Context, slash.Context]
 Bot = Union[commands.Bot, slash.SlashBot]
 
+config_file = pathlib.Path("../config.yaml")
+
 if "config" in os.environ:
     config = yaml.load(
         base64.b64decode(os.environ["config"]).decode("utf-8"), Loader=yaml.FullLoader
     )
 else:
-    with open("../config.yaml", encoding="utf-8") as file:
-        config = yaml.load(file, Loader=yaml.FullLoader)
+    try:
+        with open(config_file, encoding="utf-8") as file:
+            config = yaml.load(file, Loader=yaml.CSafeLoader)
+        if sys.argv[-1] == "docker":
+            logging.warning(
+                "Insecure input: do not pass `config.yaml` into the Docker container!"
+            )
+    except FileNotFoundError:
+        logging.critical("No configuration found; bot cannot start.")
+        raise
 
 
 def prefix(bot: Bot, message: discord.Message) -> Set[str]:

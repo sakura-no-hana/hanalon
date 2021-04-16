@@ -52,9 +52,6 @@ class Dungeon:
     def __init__(self, layers):
         self.pieces = layers
 
-    def add_piece(self, piece, layer):
-        self.pieces[layer].append(piece)
-
     def collide(self, movement):
         piece = movement.piece
         piece_hitbox = affinity.translate(piece.hitbox, *piece.loc)
