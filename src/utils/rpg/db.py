@@ -102,6 +102,7 @@ class Character:
         return cls(id)
 
     def __init__(self, identifier):
+        """Creates a character with the given ID."""
         self.identifier = identifier
 
     async def get_name(self):
@@ -196,6 +197,7 @@ class Party:
         return cls(party["_id"])
 
     def __init__(self, identifier):
+        """Creates a party with the given ID."""
         self.identifier = identifier
 
     async def add_character(self, char: Character):
@@ -260,6 +262,7 @@ class Clan:
         return cls(clan["_id"])
 
     def __init__(self, identifier):
+        """Creates a clan with the given ID."""
         self.identifier = identifier
 
     async def add_member(self, user: Player):

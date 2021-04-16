@@ -53,8 +53,8 @@ class GuildOps(commands.Cog):
         except ValueError as e:
             await HanalonEmbed(
                 ctx,
-                title=f"Registration failed!",
-                description=f"Perhaps your class or race was entered incorrectly?",
+                title="Registration failed!",
+                description="Perhaps your class or race was entered incorrectly?",
             ).respond(False)
             raise e
         await HanalonEmbed(

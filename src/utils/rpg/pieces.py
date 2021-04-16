@@ -1,7 +1,7 @@
 from shapely.geometry import Point
 
 from utils.rpg.db import RPGException
-from utils.rpg.game import Movement, Piece
+from utils.rpg.game import Piece
 
 
 class Immovable(RPGException):

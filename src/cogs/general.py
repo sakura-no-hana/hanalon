@@ -4,7 +4,7 @@ import discord
 from discord.ext import commands
 
 from utils.bot import bot, include_cog
-from utils.responses import HanalonEmbed, HanalonResponse
+from utils.responses import HanalonEmbed
 
 
 class General(commands.Cog):

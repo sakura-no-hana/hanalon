@@ -23,6 +23,7 @@ class Piece:
         skin=[["⬛"]],
         data=None,
     ):
+        """Initializes a piece with the given parameters."""
         self.loc = numpy.array([float(x), float(y)])
         self.max_speed = speed
         self.hitbox = hitbox
@@ -43,6 +44,7 @@ class Piece:
 
 class Movement:
     def __init__(self, x, y, piece, mode):
+        """Initializes a movement with the piece and vector given."""
         self.vector = numpy.array([float(x), float(y)])
         self.piece = piece
         self.mode = mode
@@ -50,6 +52,7 @@ class Movement:
 
 class Dungeon:
     def __init__(self, layers):
+        """Initializes a dungeon with the given piece layers."""
         self.pieces = layers
 
     def collide(self, movement):

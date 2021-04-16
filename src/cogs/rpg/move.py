@@ -7,6 +7,7 @@ from utils.rpg.pieces import Being, Wall
 
 class GameAction(commands.Cog):
     def __init__(self, bot):
+        """Initializes cog for testing RPG movement."""
         self.bot = bot
         self.chara = Being(0, 0, skin=[["<:__:828630739871858719>"]])
         self.chara.speed = 10

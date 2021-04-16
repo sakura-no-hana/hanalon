@@ -1,5 +1,4 @@
 from discord.ext.commands import (
-    Bot,
     CheckFailure,
     Cog,
     Command,
@@ -122,12 +121,13 @@ class Help(Cog):
     """A cog to implement the help command"""
 
     def __init__(self) -> None:
+        """Initializes the help command cog."""
         self.old_help = bot.help_command
         bot.help_command = CustomHelpCommand()
         bot.help_command.cog = self
 
     def cog_unload(self) -> None:
-        """Load back old help command"""
+        """Load back old help command."""
         self.bot.help_command = self.old_help
 
 

@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime
 import logging
 
 import pymongo
@@ -9,9 +9,9 @@ collection = pymongo.MongoClient(config["mongo"])["log"]["bot"]
 
 
 class MongoLog(logging.Handler):
-    def emit(self, entry):
+    def emit(self, record):
         collection.insert_one(
-            {"time": datetime.now(), "level": entry.levelname, "message": entry.msg}
+            {"time": datetime.now(), "level": record.levelname, "message": record.msg}
         )
 
 
