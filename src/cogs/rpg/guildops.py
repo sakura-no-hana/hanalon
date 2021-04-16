@@ -16,6 +16,7 @@ class GuildOps(commands.Cog):
 
     @commands.group()
     async def register(self, ctx: commands.Context):
+        """Registers the user. Without a subcommand, it registers the user as a player."""
         if ctx.invoked_subcommand is None:
             await ctx.invoke(bot.get_command("register party"))
 

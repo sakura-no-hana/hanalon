@@ -52,11 +52,9 @@ class CustomHelpCommand(HelpCommand):
             embed.add_field(name=name, value=value)
         await embed.respond(True)
 
-    async def send_cog_help(self, cog: Cog):
-        name = "Cog Help: " + cog.qualified_name
-        description = cog.description + "\n"
+    async def send_collection_help(self, collection, name, description):
         commands_text = "**Commands**\n"
-        for c in cog.get_commands():
+        for c in collection:
             c_name = f"{self.context.prefix}{c.qualified_name}"
             if c.signature:
                 c_name = f"`{c_name} {c.signature}`\n"
@@ -73,20 +71,12 @@ class CustomHelpCommand(HelpCommand):
     async def send_group_help(self, group: Group):
         name = "Group Help: " + group.qualified_name
         description = group.help + "\n"
-        commands_text = "**Commands**\n"
-        for c in group.commands:
-            c_name = f"{self.context.prefix}{c.qualified_name}"
-            if c.signature:
-                c_name = f"`{c_name} {c.signature}`\n"
-            else:
-                c_name = f"`{c_name}`\n"
-            if await self.can_run(c):
-                commands_text += c_name
-            else:
-                commands_text += f"~~{c_name}~~"
-        details = description + commands_text
-        embed = HanalonEmbed(self.context, title=name, description=details)
-        await embed.respond(True)
+        await self.send_collection_help(group.commands, name, description)
+
+    async def send_cog_help(self, cog: Cog):
+        name = "Cog Help: " + cog.qualified_name
+        description = cog.description + "\n"
+        await self.send_collection_help(cog.get_commands(), name, description)
 
     async def send_command_help(self, command: Command) -> None:
         prefix = self.context.prefix
