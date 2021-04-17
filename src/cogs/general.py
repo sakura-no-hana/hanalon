@@ -21,37 +21,41 @@ class General(commands.Cog):
     async def about(self, ctx: commands.Context):
         """Shows information about things. Without any subcommands, it shows the bot's information."""
         if ctx.invoked_subcommand is None:
+            if ctx.guild:
+                shard = ctx.guild.shard_id
+            else:
+                shard = 0
+
             e = HanalonEmbed(
                 ctx,
                 title="About me",
-                description="Hello! I'm Hanalon, your friendly Adventurers' Guild receptionist! Don't hesitate to consult me if you need anything!",
+                description="Hello! I'm Hanalon, a homunculus receptionist. Pleased to meet you!",
             )
             e.set_thumbnail(url=bot.user.avatar_url)
             e.add_field(
                 name="Version",
-                value="I'm not that mature yet… only v0.0.1…",
+                value=bot.__version__,
+                inline=False,
+            )
+            e.add_field(
+                name="Shard",
+                value=f"Shard #{shard} of {bot.shard_count}",
                 inline=False,
             )
             e.add_field(
                 name="Library",
-                value="I'm a homunculus made with discord.py!",
+                value=f"discord.py {discord.__version__}",
                 inline=False,
             )
             devs = [await bot.fetch_user(dev) for dev in bot.owner_ids]
             e.add_field(
                 name="Developers",
-                value="I loyally serve my masters: "
-                + ", ".join([f"{dev.name}#{dev.discriminator}" for dev in devs]),
+                value=", ".join([f"{dev.name}#{dev.discriminator}" for dev in devs]),
                 inline=False,
             )
             e.add_field(
-                name="Servers",
-                value=f"I proudly serve {len(bot.guilds)} Guild branches!",
-                inline=False,
-            )
-            e.add_field(
-                name="Users",
-                value=f"I am the receptionist for {len(bot.users)} parties!",
+                name="Players",
+                value=f"{await bot.parties.count_documents(filter=dict())} players",
                 inline=False,
             )
             await e.respond(True)

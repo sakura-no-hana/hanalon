@@ -32,11 +32,7 @@ def prefix(bot: Bot, message: discord.Message) -> Set[str]:
     return {"$", f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "}
 
 
-intents = discord.Intents.none()
-intents.guilds = True
-intents.members = True
-intents.messages = True
-intents.reactions = True
+intents = discord.Intents(guilds=True, messages=True, reactions=True)
 
 bot = commands.AutoShardedBot(
     command_prefix=prefix,
@@ -51,6 +47,8 @@ bot.db = AsyncIOMotorClient(config["mongo"])["hanalon"]
 cogs_dir = pathlib.Path("./cogs")
 
 bot.owner_only = commands.check(lambda ctx: bot.is_owner(ctx.author))
+
+bot.__version__ = "0a (unversioned)"
 
 
 def include_cog(cog: commands.Cog):
