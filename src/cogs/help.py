@@ -70,7 +70,7 @@ class CustomHelpCommand(HelpCommand):
 
     async def send_group_help(self, group: Group):
         name = "Group Help: " + group.qualified_name
-        description = group.help + "\n"
+        description = (group.help + "\n") if group.help else "No description\n"
         await self.send_collection_help(group.commands, name, description)
 
     async def send_cog_help(self, cog: Cog):
