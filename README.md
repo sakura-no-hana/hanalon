@@ -53,19 +53,25 @@ There are a few steps to set up this Discord bot locally.
 
 - Run the bot
 
-  - With Kubernetes: `perl scripts/hanalon.pl bot run k8s`
+  - Docker w/ Kubernetes:
+    - Through perl:  
+      `perl scripts/hanalon.pl bot run k8s`
     - Through bash:  
       `kubectl create namespace hanalon`  
       `kubectl delete -f k8s.yaml --namespace=hanalon`  
       `kubectl delete secret hanalon-secret --namespace=hanalon`  
       `kubectl create secret generic hanalon-secret --namespace=hanalon --from-literal=config=$(base64 -in config.yaml)`  
       `kubectl apply -f k8s.yaml --namespace=hanalon`
-  - With Docker: `perl scripts/hanalon.pl bot run docker`
+  - Docker:
+    - Through perl:  
+      `perl scripts/hanalon.pl bot run docker`
     - Through bash:  
       `docker build -t hanalon/bot`  
       `docker stop hanalon-bot`  
       `docker run -d --rm --name hanalon-bot -e config=$(base64 -in config.yaml) hanalon-bot`  
-  - With Python: `perl scripts/hanalon.pl bot run py -r=poetry`
+  - Python:
+    - Through perl:  
+      `perl scripts/hanalon.pl bot run py -r=poetry`
     - Through bash:  
       `curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3 -`  
       `poetry update`  
