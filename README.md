@@ -28,8 +28,7 @@ There are a few steps to set up this Discord bot locally.
   ├── pyproject.toml
   ├── requirements.txt
   ├── scripts
-  │   ⋮
-  ⋮   └── run.sh
+  ⋮   └── hanalon.pl
   └── src
       ├── __main__.py
       ├── cogs
@@ -41,9 +40,11 @@ There are a few steps to set up this Discord bot locally.
 
 - Run the bot
 
-  - With Docker: `bash scripts/run.sh`
-  - With Kubernetes: `bash scripts/run-kube.sh [shards=4]`
-  - Without Docker: `bash scripts/run-nodocker.sh`
+  - With Kubernetes: `perl scripts/hanalon.pl bot run k8s`
+  - With Docker: `perl scripts/hanalon.pl bot run docker`
+  - With Python: `perl scripts/hanalon.pl bot run py -r=poetry`
+
+Keep in mind that the Perl script won't with Python, but will exit with Docker or Kubernetes. This is because I don't feel like refactoring my Python code to run as a daemon.
 
 ## Contributing
 

@@ -6,7 +6,7 @@ metadata:
   annotations:
     seccomp.security.alpha.kubernetes.io/pod: "docker/default"
 spec:
-  replicas: 4
+  replicas: 1
   serviceName: bot
   selector:
     matchLabels:
@@ -29,7 +29,7 @@ spec:
                   name: hanalon-secret
                   key: config
             - name: shard_count
-              value: "4"
+              value: "1"
             - name: pod_name
               valueFrom:
                 fieldRef:
