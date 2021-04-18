@@ -123,7 +123,8 @@ if ($ARGV[0] eq "bot") {
                     }
                 }
 
-                `cd src ; python3 __main__.py`;
+                `cd src ; python3 __main__.py 2>&1`;
+                exit;
             }
         }
     } elsif ($ARGV[1] eq "build") {
