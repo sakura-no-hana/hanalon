@@ -9,9 +9,22 @@ Hanalon is an RPG Discord bot.
 
 ## Requirements
 
-- [Docker](https://docs.docker.com/get-docker/) *
+#### Convenience
+- bash
+  - If you don't have bash, chances are that you're not on \*nix. On Windows 10, this can be remedied with [WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10). Unfortunately, for other operating systems, you may need to install a VM. Of course, it is still possible to run the bot without bash.
+- [Perl](https://www.perl.org/get.html)
+  - Similar to above, chances are, you're on a Windows machine. The perl script actually relies on bash, so it would be wise to get [WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
 
-\* Without Docker, you must have [Python 3.8+](https://www.python.org/downloads/) installed.
+#### Docker w/ Kubernetes
+- [Kubectl](https://kubernetes.io/docs/tasks/tools/)
+  -  If you don't have much prior experience with Kubernetes, and aren't using this bot in production, I'd recommend using [minikube](https://minikube.sigs.k8s.io/docs/start/).
+- [Docker](https://docs.docker.com/engine/install/#server)
+
+#### Docker
+- [Docker](https://docs.docker.com/engine/install/#server)
+
+#### Python
+- [Python 3.8+](https://www.python.org/downloads/)
 
 ## Usage
 
@@ -41,10 +54,25 @@ There are a few steps to set up this Discord bot locally.
 - Run the bot
 
   - With Kubernetes: `perl scripts/hanalon.pl bot run k8s`
+    - Through bash:  
+      `kubectl create namespace hanalon`  
+      `kubectl delete -f k8s.yaml --namespace=hanalon`  
+      `kubectl delete secret hanalon-secret --namespace=hanalon`  
+      `kubectl create secret generic hanalon-secret --namespace=hanalon --from-literal=config=$(base64 -in config.yaml)`  
+      `kubectl apply -f k8s.yaml --namespace=hanalon`
   - With Docker: `perl scripts/hanalon.pl bot run docker`
+    - Through bash:  
+      `docker build -t hanalon/bot`  
+      `docker stop hanalon-bot`  
+      `docker run -d --rm --name hanalon-bot -e config=$(base64 -in config.yaml) hanalon-bot`  
   - With Python: `perl scripts/hanalon.pl bot run py -r=poetry`
+    - Through bash:  
+      `curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3 -`  
+      `poetry update`  
+      `poetry install`  
+      `cd src ; python3 __main__.py`
 
-Keep in mind that the Perl script won't with Python, but will exit with Docker or Kubernetes. This is because I don't feel like refactoring my Python code to run as a daemon.
+Keep in mind that the Perl script won't exit with Python, but will exit with Docker or Kubernetes. This is because I don't feel like refactoring my Python code to run as a daemon.
 
 ## Contributing
 
