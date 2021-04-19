@@ -1,6 +1,5 @@
 from shapely.geometry import Point, Polygon
 
-from utils.rpg.db import RPGException
 from utils.rpg.game import Piece
 
 
