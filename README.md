@@ -98,3 +98,11 @@ Pull requests are always welcome. Please open an issue so that other contributor
 Keep in mind that even as a side-project, we have standards here. Thus, we've set up a `.pre-commit-config.yaml` for your use. We currently only run a check with black, but the pre-commit hook makes sure that your code has sorted imports, is black compliant, and that your `requirements.txt` matches your `poetry.lock`. Testing is preferable to no testing, but we understand that it can be difficult to automate testing with a primarily visual application.
 
 Dependencies are managed by Poetry, which uses `pyproject.toml`. Do not manually edit the `requirements.txt`; either let pre-commit do it for you, or run `poetry export -o requirements.txt --without-hashes`.
+
+### Venv
+
+It is highly recommended that you use a venv while developing. This makes it so inter-project dependency versions do not cause conflicts. You can create a venv with `python3 -m venv .venv`. You can then activate that venv with `source .venv/bin/activate`.
+
+### Testing
+
+Tests are located in the `tests` directory and use pytest. Either use the perl script provided (`perl scripts/hanalon.pl bot test`) or manually run them (`pip3 install pytest ; pytest -v`).

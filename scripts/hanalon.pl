@@ -123,7 +123,7 @@ if ($ARGV[0] eq "bot") {
                     }
                 }
 
-                `cd src ; python3 __main__.py 2>&1`;
+                `python3 src/__main__.py 2>&1`;
                 exit;
             }
         }
@@ -145,6 +145,16 @@ if ($ARGV[0] eq "bot") {
 
         if (`kubectl`) {
             `kubectl delete -n hanalon statefulset hanalon-bot`;
+        }
+    } elsif ($ARGV[1] eq "test") {
+        if (not(`python3 -V`)) {
+            die "python 3 does not appear to be installed. please install it here: https://www.python.org/downloads/\n";
+        } else {
+            if (not(`pytest -V 2>&1`)) {
+                `pip3 install pytest`;
+            }
+
+            `pytest -v 1>&0`
         }
     }
 

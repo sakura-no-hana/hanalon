@@ -12,19 +12,25 @@ import yaml
 Context = Union[commands.Context, slash.Context]
 Bot = Union[commands.Bot, slash.SlashBot]
 
-config_file = pathlib.Path("../config.yaml")
+config_files = [pathlib.Path("../config.yaml"), pathlib.Path("config.yaml")]
+config = None
 
 if "config" in os.environ:
     config = yaml.load(
         base64.b64decode(os.environ["config"]).decode("utf-8"), Loader=yaml.CSafeLoader
     )
 else:
-    try:
-        with open(config_file, encoding="utf-8") as file:
-            config = yaml.load(file, Loader=yaml.CSafeLoader)
-    except FileNotFoundError:
-        logging.critical("No configuration found; bot cannot start.")
-        raise
+    for config_file in config_files:
+        try:
+            with open(config_file, encoding="utf-8") as file:
+                config = yaml.load(file, Loader=yaml.CSafeLoader)
+            break
+        except FileNotFoundError:
+            ...
+
+if not config:
+    logging.critical("No configuration found; bot cannot start.")
+    raise FileNotFoundError
 
 
 def prefix(bot: Bot, message: discord.Message) -> Set[str]:
