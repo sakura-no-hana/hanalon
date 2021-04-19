@@ -21,6 +21,7 @@ shapely = "*"
 black = "*"
 isort = "*"
 pre-commit = "*"
+pytest = "*"
 
 [tool.isort]
 profile = "black"
@@ -34,3 +35,12 @@ line_length = 88
 
 [tool.black]
 fast = "True"
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
+markers = [
+    "bot",
+    "game"
+]

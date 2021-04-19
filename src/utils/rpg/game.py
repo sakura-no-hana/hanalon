@@ -5,10 +5,6 @@ from shapely.geometry import Polygon
 from utils.rpg.db import RPGException
 
 
-class ObstructedPath(RPGException):
-    ...
-
-
 class InsufficientSpeed(RPGException):
     ...
 
@@ -20,7 +16,7 @@ class Piece:
         y,
         speed=0.0,
         hitbox=Polygon([(0.0, 0.0), (0.0, 1.0), (1.0, 1.0), (1.0, 0.0)]),
-        skin=(("⬛",),),
+        skin=[["⬛"]],
         data=None,
     ):
         """Initializes a piece with the given parameters."""
@@ -43,7 +39,7 @@ class Piece:
 
 
 class Movement:
-    def __init__(self, x, y, piece, mode):
+    def __init__(self, x, y, piece, mode=None):
         """Initializes a movement with the piece and vector given."""
         self.vector = numpy.array([float(x), float(y)])
         self.piece = piece
@@ -77,16 +73,18 @@ class Dungeon:
         if mag > movement.piece.speed:
             raise InsufficientSpeed
 
+        if mag == 0:
+            movement.piece.on_move(movement)
+            return
+
         test /= 2 * mag
 
         origin = numpy.copy(movement.piece.loc)
 
-        while numpy.linalg.norm(movement.piece.loc - origin) < numpy.linalg.norm(
-            movement.vector
-        ):
-            if self.collide(movement):
-                movement.piece.loc = origin
-                raise ObstructedPath
+        while round(
+            numpy.linalg.norm(movement.piece.loc - origin), 6
+        ) < numpy.linalg.norm(movement.vector):
+            self.collide(movement)
 
             movement.piece.loc += test
             movement.piece.speed -= 0.5
@@ -123,3 +121,8 @@ class Dungeon:
                     out[i][j] = "⬛"
 
         return out
+
+    def render_str(self, width, height, origin):
+        board = self.render(width, height, origin)
+        board.reverse()
+        return "\n".join(["".join(a) for a in board])

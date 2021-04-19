@@ -1,11 +1,7 @@
-from shapely.geometry import Point
+from shapely.geometry import Point, Polygon
 
 from utils.rpg.db import RPGException
 from utils.rpg.game import Piece
-
-
-class Immovable(RPGException):
-    ...
 
 
 class Wall(Piece):
@@ -13,8 +9,12 @@ class Wall(Piece):
         """Creates a piece for a wall."""
         movement.piece.speed -= float("inf")
 
-    def on_move(self, movement):
-        raise Immovable
+
+class Surface(Piece):
+    def __init__(self, *args, **kwargs):
+        """Creates a piece for a surface (e.g. floor)."""
+        super().__init__(*args, **kwargs)
+        self.hitbox = Polygon()
 
 
 class Being(Piece):

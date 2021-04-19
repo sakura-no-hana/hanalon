@@ -24,9 +24,7 @@ class GameAction(commands.Cog):
         )
 
     def board(self) -> str:
-        board = self.dungeon.render(13, 13, self.chara.loc)
-        board.reverse()
-        return "\n".join(["".join(a) for a in board])
+        return self.dungeon.render_str(13, 13, self.chara.loc)
 
     @commands.command()
     async def show(self, ctx) -> None:
