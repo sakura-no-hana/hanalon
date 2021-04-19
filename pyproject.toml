@@ -7,7 +7,6 @@ authors = ["pyxiis", "Noyx46", "DiggetyDoo", "AlankarSovani"]
 [tool.poetry.dependencies]
 python = "^3.9"
 d20 = "*"
-dill = "*"
 discord-ext-menus = {git = "https://github.com/Rapptz/discord-ext-menus"}
 discord-ext-slash = "*"
 "discord.py" = "*"
@@ -15,6 +14,7 @@ dnspython = "*"
 motor = "*"
 numpy = "*"
 PyYAML = "*"
+setproctitle = "*"
 shapely = "*"
 
 [tool.poetry.dev-dependencies]

@@ -1,7 +1,7 @@
 from discord.ext import commands
 
 from utils.responses import HanalonEmbed
-from utils.rpg.game import Dungeon, InsufficientSpeed, Movement, ObstructedPath
+from utils.rpg.game import Dungeon, InsufficientSpeed, Movement
 from utils.rpg.pieces import Being, Wall
 
 
@@ -40,13 +40,9 @@ class GameAction(commands.Cog):
         try:
             self.dungeon.move(Movement(delta_x, delta_y, self.chara, "walk"))
             error = False
-        except ObstructedPath:
-            embed.add_field(
-                name="Notice", value="There's something in the way!", inline=False
-            )
         except InsufficientSpeed:
             embed.add_field(
-                name="Notice", value="The destination is too far!", inline=False
+                name="Notice", value="Cannot reach the destination!", inline=False
             )
 
         embed.add_field(name="View", value=self.board())

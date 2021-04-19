@@ -123,8 +123,7 @@ if ($ARGV[0] eq "bot") {
                     }
                 }
 
-                `python3 src/__main__.py 2>&1`;
-                exit;
+                `nohup python3 src/__main__.py >/dev/null 2>&1 &`;
             }
         }
     } elsif ($ARGV[1] eq "build") {
@@ -139,13 +138,15 @@ if ($ARGV[0] eq "bot") {
         }
     } elsif ($ARGV[1] eq "kill") {
         if (`docker 2>&1`) {
-            `docker stop hanalon-bot`;
-            `docker rm hanalon-bot`;
+            `docker stop hanalon-bot 2>&1`;
+            `docker rm hanalon-bot 2>&1`;
         }
 
         if (`kubectl`) {
-            `kubectl delete -n hanalon statefulset hanalon-bot`;
+            `kubectl delete -n hanalon statefulset hanalon-bot 2>&1`;
         }
+
+        `pkill hanalon-bot`;
     } elsif ($ARGV[1] eq "test") {
         if (not(`python3 -V`)) {
             die "python 3 does not appear to be installed. please install it here: https://www.python.org/downloads/\n";

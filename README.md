@@ -34,7 +34,9 @@ Hanalon is an RPG Discord bot.
 
 ## Usage
 
-There are a few steps to set up this Discord bot locally.
+There are a few steps to use this Discord bot locally.
+
+### Running
 
 - Modify the `config.yaml` file. `token` is your bot token, `mongo` is your MongoDB connection URI, `guild` is the guild ID you plan on testing with, `devs` is a list of the developers' user IDs.
 
@@ -87,9 +89,26 @@ There are a few steps to set up this Discord bot locally.
       `curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3 -`  
       `poetry update`  
       `poetry install`  
-      `cd src ; python3 __main__.py`
+      `nohup python3 src/__main__.py >/dev/null &`
 
-Keep in mind that the Perl script won't exit with Python, but will exit with Docker or Kubernetes. This is because I don't feel like refactoring my Python code to run as a daemon.
+Keep in mind that all of these processes need to be explicitly killed with `perl scripts/hanalon.pl bot kill`.
+
+### Killing
+
+You can kill the bot with perl:  
+`perl scripts/hanalon.pl bot kill`
+
+Or with bash, depending on how your bot was started:
+
+- Kubernetes + Docker:  
+  `kubectl delete -n hanalon statefulset hanalon-bot 2>&1`
+
+- Docker:  
+  `docker stop hanalon-bot`  
+  `docker rm hanalon-bot`
+
+- Python:  
+  `pkill hanalon-bot`
 
 ## Contributing
 
