@@ -1,6 +1,6 @@
 import numpy
 from shapely import affinity
-from shapely.geometry import Polygon
+from shapely.geometry import Polygon, box
 from shapely.ops import nearest_points, unary_union
 
 from utils.rpg.db import RPGException
@@ -16,7 +16,7 @@ class Piece:
         x,
         y,
         speed=0.0,
-        hitbox=Polygon([(0.0, 0.0), (0.0, 1.0), (1.0, 1.0), (1.0, 0.0)]),
+        hitbox=box(-0.5, -0.5, 0.5, 0.5),
         skin=[["⬛"]],
         data=None,
     ):
