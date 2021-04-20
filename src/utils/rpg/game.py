@@ -1,6 +1,7 @@
 import numpy
 from shapely import affinity
 from shapely.geometry import Polygon
+from shapely.ops import nearest_points, unary_union
 
 from utils.rpg.db import RPGException
 
@@ -37,6 +38,20 @@ class Piece:
     def on_move(self, movement):
         self.loc += movement.vector
 
+    def move_hitbox(self, movement):
+        coords = list(self.hitbox.exterior.coords)
+        pairs = [numpy.array([x, y]) for x, y in zip(coords, coords[1:])]
+
+        def gen_quad(pair, vector):
+            return Polygon([pair[0], pair[1], pair[1] + vector, pair[0] + vector])
+
+        polys = []
+
+        for pair in pairs:
+            polys.append(gen_quad(pair, movement.vector))
+
+        return unary_union(polys)
+
 
 class Movement:
     def __init__(self, x, y, piece, mode=None):
@@ -51,18 +66,36 @@ class Dungeon:
         """Initializes a dungeon with the given piece layers."""
         self.pieces = layers
 
-    def collide(self, movement):
+    def get_collisions(self, movement):
         piece = movement.piece
-        piece_hitbox = affinity.translate(piece.hitbox, *piece.loc)
-        collided = False
+        hitbox = affinity.translate(piece.move_hitbox(movement), *piece.loc)
+
+        collisions = []
+
         for layer in self.pieces:
             for obj in layer:
                 if obj is movement.piece:
                     continue
-                if piece_hitbox.intersects(affinity.translate(obj.hitbox, *obj.loc)):
-                    collided = True
-                    obj.on_coincide(movement)
-        return collided
+                if hitbox.intersects(affinity.translate(obj.hitbox, *obj.loc)):
+                    collisions.append(obj)
+
+        def collision_distance(piece):
+            return numpy.linalg.norm(
+                numpy.array(
+                    nearest_points(piece.hitbox, movement.piece.hitbox)[0].coords[0]
+                )
+                - movement.piece.loc
+            )
+
+        collisions.sort(key=collision_distance)
+
+        return collisions
+
+    def collide(self, movement):
+        collisions = self.get_collisions(movement)
+
+        for obj in collisions:
+            obj.on_coincide(movement)
 
     def move(self, movement):
         movement.piece.speed = movement.piece.max_speed
@@ -79,17 +112,7 @@ class Dungeon:
 
         test /= 2 * mag
 
-        origin = numpy.copy(movement.piece.loc)
-
-        while round(
-            numpy.linalg.norm(movement.piece.loc - origin), 6
-        ) < numpy.linalg.norm(movement.vector):
-            self.collide(movement)
-
-            movement.piece.loc += test
-            movement.piece.speed -= 0.5
-
-        movement.piece.loc = origin
+        self.collide(movement)
 
         if movement.piece.speed < 0:
             raise InsufficientSpeed
