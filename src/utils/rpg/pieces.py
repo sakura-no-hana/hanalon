@@ -20,7 +20,7 @@ class Being(Piece):
     def __init__(self, *args, **kwargs):
         """Creates a piece for a living creature."""
         super().__init__(*args, **kwargs)
-        self.hitbox = Point(0.5, 0.5).buffer(0.125)
+        self.hitbox = Point(0.5, 0.5).buffer(0.25)
 
     def on_coincide(self, movement):
         movement.piece.speed -= float("inf")
