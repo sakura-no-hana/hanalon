@@ -22,6 +22,7 @@ black = "*"
 isort = "*"
 pre-commit = "*"
 pytest = "*"
+pytest-cov = "*"
 
 [tool.isort]
 profile = "black"

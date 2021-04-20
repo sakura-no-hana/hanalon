@@ -151,11 +151,19 @@ if ($ARGV[0] eq "bot") {
         if (not(`python3 -V`)) {
             die "python 3 does not appear to be installed. please install it here: https://www.python.org/downloads/\n";
         } else {
-            if (not(`pytest -V 2>&1`)) {
+            if (not(`pip3 show pytest`)) {
                 `pip3 install pytest`;
             }
-
-            `pytest -v 1>&0`
+            if (grep(/^--(cov|coverage)$/, @ARGV[3..$#ARGV])) {
+                if (not(`pip3 show pytest-cov`)) {
+                    `pip3 install pytest-cov`;
+                }
+                `pytest --cov=src/utils -v 1>&0`;
+            }
+            else {
+                `pytest -v 1>&0`;
+            }
+            
         }
     }
 
