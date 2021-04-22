@@ -1,5 +1,5 @@
 import numpy
-from shapely import affinity
+from shapely.affinity import translate
 from shapely.geometry import Polygon, box
 from shapely.ops import nearest_points, unary_union
 
@@ -61,7 +61,7 @@ class Piece:
         self.loc += movement.vector
 
     def true_hitbox(self):
-        return affinity.translate(self.hitbox, *self.loc)
+        return translate(self.hitbox, *self.loc)
 
     def move_hitbox(self, movement):
         coords = list(self.true_hitbox().exterior.coords)

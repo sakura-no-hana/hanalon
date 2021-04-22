@@ -1,6 +1,8 @@
-from shapely.geometry import Point, Polygon
+from shapely.affinity import translate
+from shapely.geometry import Point, Polygon, box
+from shapely.ops import unary_union
 
-from utils.rpg.game import DefiniteSkin, MergedPiece, Piece, Skin
+from utils.rpg.game import DefiniteSkin, Piece, Skin
 
 
 class Wall(Piece):
@@ -9,22 +11,26 @@ class Wall(Piece):
         movement.piece.speed -= float("inf")
 
 
-class MergedWalls(MergedPiece):
-    on_coincide = Wall.on_coincide
-
+class MergedWalls(Wall):
     def __init__(self, walls, wall_token="#", skin="🟥", *args, **kwargs):
-        self._walls = []
+        self._skin = []
+        self._hb = []
 
         for i, row in enumerate(walls.split()):
+            self._skin.append([])
             for j, tile in enumerate(row):
                 if tile == wall_token:
-                    self._walls.append(Piece(j, i, skin=DefiniteSkin([[skin]])))
+                    self._skin[i].append(skin)
+                    self._hb.append(box(-0.5 + j, -0.5 - i, 0.5 + j, 0.5 - i))
+                else:
+                    self._skin[i].append(None)
 
-        super().__init__(self._walls, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
-        del self._walls
+        self.skin = DefiniteSkin(self._skin)
+        self.hitbox = translate(unary_union(self._hb), 0, i)
 
-        self.skin.get_bounds = lambda: (range(j + 1), range(i + 1))
+        del self._skin, self._hb
 
 
 class Surface(Piece):
