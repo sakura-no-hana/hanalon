@@ -2,7 +2,7 @@ from discord.ext import commands
 
 from utils.responses import HanalonEmbed
 from utils.rpg.game import DefiniteSkin, Dungeon, InsufficientSpeed, Movement
-from utils.rpg.pieces import Being, Wall
+from utils.rpg.pieces import Being, MergedWalls, Wall
 
 
 class GameAction(commands.Cog):
@@ -27,16 +27,13 @@ class GameAction(commands.Cog):
             XXXXX.XXXXX
             """
 
-        self.mazelist = []
+        self.maze = MergedWalls(self.maze, wall_token="X")
 
-        for i, row in enumerate(self.maze.split()):
-            for j, tile in enumerate(row):
-                if tile == "X":
-                    self.mazelist.append(Wall(j + 5, i + 5, skin=DefiniteSkin([["🟥"]])))
+        self.maze.loc = (5, 5)
 
         self.dungeon = Dungeon(
             [
-                [*self.mazelist],
+                [self.maze],
                 [self.chara],
             ]
         )

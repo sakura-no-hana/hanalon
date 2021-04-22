@@ -30,7 +30,7 @@ class DefiniteSkin(Skin):
         bounds = self.get_bounds()
         if y not in bounds[1] or x not in bounds[0]:
             return None
-        return self._skin[y][x]
+        return self._skin[int(y)][int(x)]
 
 
 class Piece:
@@ -76,6 +76,33 @@ class Piece:
             polys.append(gen_quad(pair, movement.vector))
 
         return unary_union(polys)
+
+
+class MergedPiece(Piece):
+    def __init__(self, pieces, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._pieces = []
+
+        for p in pieces:
+            self._pieces.append(
+                Piece(x=p.loc[0], y=p.loc[1], hitbox=p.hitbox, skin=p.skin)
+            )
+
+        self.skin = Skin()
+
+        def get_tile(x, y):
+            for piece in self._pieces:
+                if tile := piece.skin.get_index(x - piece.loc[0], y - piece.loc[1]):
+                    return tile
+            return None
+
+        self.skin.get_index = get_tile
+
+        # bounds should be overridden for further optimization; i cba to write the algorithm
+        self.skin.get_bounds = lambda: False
+
+        self.hitbox = unary_union([piece.true_hitbox() for piece in self._pieces])
 
 
 class Movement:
