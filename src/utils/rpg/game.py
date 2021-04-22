@@ -10,14 +10,37 @@ class InsufficientSpeed(RPGException):
     ...
 
 
+class Skin:
+    def get_index(self, x, y):
+        raise NotImplementedError
+
+    def get_bounds(self):
+        raise NotImplementedError
+
+
+class DefiniteSkin(Skin):
+    def __init__(self, skin):
+        self._skin = skin
+        self._skin.reverse()
+
+    def get_bounds(self):
+        return (range(len(self._skin[0])), range(len(self._skin)))
+
+    def get_index(self, x, y):
+        bounds = self.get_bounds()
+        if y not in bounds[1] or x not in bounds[0]:
+            return None
+        return self._skin[y][x]
+
+
 class Piece:
     def __init__(
         self,
-        x,
-        y,
+        x=0.0,
+        y=0.0,
         speed=0.0,
         hitbox=box(-0.5, -0.5, 0.5, 0.5),
-        skin=[["⬛"]],
+        skin=DefiniteSkin([["⬛"]]),
         data=None,
     ):
         """Initializes a piece with the given parameters."""
@@ -25,9 +48,8 @@ class Piece:
         self.max_speed = speed
         self.hitbox = hitbox
 
-        # note that the skin is rendered upside-down, so we must reverse it
         self.skin = skin
-        self.skin.reverse()
+
         self.data = data
 
         self.speed = speed
@@ -38,8 +60,11 @@ class Piece:
     def on_move(self, movement):
         self.loc += movement.vector
 
+    def true_hitbox(self):
+        return affinity.translate(self.hitbox, *self.loc)
+
     def move_hitbox(self, movement):
-        coords = list(self.hitbox.exterior.coords)
+        coords = list(self.true_hitbox().exterior.coords)
         pairs = [numpy.array([x, y]) for x, y in zip(coords, coords[1:])]
 
         def gen_quad(pair, vector):
@@ -62,13 +87,14 @@ class Movement:
 
 
 class Dungeon:
-    def __init__(self, layers):
+    def __init__(self, layers, default="⬛"):
         """Initializes a dungeon with the given piece layers."""
         self.pieces = layers
+        self.default = default
 
     def get_collisions(self, movement):
         piece = movement.piece
-        hitbox = affinity.translate(piece.move_hitbox(movement), *piece.loc)
+        hitbox = piece.move_hitbox(movement)
 
         collisions = []
 
@@ -76,7 +102,7 @@ class Dungeon:
             for obj in layer:
                 if obj is movement.piece:
                     continue
-                if hitbox.intersects(affinity.translate(obj.hitbox, *obj.loc)):
+                if hitbox.intersects(obj.true_hitbox()):
                     collisions.append(obj)
 
         def collision_distance(piece):
@@ -129,19 +155,39 @@ class Dungeon:
             for obj in layer:
                 coords = numpy.rint(obj.loc)
 
-                for i, row in enumerate(obj.skin):
-                    for j, px in enumerate(row):
-                        if (
-                            px
-                            and 0 <= (vertical := round(coords[1] - y + i)) < height
-                            and 0 <= (horizontal := round(coords[0] - x + j)) < width
+                obj_bounds = obj.skin.get_bounds()
+
+                if obj_bounds:
+                    for row in obj_bounds[1][
+                        max(round(y - coords[1]), 0) : min(
+                            round(y + height - coords[1]), len(obj_bounds[1])
+                        )
+                    ]:
+                        for col in obj_bounds[0][
+                            max(round(x - coords[0]), 0) : min(
+                                round(x + width - coords[0]), len(obj_bounds[0])
+                            )
+                        ]:
+                            if px := obj.skin.get_index(col, row):
+                                out[row + round(coords[1] - y)][
+                                    col + round(coords[0] - x)
+                                ] = px
+                else:
+                    for row in range(
+                        round(y - coords[1]), round(y + height - coords[1])
+                    ):
+                        for col in range(
+                            round(x - coords[0]), round(x + width - coords[0])
                         ):
-                            out[vertical][horizontal] = px
+                            if px := obj.skin.get_index(col, row):
+                                out[row + round(coords[1] - y)][
+                                    col + round(coords[0] - x)
+                                ] = px
 
         for i, row in enumerate(out):
             for j, px in enumerate(row):
                 if not out[i][j]:
-                    out[i][j] = "⬛"
+                    out[i][j] = self.default
 
         return out
 

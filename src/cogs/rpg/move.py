@@ -1,7 +1,7 @@
 from discord.ext import commands
 
 from utils.responses import HanalonEmbed
-from utils.rpg.game import Dungeon, InsufficientSpeed, Movement
+from utils.rpg.game import DefiniteSkin, Dungeon, InsufficientSpeed, Movement
 from utils.rpg.pieces import Being, Wall
 
 
@@ -9,16 +9,34 @@ class GameAction(commands.Cog):
     def __init__(self, bot):
         """Initializes cog for testing RPG movement."""
         self.bot = bot
-        self.chara = Being(0, 0, skin=[["<:__:828630739871858719>"]])
+        self.chara = Being(0, 0, skin=DefiniteSkin([["<:__:828630739871858719>"]]))
         self.chara.speed = 10
         self.chara.max_speed = 10
+
+        self.maze = """
+            XXXXX.XXXXX
+            X.X.......X
+            X.X.XXX.X.X
+            X...X.X.X.X
+            X.XXX.X.X.X
+            X.X...X.X.X
+            X.XXX.X.XXX
+            X.....X...X
+            XXX.XXXXX.X
+            X...X.....X
+            XXXXX.XXXXX
+            """
+
+        self.mazelist = []
+
+        for i, row in enumerate(self.maze.split()):
+            for j, tile in enumerate(row):
+                if tile == "X":
+                    self.mazelist.append(Wall(j + 5, i + 5, skin=DefiniteSkin([["🟥"]])))
+
         self.dungeon = Dungeon(
             [
-                [
-                    Wall(3, 3, skin=[["🟥"]]),
-                    Wall(3, 4, skin=[["🟥"]]),
-                    Wall(4, 5, skin=[["🟥"]]),
-                ],
+                [*self.mazelist],
                 [self.chara],
             ]
         )

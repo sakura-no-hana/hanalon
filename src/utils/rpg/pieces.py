@@ -1,6 +1,6 @@
 from shapely.geometry import Point, Polygon
 
-from utils.rpg.game import Piece
+from utils.rpg.game import Piece, Skin
 
 
 class Wall(Piece):
@@ -24,3 +24,19 @@ class Being(Piece):
 
     def on_coincide(self, movement):
         movement.piece.speed -= float("inf")
+
+
+class Plane(Piece):
+    def __init__(self, skin_alg, *args, **kwargs):
+        """Creates an infinite non-colliding piece."""
+        super().__init__(*args, **kwargs)
+        self.hitbox = Polygon()
+
+        self.skin = Skin()
+        self.skin.get_bounds = lambda: False
+        self.skin.get_index = skin_alg
+
+
+class BoringPlane(Plane):
+    def __init__(self, skin, *args, **kwargs):
+        super().__init__(skin_alg=lambda x, y: skin, *args, **kwargs)

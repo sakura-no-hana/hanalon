@@ -1,6 +1,6 @@
 import pytest
 
-from utils.rpg.game import Dungeon, InsufficientSpeed, Movement, Piece
+from utils.rpg.game import DefiniteSkin, Dungeon, InsufficientSpeed, Movement, Piece
 from utils.rpg.pieces import Being, Surface, Wall
 
 
@@ -105,11 +105,11 @@ class TestCollision:
 @pytest.mark.game
 class TestRender:
     def test_overlay(self):
-        dungeon = Dungeon([[Piece(0, 0)], [Piece(0, 0, skin=[["."]])]])
+        dungeon = Dungeon([[Piece(0, 0)], [Piece(0, 0, skin=DefiniteSkin([["."]]))]])
         assert dungeon.render_str(1, 1, (0, 0))[0][0] == "."
 
     def test_skin(self):
-        dungeon = Dungeon([[Surface(-1, -1, skin=[["."] * 3] * 3)]])
+        dungeon = Dungeon([[Surface(-1, -1, skin=DefiniteSkin([["."] * 3] * 3))]])
         assert all(
             [all([tile == "." for tile in row]) for row in dungeon.render(3, 3, (0, 0))]
         )
