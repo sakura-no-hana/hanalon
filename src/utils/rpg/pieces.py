@@ -80,7 +80,7 @@ class Being(Piece):
                     continue
                 item[s] += item.stats[s]
         return _modified_stats
-        
+
     def apply_effects(self):
         """Apply all effects, including items. May cause
         redundancy."""
