@@ -1,5 +1,6 @@
 from discord.ext import commands
 
+from utils.bot import is_response
 from utils.responses import HanalonEmbed
 from utils.rpg.game import DefiniteSkin, Dungeon, InsufficientSpeed, Movement
 from utils.rpg.pieces import Being, MergedWalls, Wall
@@ -48,13 +49,40 @@ class GameAction(commands.Cog):
         embed.add_field(name="View", value=self.board())
         await embed.respond(True)
 
-    @commands.command()
+    @commands.command(name="start-turn")
+    async def start_turn(self, ctx):
+        self.dungeon.start_turn()
+        self.chara.speed = self.chara.max_speed
+
+        embed = HanalonEmbed(ctx)
+        embed.add_field(name="View", value=self.board())
+        await embed.respond(True)
+
+        while self.chara.speed > 0:
+            j = await self.bot.wait_for(
+                "message",
+                check=lambda message: is_response(ctx, message, embed.response),
+            )
+
+            contents = j.content.split()
+
+            if contents[0] == "move":
+                embed = await self.move(
+                    await self.bot.get_context(j), int(contents[1]), int(contents[2])
+                )
+            else:
+                return
+
     async def move(self, ctx, delta_x: int, delta_y: int) -> None:
         error = True
         embed = HanalonEmbed(ctx)
         try:
-            self.dungeon.move(Movement(delta_x, delta_y, self.chara, "walk"))
+            self.dungeon.move(
+                Movement(delta_x, delta_y, self.chara, self.dungeon, "walk")
+            )
             error = False
+
+            self.dungeon.resolve_turn()
         except InsufficientSpeed:
             embed.add_field(
                 name="Notice", value="Cannot reach the destination!", inline=False
@@ -66,6 +94,8 @@ class GameAction(commands.Cog):
             await embed.respond(False)
         else:
             await embed.respond(True, override=True)
+
+        return embed
 
 
 def setup(bot):

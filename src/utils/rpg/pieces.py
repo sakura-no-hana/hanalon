@@ -6,7 +6,7 @@ from utils.rpg.game import DefiniteSkin, Piece, Skin
 
 
 class Wall(Piece):
-    def on_coincide(self, movement):
+    def on_coincide(self, movement, mock=True):
         """Creates a piece for a wall."""
         movement.piece.speed -= float("inf")
 
@@ -46,7 +46,7 @@ class Being(Piece):
         super().__init__(*args, **kwargs)
         self.hitbox = Point(0, 0).buffer(0.125)
 
-    def on_coincide(self, movement):
+    def on_coincide(self, movement, mock=True):
         movement.piece.speed -= float("inf")
 
 
@@ -63,4 +63,4 @@ class Plane(Piece):
 
 class BoringPlane(Plane):
     def __init__(self, skin, *args, **kwargs):
-        super().__init__(skin_alg=lambda x, y: skin, *args, **kwargs)
+        super().__init__(skin_alg=lambda *_: skin, *args, **kwargs)

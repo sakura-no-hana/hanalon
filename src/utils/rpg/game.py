@@ -1,3 +1,5 @@
+import queue
+
 import numpy
 from shapely.affinity import translate
 from shapely.geometry import Polygon, box
@@ -54,7 +56,7 @@ class Piece:
 
         self.speed = speed
 
-    def on_coincide(self, movement):
+    def on_coincide(self, movement, mock=False):
         ...
 
     def on_move(self, movement):
@@ -106,11 +108,29 @@ class MergedPiece(Piece):
 
 
 class Movement:
-    def __init__(self, x, y, piece, mode=None):
+    def __init__(self, x, y, piece, dungeon, mode=None):
         """Initializes a movement with the piece and vector given."""
         self.vector = numpy.array([float(x), float(y)])
         self.piece = piece
         self.mode = mode
+
+
+class Turn(queue.Queue):
+    def do_next(self, *args, **kwargs):
+        self.get()(*args, **kwargs)
+
+
+class TurnManager(queue.Queue):
+    def __init__(self):
+        super().__init__()
+
+        self.turn = Turn()
+
+    def next_turn(self):
+        if self.empty():
+            self.put(Turn())
+        self.turn = self.get()
+        return self.turn
 
 
 class Dungeon:
@@ -118,6 +138,7 @@ class Dungeon:
         """Initializes a dungeon with the given piece layers."""
         self.pieces = layers
         self.default = default
+        self.turns = TurnManager()
 
     def get_collisions(self, movement):
         piece = movement.piece
@@ -144,15 +165,16 @@ class Dungeon:
 
         return collisions
 
-    def collide(self, movement):
+    def collide(self, movement, mock):
         collisions = self.get_collisions(movement)
 
         for obj in collisions:
-            obj.on_coincide(movement)
+            if not mock:
+                self.turns.turn.put(lambda: obj.on_coincide(movement, mock=mock))
+            else:
+                obj.on_coincide(movement, mock=mock)
 
     def move(self, movement):
-        movement.piece.speed = movement.piece.max_speed
-
         test = numpy.copy(movement.vector)
         mag = numpy.linalg.norm(test)
 
@@ -165,12 +187,21 @@ class Dungeon:
 
         test /= 2 * mag
 
-        self.collide(movement)
+        self.collide(movement, mock=True)
 
         if movement.piece.speed < 0:
             raise InsufficientSpeed
 
-        movement.piece.on_move(movement)
+        self.turns.turn.put(lambda: movement.piece.on_move(movement))
+
+        self.collide(movement, mock=False)
+
+    def start_turn(self):
+        self.turns.next_turn()
+
+    def resolve_turn(self):
+        while not self.turns.turn.empty():
+            self.turns.turn.do_next()
 
     def render(self, width, height, origin):
         x, y = origin
