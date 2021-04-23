@@ -56,9 +56,14 @@ class Piece:
         self.data = data
 
         self.speed = speed
+        self._speed = speed
 
     def on_coincide(self, movement, mock=False):
         ...
+
+    def on_turn(self, dungeon):
+        self.speed = self.max_speed
+        self._speed = self.max_speed
 
     def on_move(self, movement):
         self.loc += movement.vector
@@ -118,19 +123,36 @@ class Movement:
 
 
 class Turn(queue.Queue):
+    def __init__(self, focus=None):
+        super().__init__()
+
+        self.focus = focus
+
     def do_next(self, *args, **kwargs):
         self.get()(*args, **kwargs)
 
 
 class TurnManager(queue.Queue):
-    def __init__(self):
+    def __init__(self, dungeon):
         super().__init__()
 
-        self.turn = Turn()
+        self.turn = None
+        self.dungeon = dungeon
+
+    def put(self, *args, **kwargs):
+        super().put(*args, **kwargs)
+        if self.turn is None:
+            self.turn = self.next_turn()
 
     def next_turn(self):
         if self.empty():
-            self.put(Turn())
+            raise queue.Empty
+        else:
+            try:
+                self.turn.focus.on_turn(self.dungeon)
+                self.put(Turn(self.turn.focus))
+            except AttributeError:
+                ...
         self.turn = self.get()
         return self.turn
 
@@ -140,7 +162,7 @@ class Dungeon:
         """Initializes a dungeon with the given piece layers."""
         self.pieces = layers
         self.default = default
-        self.turns = TurnManager()
+        self.turns = TurnManager(self)
 
     def get_collisions(self, movement):
         piece = movement.piece
@@ -191,7 +213,8 @@ class Dungeon:
 
         self.collide(movement, mock=True)
 
-        if movement.piece.speed < 0:
+        if movement.piece._speed < 0:
+            movement.piece._speed = movement.piece.speed
             raise InsufficientSpeed
 
         self.turns.turn.put(lambda: movement.piece.on_move(movement))

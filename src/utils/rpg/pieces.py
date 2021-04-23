@@ -7,8 +7,10 @@ from utils.rpg.game import DefiniteSkin, Piece, Skin
 
 class Wall(Piece):
     def on_coincide(self, movement, mock=True):
-        """Creates a piece for a wall."""
-        movement.piece.speed -= float("inf")
+        if mock:
+            movement.piece._speed -= float("inf")
+        else:
+            movement.piece.speed -= float("inf")
 
 
 class MergedWalls(Wall):
@@ -47,7 +49,10 @@ class Being(Piece):
         self.hitbox = Point(0, 0).buffer(0.125)
 
     def on_coincide(self, movement, mock=True):
-        movement.piece.speed -= float("inf")
+        if mock:
+            movement.piece._speed -= float("inf")
+        else:
+            movement.piece.speed -= float("inf")
 
 
 class Plane(Piece):
