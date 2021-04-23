@@ -48,11 +48,47 @@ class Being(Piece):
         super().__init__(*args, **kwargs)
         self.hitbox = Point(0, 0).buffer(0.125)
 
+        self.stats = {
+            "atk": 100,
+            "def": 5,
+            "max_hp": 10000,
+            # etc.
+        }
+        self.equipped = []
+        self.effects = []  # Only storing non-item effects
+
     def on_coincide(self, movement, mock=True):
         if mock:
             movement.piece._speed -= float("inf")
         else:
             movement.piece.speed -= float("inf")
+
+    def equip(self, item):
+        self.equipped.append(item)
+        item.equip_on(self)
+
+    def unequip(self, item):
+        self.equipped.remove(item)
+        item.unequip()
+
+    def getstats(self) -> dict:
+        """Get stats after item bonuses"""
+        _modified_stats = self.stats.copy()
+        for item in self.equipped:
+            for s in item.stats.keys():
+                if s not in _modified_stats:
+                    continue
+                item[s] += item.stats[s]
+        return _modified_stats
+        
+    def apply_effects(self):
+        """Apply all effects, including items. May cause
+        redundancy."""
+        for eff in self.effects:
+            eff(self)
+        for item in self.equips:
+            if item.effect:
+                item.use_effect(self)
 
 
 class Plane(Piece):
