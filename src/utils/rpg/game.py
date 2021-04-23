@@ -1,6 +1,7 @@
 import queue
 
 import numpy
+import numpy.linalg
 from shapely.affinity import translate
 from shapely.geometry import Polygon, box
 from shapely.ops import nearest_points, unary_union
@@ -61,6 +62,7 @@ class Piece:
 
     def on_move(self, movement):
         self.loc += movement.vector
+        self.speed -= numpy.linalg.norm(movement.vector)
 
     def true_hitbox(self):
         return translate(self.hitbox, *self.loc)
@@ -217,13 +219,13 @@ class Dungeon:
 
                 if obj_bounds:
                     for row in obj_bounds[1][
-                        max(round(y - coords[1]), 0) : min(
-                            round(y + height - coords[1]), len(obj_bounds[1])
+                        max(round(y - coords[1]), 0) : max(
+                            min(round(y + height - coords[1]), len(obj_bounds[1])), 0
                         )
                     ]:
                         for col in obj_bounds[0][
-                            max(round(x - coords[0]), 0) : min(
-                                round(x + width - coords[0]), len(obj_bounds[0])
+                            max(round(x - coords[0]), 0) : max(
+                                min(round(x + width - coords[0]), len(obj_bounds[0])), 0
                             )
                         ]:
                             if px := obj.skin.get_index(col, row):

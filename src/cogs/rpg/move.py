@@ -4,15 +4,14 @@ from utils.bot import is_response
 from utils.responses import HanalonEmbed
 from utils.rpg.game import DefiniteSkin, Dungeon, InsufficientSpeed, Movement
 from utils.rpg.pieces import Being, MergedWalls, Wall
+from utils.rpg.prefabs import protohero
 
 
 class GameAction(commands.Cog):
     def __init__(self, bot):
         """Initializes cog for testing RPG movement."""
         self.bot = bot
-        self.chara = Being(0, 0, skin=DefiniteSkin([["<:__:828630739871858719>"]]))
-        self.chara.speed = 10
-        self.chara.max_speed = 10
+        self.chara = protohero.PrototypePecorine(x=0, y=0, speed=10)
 
         self.maze = """
             XXXXX.XXXXX
@@ -52,7 +51,6 @@ class GameAction(commands.Cog):
     @commands.command(name="start-turn")
     async def start_turn(self, ctx):
         self.dungeon.start_turn()
-        self.chara.speed = self.chara.max_speed
 
         embed = HanalonEmbed(ctx)
         embed.add_field(name="View", value=self.board())
@@ -83,6 +81,8 @@ class GameAction(commands.Cog):
             error = False
 
             self.dungeon.resolve_turn()
+
+            print(self.chara.speed)
         except InsufficientSpeed:
             embed.add_field(
                 name="Notice", value="Cannot reach the destination!", inline=False
