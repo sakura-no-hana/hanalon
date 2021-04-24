@@ -1,20 +1,24 @@
+import textwrap
+
 from utils.rpg.piece import Being, DefiniteSkin
 
-_characters = {
+characters = {
     "Yuni": 828629768651014195,
     "Yui": 828630740341227570,
     "Pecorine": 828630739871858719,
     "Luna": 828110282823434281,
     "Kyaru": 828630740123779072,
 }
-__all__ = [f"Prototype{name}" for name in _characters]
+__all__ = [f"Prototype{name}" for name in characters]
 
-for _ in _characters:
+for _ in characters:
     exec(
-        f"""
-class Prototype{_}(Being):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.skin = DefiniteSkin([["<:__:{_characters[_]}>"]])
-    """
+        textwrap.dedent(
+            f"""
+            class Prototype{_}(Being):
+                def __init__(self, *args, **kwargs):
+                    super().__init__(*args, **kwargs)
+                    self.skin = DefiniteSkin([["<:__:{characters[_]}>"]])
+            """
+        )
     )
