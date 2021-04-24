@@ -1,6 +1,13 @@
 import pytest
 
-from utils.rpg.game import DefiniteSkin, Dungeon, InsufficientSpeed, Movement, Piece
+from utils.rpg.game import (
+    DefiniteSkin,
+    Dungeon,
+    InsufficientSpeed,
+    Movement,
+    Piece,
+    Turn,
+)
 from utils.rpg.pieces import Being, Surface, Wall
 
 
@@ -8,13 +15,17 @@ from utils.rpg.pieces import Being, Surface, Wall
 class TestHooks:
     def test_coincide(self):
         class HookedPiece(Piece):
-            def on_coincide(self, movement):
+            def on_coincide(self, movement, mock):
                 self.coincided = True
 
         a, b = Piece(0, 0, speed=1), HookedPiece(0, 1)
         dungeon = Dungeon([[a, b]])
 
-        dungeon.move(Movement(0, 1, a))
+        dungeon.turns.put(Turn(a))
+
+        dungeon.move(Movement(0, 1, a, dungeon))
+
+        dungeon.resolve_turn()
 
         assert b.coincided
 
@@ -26,7 +37,11 @@ class TestHooks:
         a = HookedPiece(0, 0)
         dungeon = Dungeon([[a]])
 
-        dungeon.move(Movement(0, 0, a))
+        dungeon.turns.put(Turn(a))
+
+        dungeon.move(Movement(0, 0, a, dungeon))
+
+        dungeon.resolve_turn()
 
         assert a.moved
 
@@ -37,21 +52,37 @@ class TestDistance:
         chara = Being(0, 0, speed=5)
         dungeon = Dungeon([[chara]])
 
+        dungeon.turns.put(Turn(chara))
+
         with pytest.raises(InsufficientSpeed):
-            dungeon.move(Movement(0, 10 ** 10, chara))
+            dungeon.move(Movement(0, 10 ** 10, chara, dungeon))
+
+        dungeon.resolve_turn()
+
+        assert tuple(chara.loc) == (0, 0)
 
     def test_far_diagonal(self):
         chara = Being(0, 0, speed=5)
         dungeon = Dungeon([[chara]])
 
+        dungeon.turns.put(Turn(chara))
+
         with pytest.raises(InsufficientSpeed):
-            dungeon.move(Movement(3, 4.0001, chara))
+            dungeon.move(Movement(3, 4.0001, chara, dungeon))
+
+        dungeon.resolve_turn()
+
+        assert tuple(chara.loc) == (0, 0)
 
     def test_near_orthogonal(self):
         chara = Being(0, 0, speed=5)
         dungeon = Dungeon([[chara]])
 
-        dungeon.move(Movement(0, 5, chara))
+        dungeon.turns.put(Turn(chara))
+
+        dungeon.move(Movement(0, 5, chara, dungeon))
+
+        dungeon.resolve_turn()
 
         assert tuple(chara.loc) == (0, 5)
 
@@ -59,7 +90,11 @@ class TestDistance:
         chara = Being(0, 0, speed=5)
         dungeon = Dungeon([[chara]])
 
-        dungeon.move(Movement(3, 4, chara))
+        dungeon.turns.put(Turn(chara))
+
+        dungeon.move(Movement(3, 4, chara, dungeon))
+
+        dungeon.resolve_turn()
 
         assert tuple(chara.loc) == (3, 4)
 
@@ -70,7 +105,11 @@ class TestCollision:
         chara = Being(0, 0, speed=5)
         dungeon = Dungeon([[Wall(0, 5)], [chara]])
 
-        dungeon.move(Movement(0, 4, chara))
+        dungeon.turns.put(Turn(chara))
+
+        dungeon.move(Movement(0, 4, chara, dungeon))
+
+        dungeon.resolve_turn()
 
         assert tuple(chara.loc) == (0, 4)
 
@@ -78,7 +117,11 @@ class TestCollision:
         chara = Being(0, 0, speed=5)
         dungeon = Dungeon([[Wall(0, 2)], [chara]])
 
-        dungeon.move(Movement(1, 2, chara))
+        dungeon.turns.put(Turn(chara))
+
+        dungeon.move(Movement(1, 2, chara, dungeon))
+
+        dungeon.resolve_turn()
 
         assert tuple(chara.loc) == (1, 2)
 
@@ -86,8 +129,12 @@ class TestCollision:
         chara = Being(0, 0, speed=5)
         dungeon = Dungeon([[Wall(0, 1)], [chara]])
 
+        dungeon.turns.put(Turn(chara))
+
         with pytest.raises(InsufficientSpeed):
-            dungeon.move(Movement(0, 4, chara))
+            dungeon.move(Movement(0, 4, chara, dungeon))
+
+        dungeon.resolve_turn()
 
         assert tuple(chara.loc) == (0, 0)
 
@@ -95,8 +142,12 @@ class TestCollision:
         chara = Being(0, 0, speed=5)
         dungeon = Dungeon([[Wall(1, 1)], [chara]])
 
+        dungeon.turns.put(Turn(chara))
+
         with pytest.raises(InsufficientSpeed):
-            dungeon.move(Movement(2, 2, chara))
+            dungeon.move(Movement(2, 2, chara, dungeon))
+
+        dungeon.resolve_turn()
 
         assert tuple(chara.loc) == (0, 0)
 
