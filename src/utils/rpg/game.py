@@ -7,9 +7,7 @@ from typing import Any, Iterable
 
 import numpy
 import numpy.linalg
-from shapely.affinity import translate
-from shapely.geometry import Polygon, box
-from shapely.ops import nearest_points, unary_union
+from shapely.ops import nearest_points
 
 from utils.rpg.db import RPGException
 from utils.rpg.piece import Piece
@@ -32,28 +30,31 @@ class Movement:
 
 
 class Turn(queue.Queue):
-    def __init__(self, focus=None):
+    def __init__(self, focus: Piece = None):
         super().__init__()
 
         self.focus = focus
 
     def do_next(self, *args, **kwargs):
+        """Does the next action in the turn."""
         self.get()(*args, **kwargs)
 
 
 class TurnManager(queue.Queue):
-    def __init__(self, dungeon):
+    def __init__(self, dungeon: Dungeon):
         super().__init__()
 
         self.turn = None
         self.dungeon = dungeon
 
     def put(self, *args, **kwargs):
+        """Puts a new turn, advancing to that turn if no turn is present."""
         super().put(*args, **kwargs)
         if self.turn is None:
             self.turn = self.next_turn()
 
     def next_turn(self):
+        """Advances to the next turn, putting a turn with the same focus back into the queue."""
         if self.empty():
             raise queue.Empty
         else:
@@ -74,7 +75,8 @@ class Dungeon:
     def __post_init__(self):
         self.turns = TurnManager(self)
 
-    def get_collisions(self, movement):
+    def get_collisions(self, movement: Movement):
+        """Gets all piece collisions, sorted by distance from piece origin."""
         piece = movement.piece
         hitbox = piece.move_hitbox(movement)
 
@@ -99,7 +101,8 @@ class Dungeon:
 
         return collisions
 
-    def collide(self, movement, mock):
+    def collide(self, movement: Movement, mock: bool) -> None:
+        """Simulates collisions."""
         collisions = self.get_collisions(movement)
 
         for obj in collisions:
@@ -108,7 +111,8 @@ class Dungeon:
             else:
                 obj.on_coincide(movement, mock=mock)
 
-    def move(self, movement):
+    def move(self, movement: Movement) -> None:
+        """Moves a piece according to the movement."""
         test = numpy.copy(movement.vector)
         mag = numpy.linalg.norm(test)
 
@@ -132,13 +136,18 @@ class Dungeon:
         self.collide(movement, mock=False)
 
     def start_turn(self):
+        """Starts a turn."""
         self.turns.next_turn()
 
     def resolve_turn(self):
+        """Completes all queued actions in a turn."""
         while not self.turns.turn.empty():
             self.turns.turn.do_next()
 
-    def render(self, width, height, origin):
+    def render(
+        self, width: int, height: int, origin: Iterable[int]
+    ) -> Iterable[Iterable[str]]:
+        """Renders a 2D list for display."""
         x, y = origin
         dx, dy = (width - 1) // 2, (height - 1) // 2
         out = [[None for _ in range(width)] for _ in range(height)]
@@ -184,7 +193,8 @@ class Dungeon:
 
         return out
 
-    def render_str(self, width, height, origin):
+    def render_str(self, width: int, height: int, origin: Iterable[int]) -> str:
+        """Creates string to display board."""
         board = self.render(width, height, origin)
         board.reverse()
         return "\n".join(["".join(a) for a in board])

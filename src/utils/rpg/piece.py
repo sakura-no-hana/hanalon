@@ -63,6 +63,7 @@ class Piece:
 
 class MergedPiece(Piece):
     def __init__(self, pieces: Iterable[Piece], *args, **kwargs):
+        """Creates a single piece which simulates multiple pieces. Keep in mind that hooks are overwritten."""
         super().__init__(*args, **kwargs)
 
         self._pieces = []
@@ -100,6 +101,7 @@ class MergedWalls(Wall):
     def __init__(
         self, walls: str, wall_token: str = "#", skin: str = "🟥", *args, **kwargs
     ):
+        """Creates a piece that simulates many individual walls."""
         self._skin = []
         self._hb = []
 
@@ -151,4 +153,5 @@ class Plane(Piece):
 
 class BoringPlane(Plane):
     def __init__(self, skin: str, *args, **kwargs):
+        """Creates an infinite non-colliding piece with a uniform skin."""
         super().__init__(skin_alg=lambda *_: skin, *args, **kwargs)
