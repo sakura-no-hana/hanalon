@@ -28,6 +28,7 @@ class Piece:
     def __post_init__(self):
         self.x = float(self.x)
         self.y = float(self.y)
+        self.speed = float(self.speed)
         self.loc = numpy.array([self.x, self.y])
         self.max_speed = self.speed
         self._speed = self.speed
