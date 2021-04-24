@@ -55,7 +55,7 @@ class TurnManager(queue.Queue):
 
     def next_turn(self):
         """Advances to the next turn, putting a turn with the same focus back into the queue."""
-        if self.empty():
+        if self.empty() and not self.turn:
             raise queue.Empty
         else:
             try:

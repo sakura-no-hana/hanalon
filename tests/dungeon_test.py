@@ -1,6 +1,6 @@
 import pytest
 
-from utils.rpg.game import Dungeon, InsufficientSpeed, Movement, Piece, Turn
+from utils.rpg.game import Dungeon, InsufficientSpeed, Movement, Turn
 from utils.rpg.piece import Being, Piece, Surface, Wall
 from utils.rpg.skin import DefiniteSkin
 
@@ -17,12 +17,22 @@ def setup_dungeon():
 
 @pytest.mark.game
 class TestHooks:
-    def test_coincide(self):
-        class HookedPiece(Piece):
-            def on_coincide(self, movement, mock):
-                self.coincided = True
+    class HookedPiece(Piece):
+        def __post_init__(self):
+            super().__post_init__()
+            self.turn = False
 
-        a, b = Piece(0, 0, speed=1), HookedPiece(0, 1)
+        def on_coincide(self, movement, mock=True):
+            self.coincided = True
+
+        def on_move(self, movement):
+            self.moved = True
+
+        def on_turn(self, dungeon):
+            self.turn = True
+
+    def test_coincide(self):
+        a, b = Piece(0, 0, speed=1), TestHooks.HookedPiece(0, 1)
         dungeon = Dungeon([[a, b]])
 
         dungeon.turns.put(Turn(a))
@@ -34,11 +44,7 @@ class TestHooks:
         assert b.coincided
 
     def test_move(self):
-        class HookedPiece(Piece):
-            def on_move(self, movement):
-                self.moved = True
-
-        a = HookedPiece(0, 0)
+        a = TestHooks.HookedPiece(0, 0)
         dungeon = Dungeon([[a]])
 
         dungeon.turns.put(Turn(a))
@@ -48,6 +54,26 @@ class TestHooks:
         dungeon.resolve_turn()
 
         assert a.moved
+
+    def test_turn(self):
+        a = TestHooks.HookedPiece(0, 0)
+        dungeon = Dungeon([[a]])
+
+        dungeon.turns.put(Turn(a))
+
+        assert not a.turn
+
+        dungeon.move(Movement(0, 0, a, dungeon))
+
+        assert not a.turn
+
+        dungeon.resolve_turn()
+
+        assert not a.turn
+
+        dungeon.start_turn()
+
+        assert a.turn
 
 
 @pytest.mark.game
