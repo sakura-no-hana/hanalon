@@ -1,6 +1,6 @@
 from discord.ext import commands
 
-from utils.bot import Context, bot, cogs_dir, include_cog
+from utils.bot import bot, cogs_dir, include_cog
 from utils.responses import HanalonEmbed
 
 
@@ -11,7 +11,7 @@ class LockedCog(Exception):
 class Cogs(commands.Cog):
     @commands.command()
     @bot.owner_only
-    async def load(self, ctx: Context, module: str):
+    async def load(self, ctx: commands.Context, module: str):
         """Loads a cog."""
         bot.load_extension(f"{cogs_dir.name}.{module}")
         await HanalonEmbed(
@@ -22,7 +22,7 @@ class Cogs(commands.Cog):
 
     @commands.command()
     @bot.owner_only
-    async def unload(self, ctx: Context, module: str):
+    async def unload(self, ctx: commands.Context, module: str):
         """Unloads a cog."""
         bot.unload_extension(f"{cogs_dir.name}.{module}")
         if type(self).__name__ not in [type(cog).__name__ for cog in bot.cogs.values()]:
@@ -37,7 +37,7 @@ class Cogs(commands.Cog):
 
     @commands.command()
     @bot.owner_only
-    async def reload(self, ctx: Context, module: str):
+    async def reload(self, ctx: commands.Context, module: str):
         """Reloads a cog."""
         bot.reload_extension(f"{cogs_dir.name}.{module}")
         await HanalonEmbed(

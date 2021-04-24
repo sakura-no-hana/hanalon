@@ -2,13 +2,13 @@ from typing import Iterable, Mapping, Optional, Union
 
 import discord
 from discord.embeds import EmptyEmbed
-from discord.ext import menus, slash
+from discord.ext import commands, menus
 
-from .bot import Context, bot
+from utils.bot import bot
 
 
 class HanalonPages(menus.Menu):
-    def __init__(self, context: Context, pages: Iterable[Mapping]):
+    def __init__(self, context: commands.Context, pages: Iterable[Mapping]):
         """Creates an interactive list of pages."""
         super().__init__()
         self.context = context
@@ -16,13 +16,10 @@ class HanalonPages(menus.Menu):
         self.index = 0
 
     async def send_initial_message(
-        self, ctx: Context, channel: discord.abc.Messageable
+        self, ctx: commands.Context, channel: discord.abc.Messageable
     ) -> discord.Message:
         """Sends the initial message."""
-        if isinstance(self.context, slash.Context):
-            return await self.context.respond(**self.pages[self.index])
-        else:
-            return await self.context.send(**self.pages[self.index])
+        return await self.context.send(**self.pages[self.index])
 
     async def go_to(self, index: int):
         """Updates HanalonPages instance to a certain page."""
@@ -30,10 +27,7 @@ class HanalonPages(menus.Menu):
         if not 0 <= index < len(self.pages):
             index %= len(self.pages)
         self.index = index
-        if isinstance(self.context, slash.Context):
-            self.message = await self.context.respond(**self.pages[self.index])
-        else:
-            await self.message.edit(**self.pages[self.index])
+        await self.message.edit(**self.pages[self.index])
 
     async def validate(self, payload: discord.RawReactionActionEvent) -> bool:
         """Returns whether the bot should act on a reaction."""
@@ -72,7 +66,7 @@ class HanalonPages(menus.Menu):
 class HanalonEmbed(discord.Embed):
     def __init__(
         self,
-        context: Context,
+        context: commands.Context,
         title: str = EmptyEmbed,
         description: str = EmptyEmbed,
         color: Union[discord.Color, int] = bot.color,
@@ -80,10 +74,7 @@ class HanalonEmbed(discord.Embed):
     ):
         """Creates an embed with prettifying and permissions taken care of."""
         super().__init__(title=title, description=description, color=color, url=url)
-        if isinstance(context, slash.Context):
-            self.timestamp = context.created_at
-        else:
-            self.timestamp = context.message.created_at
+        self.timestamp = context.message.created_at
         self.set_footer(
             text=f"{context.author.name}#{context.author.discriminator}",
             icon_url=context.author.avatar_url,
@@ -96,56 +87,51 @@ class HanalonEmbed(discord.Embed):
         code: Optional[bool] = None,
         override: bool = False,
         destination: Optional[discord.abc.Messageable] = None,
-        flags: Optional[slash.MessageFlags] = None,
-        rtype: slash.InteractionResponseType = slash.InteractionResponseType.ChannelMessageWithSource,
     ):
         """Sends a response; this deals with replies and reactions, which most bot messages will use."""
-        if isinstance(self.context, slash.Context):
-            self.response = HanalonResponse(self.context)
-            await self.response.send(embed=self, flags=flags, rtype=rtype)
-        else:
-            self.response = HanalonResponse(self.context, code, override, destination)
 
-            if self.context.channel.permissions_for(self.context.me).embed_links:
-                await self.response.send(embed=self)
-            elif self.context.channel.permissions_for(self.context.me).manage_webhooks:
-                pfp = await bot.user.avatar_url.read()
-                webhook = await self.context.channel.create_webhook(
-                    name=self.context.guild.me.display_name,
-                    avatar=pfp,
-                    reason="I can't send embeds…",
-                )
-                await webhook.send(embed=self)
-                await webhook.delete()
+        self.response = HanalonResponse(self.context, code, override, destination)
 
-                # can't be bothered to deal with reaction logic. try/except is the simplest way to
-                # handle reactions.
-                try:
-                    await self.response.send()
-                except discord.Forbidden:
-                    pass
-            elif self.context.channel.permissions_for(self.context.me).send_messages:
-                if self.title:
-                    title_proxy = f"**{self.title}**"
-                else:
-                    title_proxy = ""
-                message = (
-                    f'{title_proxy}\n{self.description if self.description else ""}\n\n'
-                )
-                for field in self.fields:
-                    message += f"*{field.name}*\n{field.value}\n\n"
-                try:
-                    await self.response.send(message)
-                except discord.Forbidden:
-                    pass
+        if self.context.channel.permissions_for(self.context.me).embed_links:
+            await self.response.send(embed=self)
+        elif self.context.channel.permissions_for(self.context.me).manage_webhooks:
+            pfp = await bot.user.avatar_url.read()
+            webhook = await self.context.channel.create_webhook(
+                name=self.context.guild.me.display_name,
+                avatar=pfp,
+                reason="I can't send embeds…",
+            )
+            await webhook.send(embed=self)
+            await webhook.delete()
+
+            # can't be bothered to deal with reaction logic. try/except is the simplest way to
+            # handle reactions.
+            try:
+                await self.response.send()
+            except discord.Forbidden:
+                pass
+        elif self.context.channel.permissions_for(self.context.me).send_messages:
+            if self.title:
+                title_proxy = f"**{self.title}**"
             else:
-                raise discord.Forbidden
+                title_proxy = ""
+            message = (
+                f'{title_proxy}\n{self.description if self.description else ""}\n\n'
+            )
+            for field in self.fields:
+                message += f"*{field.name}*\n{field.value}\n\n"
+            try:
+                await self.response.send(message)
+            except discord.Forbidden:
+                pass
+        else:
+            raise discord.Forbidden
 
 
 class HanalonResponse:
     def __init__(
         self,
-        context: Context,
+        context: commands.Context,
         success: Optional[bool] = None,
         override_success: bool = False,
         destination: Optional[discord.abc.Messageable] = None,
@@ -159,23 +145,20 @@ class HanalonResponse:
 
     async def send(self, **kwargs):
         """Sends a response; this deals with replies and reactions, which most bot messages will use."""
-        if isinstance(self.context, slash.Context):
-            self.reply = await self.context.respond(**kwargs)
-        else:
-            if "mention_author" not in kwargs:
-                kwargs["mention_author"] = False
-            try:
-                if (
-                    isinstance(self.destination, discord.abc.Messageable)
-                    and self.destination != self.context.channel
-                ):
-                    self.reply = await self.destination.send(**kwargs)
-                else:
-                    self.reply = await self.context.reply(**kwargs)
-            except Exception:
-                if not self.override:
-                    raise
-            if self.success:
-                await self.context.message.add_reaction(bot.success)
-            elif self.success is not None:
-                await self.context.message.add_reaction(bot.failure)
+        if "mention_author" not in kwargs:
+            kwargs["mention_author"] = False
+        try:
+            if (
+                isinstance(self.destination, discord.abc.Messageable)
+                and self.destination != self.context.channel
+            ):
+                self.reply = await self.destination.send(**kwargs)
+            else:
+                self.reply = await self.context.reply(**kwargs)
+        except Exception:
+            if not self.override:
+                raise
+        if self.success:
+            await self.context.message.add_reaction(bot.success)
+        elif self.success is not None:
+            await self.context.message.add_reaction(bot.failure)

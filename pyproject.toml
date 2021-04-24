@@ -8,7 +8,6 @@ authors = ["pyxiis", "Noyx46", "DiggetyDoo", "AlankarSovani"]
 python = "^3.9"
 d20 = "*"
 discord-ext-menus = {git = "https://github.com/Rapptz/discord-ext-menus"}
-discord-ext-slash = "*"
 "discord.py" = "*"
 dnspython = "*"
 motor = "*"
