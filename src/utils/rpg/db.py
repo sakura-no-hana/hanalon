@@ -1,6 +1,8 @@
+from dataclasses import dataclass
 from enum import Enum, unique
 import math
 from typing import Iterable, Optional, Union
+from uuid import UUID
 from uuid import uuid4 as uuid
 
 import bson
@@ -78,7 +80,10 @@ class Damage(Enum):
     THUNDER = 12
 
 
+@dataclass
 class Character:
+    identifier: UUID
+
     @classmethod
     async def register(
         cls, player: discord.User, name: str, job: str, race: Optional[str] = "human"
@@ -100,10 +105,6 @@ class Character:
             }
         )
         return cls(identifier)
-
-    def __init__(self, identifier):
-        """Creates a character with the given ID."""
-        self.identifier = identifier
 
     async def get_name(self):
         if not (char := await bot.characters.find_one({"_id": self.identifier})):
@@ -173,7 +174,10 @@ class Character:
         return await bot.fetch_user(char["player"])
 
 
+@dataclass
 class Party:
+    identifier: UUID
+
     @classmethod
     async def register(
         cls, player: discord.User, characters: Optional[Iterable[Character]] = tuple()
@@ -195,10 +199,6 @@ class Party:
         if not (party := await bot.parties.find_one({"player": bson.Int64(user.id)})):
             raise NotRegistered
         return cls(party["_id"])
-
-    def __init__(self, identifier):
-        """Creates a party with the given ID."""
-        self.identifier = identifier
 
     async def add_character(self, char: Character):
         if not await bot.parties.find_one({"_id": self.identifier}):
@@ -234,7 +234,10 @@ class Party:
 Player = Union[discord.User, discord.Member, Party]
 
 
+@dataclass
 class Clan:
+    identifier: UUID
+
     @classmethod
     async def register(cls, player: Player, name: str):
         exists = await bot.clans.find_one({"members": bson.Int64(player.id)})
@@ -260,10 +263,6 @@ class Clan:
         if not (clan := await bot.clans.find_one({"members": user.identifier})):
             raise NotRegistered
         return cls(clan["_id"])
-
-    def __init__(self, identifier):
-        """Creates a clan with the given ID."""
-        self.identifier = identifier
 
     async def add_member(self, user: Player):
         try:

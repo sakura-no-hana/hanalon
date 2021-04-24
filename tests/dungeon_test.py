@@ -1,14 +1,18 @@
 import pytest
 
-from utils.rpg.game import (
-    DefiniteSkin,
-    Dungeon,
-    InsufficientSpeed,
-    Movement,
-    Piece,
-    Turn,
-)
-from utils.rpg.pieces import Being, Surface, Wall
+from utils.rpg.game import Dungeon, InsufficientSpeed, Movement, Piece, Turn
+from utils.rpg.piece import Being, Piece, Surface, Wall
+from utils.rpg.skin import DefiniteSkin
+
+
+@pytest.fixture
+def setup_dungeon():
+    chara = Being(0, 0, speed=5)
+    dungeon = Dungeon([[chara]])
+
+    dungeon.turns.put(Turn(chara))
+
+    return chara, dungeon
 
 
 @pytest.mark.game
@@ -48,11 +52,8 @@ class TestHooks:
 
 @pytest.mark.game
 class TestDistance:
-    def test_far_orthogonal(self):
-        chara = Being(0, 0, speed=5)
-        dungeon = Dungeon([[chara]])
-
-        dungeon.turns.put(Turn(chara))
+    def test_far_orthogonal(self, setup_dungeon):
+        chara, dungeon = setup_dungeon
 
         with pytest.raises(InsufficientSpeed):
             dungeon.move(Movement(0, 10 ** 10, chara, dungeon))
@@ -61,11 +62,8 @@ class TestDistance:
 
         assert tuple(chara.loc) == (0, 0)
 
-    def test_far_diagonal(self):
-        chara = Being(0, 0, speed=5)
-        dungeon = Dungeon([[chara]])
-
-        dungeon.turns.put(Turn(chara))
+    def test_far_diagonal(self, setup_dungeon):
+        chara, dungeon = setup_dungeon
 
         with pytest.raises(InsufficientSpeed):
             dungeon.move(Movement(3, 4.0001, chara, dungeon))
@@ -74,11 +72,8 @@ class TestDistance:
 
         assert tuple(chara.loc) == (0, 0)
 
-    def test_near_orthogonal(self):
-        chara = Being(0, 0, speed=5)
-        dungeon = Dungeon([[chara]])
-
-        dungeon.turns.put(Turn(chara))
+    def test_near_orthogonal(self, setup_dungeon):
+        chara, dungeon = setup_dungeon
 
         dungeon.move(Movement(0, 5, chara, dungeon))
 
@@ -86,11 +81,8 @@ class TestDistance:
 
         assert tuple(chara.loc) == (0, 5)
 
-    def test_near_diagonal(self):
-        chara = Being(0, 0, speed=5)
-        dungeon = Dungeon([[chara]])
-
-        dungeon.turns.put(Turn(chara))
+    def test_near_diagonal(self, setup_dungeon):
+        chara, dungeon = setup_dungeon
 
         dungeon.move(Movement(3, 4, chara, dungeon))
 
@@ -101,9 +93,10 @@ class TestDistance:
 
 @pytest.mark.game
 class TestCollision:
-    def test_far_orthogonal(self):
-        chara = Being(0, 0, speed=5)
-        dungeon = Dungeon([[Wall(0, 5)], [chara]])
+    def test_far_orthogonal(self, setup_dungeon):
+        chara, dungeon = setup_dungeon
+
+        dungeon.pieces.append([Wall(0, 5)])
 
         dungeon.turns.put(Turn(chara))
 
@@ -113,11 +106,10 @@ class TestCollision:
 
         assert tuple(chara.loc) == (0, 4)
 
-    def test_far_diagonal(self):
-        chara = Being(0, 0, speed=5)
-        dungeon = Dungeon([[Wall(0, 2)], [chara]])
+    def test_far_diagonal(self, setup_dungeon):
+        chara, dungeon = setup_dungeon
 
-        dungeon.turns.put(Turn(chara))
+        dungeon.pieces.append([Wall(0, 2)])
 
         dungeon.move(Movement(1, 2, chara, dungeon))
 
@@ -125,11 +117,10 @@ class TestCollision:
 
         assert tuple(chara.loc) == (1, 2)
 
-    def test_near_orthogonal(self):
-        chara = Being(0, 0, speed=5)
-        dungeon = Dungeon([[Wall(0, 1)], [chara]])
+    def test_near_orthogonal(self, setup_dungeon):
+        chara, dungeon = setup_dungeon
 
-        dungeon.turns.put(Turn(chara))
+        dungeon.pieces.append([Wall(0, 1)])
 
         with pytest.raises(InsufficientSpeed):
             dungeon.move(Movement(0, 4, chara, dungeon))
@@ -138,11 +129,10 @@ class TestCollision:
 
         assert tuple(chara.loc) == (0, 0)
 
-    def test_near_diagonal(self):
-        chara = Being(0, 0, speed=5)
-        dungeon = Dungeon([[Wall(1, 1)], [chara]])
+    def test_near_diagonal(self, setup_dungeon):
+        chara, dungeon = setup_dungeon
 
-        dungeon.turns.put(Turn(chara))
+        dungeon.pieces.append([Wall(1, 1)])
 
         with pytest.raises(InsufficientSpeed):
             dungeon.move(Movement(2, 2, chara, dungeon))

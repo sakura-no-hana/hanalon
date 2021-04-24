@@ -1,4 +1,4 @@
-from utils.rpg.pieces import Being, DefiniteSkin
+from utils.rpg.piece import Being, DefiniteSkin
 
 _characters = {
     "Yuni": 828629768651014195,
