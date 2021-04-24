@@ -1,9 +1,8 @@
 from discord.ext import commands
 
-from utils.bot import is_response
-from utils.responses import HanalonEmbed
-from utils.rpg.game import Dungeon, InsufficientSpeed, Movement, Turn
-from utils.rpg.piece import MergedWalls
+from utils.discord.bot import is_response
+from utils.discord.responses import HanalonEmbed
+from utils.rpg.dungeon import Dungeon, InsufficientSpeed, MergedWalls, Movement, Turn
 from utils.rpg.prefabs import protohero
 
 

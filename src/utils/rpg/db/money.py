@@ -9,7 +9,7 @@ class Money:
         self.amount = amount
 
     def _get(self, scale: int):
-        return round(self.amount % 10 ** (scale + 2) // 10 ** scale, 6)
+        return self.amount % 10 ** (scale + 2) // 10 ** scale
 
     def _set(self, scale: int, amount: Number):
         self.amount += 10 ** scale * amount - self._get(scale)

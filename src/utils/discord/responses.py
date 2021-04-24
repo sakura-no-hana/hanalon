@@ -4,7 +4,7 @@ import discord
 from discord.embeds import EmptyEmbed
 from discord.ext import commands, menus
 
-from utils.bot import bot
+from utils.discord.bot import bot
 
 
 class HanalonPages(menus.Menu):

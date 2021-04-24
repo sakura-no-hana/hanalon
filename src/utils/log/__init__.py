@@ -4,15 +4,17 @@ import logging
 
 import motor.motor_asyncio
 
-from utils.bot import config
-
-log = motor.motor_asyncio.AsyncIOMotorClient(config["mongo"])["log"]["bot"]
+from utils.discord.bot import config
 
 
 class MongoLog(logging.Handler):
+    def __init__(self, loc, level):
+        super().__init__(level=level)
+        self.log = motor.motor_asyncio.AsyncIOMotorClient(config["mongo"])["log"][loc]
+
     def emit(self, record):
         asyncio.ensure_future(
-            log.insert_one(
+            self.log.insert_one(
                 {
                     "time": datetime.now(),
                     "level": record.levelname,

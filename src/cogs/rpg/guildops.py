@@ -1,7 +1,7 @@
 from discord.ext import commands
 
-from utils.bot import bot, include_cog, is_response
-from utils.responses import HanalonEmbed
+from utils.discord.bot import bot, include_cog, is_response
+from utils.discord.responses import HanalonEmbed
 from utils.rpg.db import Character, Clan, Job, Party, Race
 
 

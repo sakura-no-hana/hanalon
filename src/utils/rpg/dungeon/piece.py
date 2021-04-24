@@ -10,10 +10,10 @@ from shapely.geometry import Point, Polygon, box
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import unary_union
 
-from utils.rpg.skin import DefiniteSkin, Skin
+from utils.rpg.dungeon.skin import DefiniteSkin, Skin
 
 if TYPE_CHECKING:
-    from utils.rpg.game import Dungeon, Movement
+    from utils.rpg.dungeon.game import Dungeon, Movement
 
 
 @dataclass

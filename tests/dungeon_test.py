@@ -1,8 +1,16 @@
 import pytest
 
-from utils.rpg.game import Dungeon, InsufficientSpeed, Movement, Turn
-from utils.rpg.piece import Being, Piece, Surface, Wall
-from utils.rpg.skin import DefiniteSkin
+from utils.rpg.dungeon import (
+    Being,
+    DefiniteSkin,
+    Dungeon,
+    InsufficientSpeed,
+    Movement,
+    Piece,
+    Surface,
+    Turn,
+    Wall,
+)
 
 
 @pytest.fixture

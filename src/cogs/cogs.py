@@ -1,7 +1,7 @@
 from discord.ext import commands
 
-from utils.bot import bot, cogs_dir, include_cog
-from utils.responses import HanalonEmbed
+from utils.discord.bot import bot, cogs_dir, include_cog
+from utils.discord.responses import HanalonEmbed
 
 
 class LockedCog(Exception):

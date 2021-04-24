@@ -1,6 +1,6 @@
 import textwrap
 
-from utils.rpg.piece import Being, DefiniteSkin
+from utils.rpg.dungeon import Being, DefiniteSkin
 
 characters = {
     "Yuni": 828629768651014195,

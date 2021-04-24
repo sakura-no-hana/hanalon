@@ -9,8 +9,8 @@ import numpy
 import numpy.linalg
 from shapely.ops import nearest_points
 
-from utils.rpg.db import RPGException
-from utils.rpg.piece import Piece
+from utils.rpg import RPGException
+from utils.rpg.dungeon.piece import Piece
 
 
 class InsufficientSpeed(RPGException):
