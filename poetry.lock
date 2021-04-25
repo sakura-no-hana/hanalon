@@ -159,17 +159,6 @@ reference = "master"
 resolved_reference = "309c70222eec33acacb8c21bbb0fbe9bc57de661"
 
 [[package]]
-name = "discord-ext-slash"
-version = "0.5.1"
-description = "Support slash commands with discord.py."
-category = "main"
-optional = false
-python-versions = ">=3.7"
-
-[package.dependencies]
-"discord.py" = ">=1.5,<1.8"
-
-[[package]]
 name = "discord.py"
 version = "1.7.1"
 description = "A Python wrapper for the Discord API"
@@ -217,7 +206,7 @@ python-versions = "*"
 
 [[package]]
 name = "identify"
-version = "2.2.3"
+version = "2.2.4"
 description = "File identification library for Python"
 category = "dev"
 optional = false
@@ -533,7 +522,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "29b2dea49ccb75732532c47ec899d4a49c41b25b3653703450b101ed6f619654"
+content-hash = "c43e43952a2ab287195f4ded124ec9a7bcd064b3b6ca63b0bf07f2b0dea3a5f4"
 
 [metadata.files]
 aiohttp = [
@@ -673,10 +662,6 @@ d20 = [
     {file = "d20-1.1.0.tar.gz", hash = "sha256:dde9c557b46934a93ab358bb88dd44b28aa30c54b6dc107192c0670d2ff88aff"},
 ]
 discord-ext-menus = []
-discord-ext-slash = [
-    {file = "discord-ext-slash-0.5.1.tar.gz", hash = "sha256:6bcdc806d057281403ac6c2c52b9096bf71bb6618b53304bffe5d319607d239c"},
-    {file = "discord_ext_slash-0.5.1-py3-none-any.whl", hash = "sha256:12dc8426f6d620578af2558c638d971c1fbaa904d11bfe82f5195d76cf1a7794"},
-]
 "discord.py" = [
     {file = "discord.py-1.7.1-py3-none-any.whl", hash = "sha256:399b80d576a63fa901300e80080568e1d9cd9c21260ca622fd7145c0009278fa"},
     {file = "discord.py-1.7.1.tar.gz", hash = "sha256:82bc5e6325ab7557db9c466f638c98e18be03c330f56ad9bf4c18bdcf19faf55"},
@@ -694,8 +679,8 @@ filelock = [
     {file = "filelock-3.0.12.tar.gz", hash = "sha256:18d82244ee114f543149c66a6e0c14e9c4f8a1044b5cdaadd0f82159d6a6ff59"},
 ]
 identify = [
-    {file = "identify-2.2.3-py2.py3-none-any.whl", hash = "sha256:398cb92a7599da0b433c65301a1b62b9b1f4bb8248719b84736af6c0b22289d6"},
-    {file = "identify-2.2.3.tar.gz", hash = "sha256:4537474817e0bbb8cea3e5b7504b7de6d44e3f169a90846cbc6adb0fc8294502"},
+    {file = "identify-2.2.4-py2.py3-none-any.whl", hash = "sha256:ad9f3fa0c2316618dc4d840f627d474ab6de106392a4f00221820200f490f5a8"},
+    {file = "identify-2.2.4.tar.gz", hash = "sha256:9bcc312d4e2fa96c7abebcdfb1119563b511b5e3985ac52f60d9116277865b2e"},
 ]
 idna = [
     {file = "idna-3.1-py3-none-any.whl", hash = "sha256:5205d03e7bcbb919cc9c19885f9920d622ca52448306f2377daede5cf3faac16"},

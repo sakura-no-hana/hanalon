@@ -1,151 +1,61 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+from numbers import Number
 import queue
+from typing import Any, Iterable
 
 import numpy
 import numpy.linalg
-from shapely.affinity import translate
-from shapely.geometry import Polygon, box
-from shapely.ops import nearest_points, unary_union
+from shapely.ops import nearest_points
 
-from utils.rpg.db import RPGException
+from utils.rpg import RPGException
+from utils.rpg.dungeon.piece import Piece
 
 
 class InsufficientSpeed(RPGException):
     ...
 
 
-class Skin:
-    def get_index(self, x, y):
-        raise NotImplementedError
-
-    def get_bounds(self):
-        raise NotImplementedError
-
-
-class DefiniteSkin(Skin):
-    def __init__(self, skin):
-        self._skin = skin
-        self._skin.reverse()
-
-    def get_bounds(self):
-        return (range(len(self._skin[0])), range(len(self._skin)))
-
-    def get_index(self, x, y):
-        bounds = self.get_bounds()
-        if y not in bounds[1] or x not in bounds[0]:
-            return None
-        return self._skin[int(y)][int(x)]
-
-
-class Piece:
-    def __init__(
-        self,
-        x=0.0,
-        y=0.0,
-        speed=0.0,
-        hitbox=box(-0.5, -0.5, 0.5, 0.5),
-        skin=DefiniteSkin([["⬛"]]),
-        data=None,
-    ):
-        """Initializes a piece with the given parameters."""
-        self.loc = numpy.array([float(x), float(y)])
-        self.max_speed = speed
-        self.hitbox = hitbox
-
-        self.skin = skin
-
-        self.data = data
-
-        self.speed = speed
-        self._speed = speed
-
-    def on_coincide(self, movement, mock=False):
-        ...
-
-    def on_turn(self, dungeon):
-        self.speed = self.max_speed
-        self._speed = self.max_speed
-
-    def on_move(self, movement):
-        self.loc += movement.vector
-        self.speed -= numpy.linalg.norm(movement.vector)
-
-    def true_hitbox(self):
-        return translate(self.hitbox, *self.loc)
-
-    def move_hitbox(self, movement):
-        coords = list(self.true_hitbox().exterior.coords)
-        pairs = [numpy.array([x, y]) for x, y in zip(coords, coords[1:])]
-
-        def gen_quad(pair, vector):
-            return Polygon([pair[0], pair[1], pair[1] + vector, pair[0] + vector])
-
-        polys = []
-
-        for pair in pairs:
-            polys.append(gen_quad(pair, movement.vector))
-
-        return unary_union(polys)
-
-
-class MergedPiece(Piece):
-    def __init__(self, pieces, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._pieces = []
-
-        for p in pieces:
-            self._pieces.append(
-                Piece(x=p.loc[0], y=p.loc[1], hitbox=p.hitbox, skin=p.skin)
-            )
-
-        self.skin = Skin()
-
-        def get_tile(x, y):
-            for piece in self._pieces:
-                if tile := piece.skin.get_index(x - piece.loc[0], y - piece.loc[1]):
-                    return tile
-            return None
-
-        self.skin.get_index = get_tile
-
-        # bounds should be overridden for further optimization; i cba to write the algorithm
-        self.skin.get_bounds = lambda: False
-
-        self.hitbox = unary_union([piece.true_hitbox() for piece in self._pieces])
-
-
+@dataclass
 class Movement:
-    def __init__(self, x, y, piece, dungeon, mode=None):
-        """Initializes a movement with the piece and vector given."""
-        self.vector = numpy.array([float(x), float(y)])
-        self.piece = piece
-        self.mode = mode
+    x: Number
+    y: Number
+    piece: Piece
+    dungeon: Dungeon
+    mode: Any = None
+
+    def __post_init__(self):
+        self.vector = numpy.array([float(self.x), float(self.y)])
 
 
 class Turn(queue.Queue):
-    def __init__(self, focus=None):
+    def __init__(self, focus: Piece = None):
         super().__init__()
 
         self.focus = focus
 
     def do_next(self, *args, **kwargs):
+        """Does the next action in the turn."""
         self.get()(*args, **kwargs)
 
 
 class TurnManager(queue.Queue):
-    def __init__(self, dungeon):
+    def __init__(self, dungeon: Dungeon):
         super().__init__()
 
         self.turn = None
         self.dungeon = dungeon
 
     def put(self, *args, **kwargs):
+        """Puts a new turn, advancing to that turn if no turn is present."""
         super().put(*args, **kwargs)
         if self.turn is None:
             self.turn = self.next_turn()
 
     def next_turn(self):
-        if self.empty():
+        """Advances to the next turn, putting a turn with the same focus back into the queue."""
+        if self.empty() and not self.turn:
             raise queue.Empty
         else:
             try:
@@ -157,14 +67,16 @@ class TurnManager(queue.Queue):
         return self.turn
 
 
+@dataclass
 class Dungeon:
-    def __init__(self, layers, default="⬛"):
-        """Initializes a dungeon with the given piece layers."""
-        self.pieces = layers
-        self.default = default
+    pieces: Iterable[Iterable[Iterable[Piece]]]
+    default: str = "⬛"
+
+    def __post_init__(self):
         self.turns = TurnManager(self)
 
-    def get_collisions(self, movement):
+    def get_collisions(self, movement: Movement):
+        """Gets all piece collisions, sorted by distance from piece origin."""
         piece = movement.piece
         hitbox = piece.move_hitbox(movement)
 
@@ -189,7 +101,8 @@ class Dungeon:
 
         return collisions
 
-    def collide(self, movement, mock):
+    def collide(self, movement: Movement, mock: bool) -> None:
+        """Simulates collisions."""
         collisions = self.get_collisions(movement)
 
         for obj in collisions:
@@ -198,7 +111,8 @@ class Dungeon:
             else:
                 obj.on_coincide(movement, mock=mock)
 
-    def move(self, movement):
+    def move(self, movement: Movement) -> None:
+        """Moves a piece according to the movement."""
         test = numpy.copy(movement.vector)
         mag = numpy.linalg.norm(test)
 
@@ -222,13 +136,18 @@ class Dungeon:
         self.collide(movement, mock=False)
 
     def start_turn(self):
+        """Starts a turn."""
         self.turns.next_turn()
 
     def resolve_turn(self):
+        """Completes all queued actions in a turn."""
         while not self.turns.turn.empty():
             self.turns.turn.do_next()
 
-    def render(self, width, height, origin):
+    def render(
+        self, width: int, height: int, origin: Iterable[int]
+    ) -> Iterable[Iterable[str]]:
+        """Renders a 2D list for display."""
         x, y = origin
         dx, dy = (width - 1) // 2, (height - 1) // 2
         out = [[None for _ in range(width)] for _ in range(height)]
@@ -274,7 +193,8 @@ class Dungeon:
 
         return out
 
-    def render_str(self, width, height, origin):
+    def render_str(self, width: int, height: int, origin: Iterable[int]) -> str:
+        """Creates string to display board."""
         board = self.render(width, height, origin)
         board.reverse()
         return "\n".join(["".join(a) for a in board])

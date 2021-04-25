@@ -5,12 +5,10 @@ import pathlib
 from typing import Set, Union
 
 import discord
-from discord.ext import commands, slash
+from discord.ext import commands
+from discord.ext.commands.bot import BotBase
 from motor.motor_asyncio import AsyncIOMotorClient
 import yaml
-
-Context = Union[commands.Context, slash.Context]
-Bot = Union[commands.Bot, slash.SlashBot]
 
 config_files = [pathlib.Path("../config.yaml"), pathlib.Path("config.yaml")]
 config = None
@@ -33,7 +31,7 @@ if not config:
     raise FileNotFoundError
 
 
-def prefix(bot: Bot, message: discord.Message) -> Set[str]:
+def prefix(bot: BotBase, message: discord.Message) -> Set[str]:
     """Returns the set of prefixes the bot accepts."""
     return {"$", f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "}
 
@@ -60,7 +58,6 @@ bot.__version__ = "0a (unversioned)"
 def include_cog(cog: commands.Cog):
     """Loads a cog."""
     bot.add_cog(cog())
-    # bot.add_slash_cog(cog())
 
 
 def load_cogs():
@@ -96,7 +93,7 @@ async def prepare():
 
 
 @bot.listen("on_command_error")
-async def handle(ctx: Context, error: commands.CommandError):
+async def handle(ctx: commands.Context, error: commands.CommandError):
     """Handles command errors; it currently reacts to them."""
     if not isinstance(error, commands.CommandNotFound):
         await ctx.message.add_reaction(bot.failure)

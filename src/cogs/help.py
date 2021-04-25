@@ -8,8 +8,8 @@ from discord.ext.commands import (
     HelpCommand,
 )
 
-from utils.bot import bot
-from utils.responses import HanalonEmbed
+from utils.discord.bot import bot
+from utils.discord.responses import HanalonEmbed
 
 
 class CustomHelpCommand(HelpCommand):
