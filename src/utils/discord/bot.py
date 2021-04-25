@@ -48,7 +48,7 @@ bot.color = config["color"]
 bot.success = config["success"]
 bot.failure = config["failure"]
 bot.db = AsyncIOMotorClient(config["mongo"])["hanalon"]
-cogs_dir = pathlib.Path("./cogs")
+cogs_dir = pathlib.Path("./bot/cogs")
 
 bot.owner_only = commands.check(lambda ctx: bot.is_owner(ctx.author))
 

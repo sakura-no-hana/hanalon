@@ -9,11 +9,15 @@ class LockedCog(Exception):
 
 
 class Cogs(commands.Cog):
+    @classmethod
+    def module(cls, cog: str) -> str:
+        return f"{'.'.join(cogs_dir.parts)}.{cog}"
+
     @commands.command()
     @bot.owner_only
     async def load(self, ctx: commands.Context, module: str):
         """Loads a cog."""
-        bot.load_extension(f"{cogs_dir.name}.{module}")
+        bot.load_extension(Cogs.module(module))
         await HanalonEmbed(
             title="Module loaded!",
             description=f"`{module}` has been loaded successfully!",
@@ -24,9 +28,9 @@ class Cogs(commands.Cog):
     @bot.owner_only
     async def unload(self, ctx: commands.Context, module: str):
         """Unloads a cog."""
-        bot.unload_extension(f"{cogs_dir.name}.{module}")
+        bot.unload_extension(Cogs.module(module))
         if type(self).__name__ not in [type(cog).__name__ for cog in bot.cogs.values()]:
-            bot.load_extension(f"{cogs_dir.name}.{module}")
+            bot.load_extension(Cogs.module(module))
             raise LockedCog(bot.cogs.values())
 
         await HanalonEmbed(
@@ -39,15 +43,12 @@ class Cogs(commands.Cog):
     @bot.owner_only
     async def reload(self, ctx: commands.Context, module: str):
         """Reloads a cog."""
-        bot.reload_extension(f"{cogs_dir.name}.{module}")
+        bot.reload_extension(Cogs.module(module))
         await HanalonEmbed(
             title="Module reloaded!",
             description=f"`{module}` has been reloaded successfully!",
             context=ctx,
         ).respond(True, override=True)
-
-    def cog_unload(self):
-        raise LockedCog
 
 
 def setup(_):
