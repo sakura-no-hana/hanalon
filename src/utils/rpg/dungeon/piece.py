@@ -14,22 +14,20 @@ from utils.rpg.dungeon.skin import DefiniteSkin, Skin
 
 if TYPE_CHECKING:
     from utils.rpg.dungeon.game import Dungeon, Movement
+    from utils.rpg.dungeon.ray import Ray
 
 
 @dataclass
 class Piece:
-    x: Number = 0.0
-    y: Number = 0.0
+    loc: Iterable[Number] = (0.0, 0.0)
     speed: Number = 0.0
     hitbox: BaseGeometry = box(-0.5, -0.5, 0.5, 0.5)
     skin: Skin = DefiniteSkin([["⬛"]])
     data: Any = None
 
     def __post_init__(self):
-        self.x = float(self.x)
-        self.y = float(self.y)
+        self.loc = numpy.array(self.loc[:2])
         self.speed = float(self.speed)
-        self.loc = numpy.array([self.x, self.y])
         self.max_speed = self.speed
         self._speed = self.speed
 
@@ -43,6 +41,9 @@ class Piece:
     def on_move(self, movement: Movement):
         self.loc += movement.vector
         self.speed -= numpy.linalg.norm(movement.vector)
+
+    def on_sight(self, ray: Ray):
+        ...
 
     def true_hitbox(self):
         return translate(self.hitbox, *self.loc)

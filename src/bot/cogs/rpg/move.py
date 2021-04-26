@@ -12,11 +12,11 @@ class GameAction(commands.Cog):
         self.bot = bot
 
         self.charas = [
-            protohero.PrototypePecorine(x=0, y=0, speed=10),
-            protohero.PrototypeYuni(x=-2, y=0, speed=10),
-            protohero.PrototypeYui(x=0, y=-2, speed=10),
-            protohero.PrototypeLuna(x=-4, y=0, speed=10),
-            protohero.PrototypeKyaru(x=0, y=-4, speed=10),
+            protohero.PrototypePecorine(loc=(0, 0), speed=10),
+            protohero.PrototypeYuni(loc=(-2, 0), speed=10),
+            protohero.PrototypeYui(loc=(0, -2), speed=10),
+            protohero.PrototypeLuna(loc=(-4, 0), speed=10),
+            protohero.PrototypeKyaru(loc=(0, -4), speed=10),
         ]
 
         self.chara = self.charas[0]
@@ -108,8 +108,7 @@ class GameAction(commands.Cog):
         try:
             self.dungeon.move(
                 Movement(
-                    delta_x,
-                    delta_y,
+                    (delta_x, delta_y),
                     self.dungeon.turns.turn.focus,
                     self.dungeon,
                     "walk",

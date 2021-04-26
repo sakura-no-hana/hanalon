@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from numbers import Number
 import queue
-from typing import Any, Iterable
+from typing import Any, Iterable, Optional
 
 import numpy
 import numpy.linalg
@@ -11,6 +11,7 @@ from shapely.ops import nearest_points
 
 from utils.rpg import RPGException
 from utils.rpg.dungeon.piece import Piece
+from utils.rpg.dungeon.ray import Ray
 
 
 class InsufficientSpeed(RPGException):
@@ -19,14 +20,13 @@ class InsufficientSpeed(RPGException):
 
 @dataclass
 class Movement:
-    x: Number
-    y: Number
+    vector: Iterable[Number]
     piece: Piece
     dungeon: Dungeon
     mode: Any = None
 
     def __post_init__(self):
-        self.vector = numpy.array([float(self.x), float(self.y)])
+        self.vector = numpy.array(self.vector[:2])
 
 
 class Turn(queue.Queue):
@@ -75,29 +75,32 @@ class Dungeon:
     def __post_init__(self):
         self.turns = TurnManager(self)
 
-    def get_collisions(self, movement: Movement):
+    def get_collisions(self, movement: Movement) -> queue.PriorityQueue:
         """Gets all piece collisions, sorted by distance from piece origin."""
         piece = movement.piece
         hitbox = piece.move_hitbox(movement)
 
-        collisions = []
+        collisions = queue.PriorityQueue()
 
         for layer in self.pieces:
             for obj in layer:
-                if obj is movement.piece:
+                if obj is piece:
                     continue
                 if hitbox.intersects(obj.true_hitbox()):
-                    collisions.append(obj)
-
-        def collision_distance(piece):
-            return numpy.linalg.norm(
-                numpy.array(
-                    nearest_points(piece.hitbox, movement.piece.hitbox)[0].coords[0]
-                )
-                - movement.piece.loc
-            )
-
-        collisions.sort(key=collision_distance)
+                    collisions.put(
+                        (
+                            numpy.linalg.norm(
+                                numpy.array(
+                                    nearest_points(
+                                        piece.true_hitbox(),
+                                        obj.true_hitbox().intersection(hitbox),
+                                    )[0].coords[0]
+                                )
+                                - piece.loc
+                            ),
+                            obj,
+                        )
+                    )
 
         return collisions
 
@@ -105,7 +108,8 @@ class Dungeon:
         """Simulates collisions."""
         collisions = self.get_collisions(movement)
 
-        for obj in collisions:
+        while not collisions.empty():
+            obj = collisions.get()[1]
             if not mock:
                 self.turns.turn.put(lambda: obj.on_coincide(movement, mock=mock))
             else:
@@ -113,8 +117,7 @@ class Dungeon:
 
     def move(self, movement: Movement) -> None:
         """Moves a piece according to the movement."""
-        test = numpy.copy(movement.vector)
-        mag = numpy.linalg.norm(test)
+        mag = numpy.linalg.norm(numpy.copy(movement.vector))
 
         if mag > movement.piece.speed:
             raise InsufficientSpeed
@@ -122,8 +125,6 @@ class Dungeon:
         if mag == 0:
             movement.piece.on_move(movement)
             return
-
-        test /= 2 * mag
 
         self.collide(movement, mock=True)
 
@@ -145,7 +146,11 @@ class Dungeon:
             self.turns.turn.do_next()
 
     def render(
-        self, width: int, height: int, origin: Iterable[int]
+        self,
+        width: int,
+        height: int,
+        origin: Iterable[int],
+        focus: Optional[Piece] = None,
     ) -> Iterable[Iterable[str]]:
         """Renders a 2D list for display."""
         x, y = origin
@@ -185,11 +190,11 @@ class Dungeon:
                                 out[row + round(coords[1] - y)][
                                     col + round(coords[0] - x)
                                 ] = px
-
-        for i, row in enumerate(out):
-            for j, px in enumerate(row):
-                if not out[i][j]:
-                    out[i][j] = self.default
+        if not focus:
+            for i, row in enumerate(out):
+                for j, px in enumerate(row):
+                    if not out[i][j]:
+                        out[i][j] = self.default
 
         return out
 
