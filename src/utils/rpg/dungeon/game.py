@@ -69,7 +69,7 @@ class TurnManager(queue.Queue):
 @dataclass
 class Dungeon:
     pieces: Iterable[Iterable[Iterable[Piece]]]
-    default: str = "🟩"
+    default: str = "⬛"
     blind: str = "<:__:834557109235482686>"
 
     def __post_init__(self):

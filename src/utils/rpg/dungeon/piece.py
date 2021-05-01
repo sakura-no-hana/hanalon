@@ -23,7 +23,7 @@ class Piece:
     loc: Iterable[Number] = (0.0, 0.0)
     speed: Number = 0.0
     hitbox: BaseGeometry = box(-0.5, -0.5, 0.5, 0.5)
-    skin: Skin = DefiniteSkin([["⬛"]])
+    skin: Skin = DefiniteSkin([["*️⃣"]])
     data: Any = None
 
     def __post_init__(self):
