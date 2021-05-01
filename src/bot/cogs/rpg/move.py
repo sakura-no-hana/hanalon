@@ -76,7 +76,7 @@ class GameAction(commands.Cog):
         self.dungeon.start_turn()
 
         embed = HanalonEmbed(ctx)
-        embed.add_field(name="View", value=self.board())
+        embed.description = f"**View**\n{self.board()}"
         await embed.respond(True)
 
         while True:
@@ -133,8 +133,7 @@ class GameAction(commands.Cog):
             value=float(self.dungeon.turns.turn.focus.speed),
             inline=False,
         )
-        embed.add_field(name="View", value=self.board())
-
+        embed.description = f"**View**\n{self.board()}"
         if error:
             await embed.respond(False)
         else:

@@ -2,7 +2,6 @@ import base64
 import logging
 import os
 import pathlib
-from typing import Set, Union
 
 import discord
 from discord.ext import commands
@@ -31,7 +30,7 @@ if not config:
     raise FileNotFoundError
 
 
-def prefix(bot: BotBase, message: discord.Message) -> Set[str]:
+def prefix(bot: BotBase, message: discord.Message) -> set[str]:
     """Returns the set of prefixes the bot accepts."""
     return {"$", f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "}
 

@@ -6,94 +6,85 @@ import queue
 from typing import TYPE_CHECKING, Iterable
 
 import numpy
-from numpy.linalg import norm
 from shapely.geometry import LineString, Point
 from shapely.ops import nearest_points
 
 if TYPE_CHECKING:
     from utils.rpg.dungeon.game import Dungeon
+    from utils.rpg.dungeon.piece import Piece
 
 
 @dataclass
 class Ray:
     start: Iterable[Number]
     end: Iterable[Number]
+    intensity: Number  # we need this for potential view distance implementation. x-ray vision, maybe?
     dungeon: Dungeon
+    ignore: Iterable[Piece]
 
     def __post_init__(self):
         self.start = numpy.array(self.start[:2])
         self.end = numpy.array(self.end[:2])
+        self.intensity = float(self.intensity)
 
         self.vector = self.end - self.start
         self.hitbox = LineString([self.start, self.end])
 
-        self.trace = queue.PriorityQueue()
-
-        # self._norm = norm(self.vector)
-        # self._unit = self.vector / self._norm
-
-    def obstructions(self) -> queue.PriorityQueue:
+    def trace(self):
         collisions = queue.PriorityQueue()
 
         for layer in self.dungeon.pieces:
             for obj in layer:
-                if self.hitbox.intersects(obj.true_hitbox()):
-                    collisions.put(
-                        (
-                            numpy.linalg.norm(
-                                numpy.array(
-                                    nearest_points(
-                                        Point(self.start),
-                                        obj.true_hitbox().intersection(self.hitbox),
-                                    )[0].coords[0]
-                                )
-                                - self.start
-                            ),
-                            obj,
-                        )
-                    )
+                if obj in self.ignore:
+                    continue
+                obj.process_kinesis(
+                    collisions, self.hitbox, self.start, "sight", ray=self
+                )
 
-        return collisions
+        while collisions.qsize() != 0:
+            collision = collisions.get()
+            collision[1](intersect=collision[2])
+
+            if self.intensity < 0:
+                return nearest_points(collision[2], Point(self.start))[0]
+
+        return Point(self.end)
 
 
 @dataclass
 class RayTracer:
     size: Iterable[int]
-    origin: Iterable[int]
+    origin: Iterable[Number]
+    source: Piece
     dungeon: Dungeon
 
     def __post_init__(self):
-        self.field = numpy.zeros(self.size[:2], dtype=bool)
+        self.field = numpy.zeros(self.size[2::-1], dtype=bool)
+
+        self.origin = tuple(round(i) for i in self.origin)
         self.dx = self.size[0] // 2
         self.dy = self.size[1] // 2
 
-        self.interest_points = set(
-            [
-                (self.origin[0] - self.dx, y)
-                for y in range(
-                    self.origin[1] - self.dy,
-                    self.origin[1] + self.dy,
+        corners = numpy.array(((0.5, 0.5), (0.5, -0.5), (-0.5, 0.5), (-0.5, -0.5)))
+
+        for i in range(self.size[1]):
+            for j in range(self.size[0]):
+                goal = numpy.array(
+                    (self.origin[0] + j - self.dx, self.origin[1] + i - self.dy)
                 )
-            ]
-            + [
-                (self.origin[0] + self.dx, y)
-                for y in range(
-                    self.origin[1] - self.dy,
-                    self.origin[1] + self.dy,
-                )
-            ]
-            + [
-                (x, self.origin[1] - self.dy)
-                for x in range(
-                    self.origin[0] - self.dx,
-                    self.origin[0] + self.dx,
-                )
-            ]
-            + [
-                (x, self.origin[1] + self.dy)
-                for x in range(
-                    self.origin[0] - self.dx,
-                    self.origin[0] + self.dx,
-                )
-            ]
-        )
+
+                for corner in corners:
+                    destination = goal + corner
+
+                    r = Ray(
+                        self.origin,
+                        destination,
+                        1,
+                        self.dungeon,
+                        ignore=(self.source,),
+                    )
+                    end = r.trace()
+
+                    if Point(destination).distance(Point(end)) <= 0.1:
+                        self.field[i][j] = True
+                        break

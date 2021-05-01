@@ -3,15 +3,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 from numbers import Number
 import queue
-from typing import Any, Iterable, Optional
+from typing import Any, Iterable
 
 import numpy
 import numpy.linalg
-from shapely.ops import nearest_points
 
 from utils.rpg import RPGException
 from utils.rpg.dungeon.piece import Piece
-from utils.rpg.dungeon.ray import Ray
+from utils.rpg.dungeon.ray import RayTracer
 
 
 class InsufficientSpeed(RPGException):
@@ -55,7 +54,7 @@ class TurnManager(queue.Queue):
 
     def next_turn(self):
         """Advances to the next turn, putting a turn with the same focus back into the queue."""
-        if self.empty() and not self.turn:
+        if self.qsize() == 0 and not self.turn:
             raise queue.Empty
         else:
             try:
@@ -70,50 +69,42 @@ class TurnManager(queue.Queue):
 @dataclass
 class Dungeon:
     pieces: Iterable[Iterable[Iterable[Piece]]]
-    default: str = "⬛"
+    default: str = "🟩"
+    blind: str = "<:__:834557109235482686>"
 
     def __post_init__(self):
         self.turns = TurnManager(self)
 
-    def get_collisions(self, movement: Movement) -> queue.PriorityQueue:
-        """Gets all piece collisions, sorted by distance from piece origin."""
+    def collide(self, movement: Movement, mock: bool) -> None:
+        """Simulates collisions."""
         piece = movement.piece
-        hitbox = piece.move_hitbox(movement)
-
-        collisions = queue.PriorityQueue()
+        sim_queue = queue.PriorityQueue()
 
         for layer in self.pieces:
             for obj in layer:
                 if obj is piece:
                     continue
-                if hitbox.intersects(obj.true_hitbox()):
-                    collisions.put(
-                        (
-                            numpy.linalg.norm(
-                                numpy.array(
-                                    nearest_points(
-                                        piece.true_hitbox(),
-                                        obj.true_hitbox().intersection(hitbox),
-                                    )[0].coords[0]
-                                )
-                                - piece.loc
-                            ),
-                            obj,
-                        )
+                if not mock:
+                    obj.process_kinesis(
+                        self.turns.turn,
+                        movement.piece.move_hitbox(movement),
+                        movement.piece.loc,
+                        "coincide",
+                        movement,
+                        mock=False,
+                    )
+                else:
+                    obj.process_kinesis(
+                        sim_queue,
+                        movement.piece.move_hitbox(movement),
+                        movement.piece.loc,
+                        "coincide",
+                        movement,
+                        mock=True,
                     )
 
-        return collisions
-
-    def collide(self, movement: Movement, mock: bool) -> None:
-        """Simulates collisions."""
-        collisions = self.get_collisions(movement)
-
-        while not collisions.empty():
-            obj = collisions.get()[1]
-            if not mock:
-                self.turns.turn.put(lambda: obj.on_coincide(movement, mock=mock))
-            else:
-                obj.on_coincide(movement, mock=mock)
+        while sim_queue.qsize() != 0:
+            sim_queue.get()[1]()
 
     def move(self, movement: Movement) -> None:
         """Moves a piece according to the movement."""
@@ -142,7 +133,7 @@ class Dungeon:
 
     def resolve_turn(self):
         """Completes all queued actions in a turn."""
-        while not self.turns.turn.empty():
+        while self.turns.turn.qsize() != 0:
             self.turns.turn.do_next()
 
     def render(
@@ -150,12 +141,11 @@ class Dungeon:
         width: int,
         height: int,
         origin: Iterable[int],
-        focus: Optional[Piece] = None,
     ) -> Iterable[Iterable[str]]:
         """Renders a 2D list for display."""
         x, y = origin
         dx, dy = (width - 1) // 2, (height - 1) // 2
-        out = [[None for _ in range(width)] for _ in range(height)]
+        out = [[None] * width for _ in range(height)]
         x, y = x - dx, y - dy
 
         for layer in self.pieces:
@@ -190,11 +180,15 @@ class Dungeon:
                                 out[row + round(coords[1] - y)][
                                     col + round(coords[0] - x)
                                 ] = px
-        if not focus:
-            for i, row in enumerate(out):
-                for j, px in enumerate(row):
-                    if not out[i][j]:
-                        out[i][j] = self.default
+
+        rays = RayTracer((width, height), origin, self.turns.turn.focus, self).field
+
+        for i, row in enumerate(out):
+            for j, px in enumerate(row):
+                if not rays[i][j]:
+                    out[i][j] = self.blind
+                elif not out[i][j]:
+                    out[i][j] = self.default
 
         return out
 
