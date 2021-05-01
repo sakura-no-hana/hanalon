@@ -66,6 +66,7 @@ class RayTracer:
         self.dy = self.size[1] // 2
 
         corners = numpy.array(((0.5, 0.5), (0.5, -0.5), (-0.5, 0.5), (-0.5, -0.5)))
+        traced = dict()
 
         for i in range(self.size[1]):
             for j in range(self.size[0]):
@@ -75,6 +76,14 @@ class RayTracer:
 
                 for corner in corners:
                     destination = goal + corner
+
+                    dest_rep = str(destination)
+
+                    if dest_rep in traced:
+                        if traced[dest_rep]:
+                            self.field[i][j] = True
+                            break
+                        continue
 
                     r = Ray(
                         self.origin,
@@ -87,4 +96,7 @@ class RayTracer:
 
                     if Point(destination).distance(Point(end)) <= 0.1:
                         self.field[i][j] = True
+                        traced[dest_rep] = True
                         break
+
+                    traced[dest_rep] = False

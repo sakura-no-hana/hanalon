@@ -70,7 +70,8 @@ class TurnManager(queue.Queue):
 class Dungeon:
     pieces: Iterable[Iterable[Iterable[Piece]]]
     default: str = "⬛"
-    blind: str = "<:__:834557109235482686>"
+    # blind: str = "<:__:834557109235482686>"
+    blind: str = "🌫️"
 
     def __post_init__(self):
         self.turns = TurnManager(self)
