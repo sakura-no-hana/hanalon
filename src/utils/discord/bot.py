@@ -38,10 +38,13 @@ def prefix(bot: BotBase, message: discord.Message) -> set[str]:
 intents = discord.Intents(guilds=True, messages=True, reactions=True)
 
 bot = commands.AutoShardedBot(
+    activity=discord.Activity(
+        name="the Sola bot arena", type=discord.ActivityType.competing
+    ),
     command_prefix=prefix,
     intents=intents,
-    debug_guild=config["guild"],
     owner_ids=config["devs"],
+    status=discord.Status.idle,
 )
 bot.color = config["color"]
 bot.success = config["success"]
@@ -81,14 +84,8 @@ def is_response(ctx, message, response):
 
 @bot.listen("on_ready")
 async def prepare():
-    """Prepares the bot; it currently changes its presence."""
+    """Prints to stdout when bot logs on."""
     print(f"Logged on as {bot.user.name}#{bot.user.discriminator}")
-    await bot.change_presence(
-        status=discord.Status.idle,
-        activity=discord.Activity(
-            name="the Sola bot arena", type=discord.ActivityType.competing
-        ),
-    )
 
 
 @bot.listen("on_command_error")
