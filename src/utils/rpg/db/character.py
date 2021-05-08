@@ -1,7 +1,8 @@
 from dataclasses import dataclass
-from enum import Enum, unique
+from enum import IntEnum
 import math
-from typing import Optional
+import textwrap
+from typing import Iterable, Optional
 from uuid import UUID
 from uuid import uuid4 as uuid
 
@@ -11,50 +12,120 @@ import discord
 from utils.discord.bot import bot
 from utils.rpg.db.exceptions import NotRegistered
 
+Job = IntEnum(
+    "Job",
+    [
+        "ROGUE",
+        "BARD",
+        "ASSASSIN",
+        "RANGER",
+        "ALCHEMIST",
+        "ARTIFICER",
+        "ADVENTURER",
+        "DRUID",
+        "MONK",
+        "MAGE",
+        "WARLOCK",
+        "CLERIC",
+        "SPELLSWORD",
+        "PALADIN",
+        "KNIGHT",
+        "WARRIOR",
+    ],
+    start=0,
+)
 
-@unique
-class Job(Enum):
-    ROGUE = 0
-    BARD = 1
-    ASSASSIN = 2
-    RANGER = 3
-    ALCHEMIST = 4
-    ARTIFICER = 5
-    ADVENTURER = 6
-    DRUID = 7
-    MONK = 8
-    MAGE = 9
-    WARLOCK = 10
-    CLERIC = 11
-    BLADESINGER = 12
-    PALADIN = 13
-    KNIGHT = 14
-    WARRIOR = 15
+Race = IntEnum(
+    "Race",
+    [
+        "HUMAN",
+        "ELF",
+        "DWARF",
+        "FAERIE",
+        "GNOME",
+        "HALFLING",
+        "CATFOLK",
+        "DOGFOLK",
+        "BIRDFOLK",
+        "RABBITFOLK",
+        "DRAGONBORN",
+        "SIREN",
+        "AMAZON",
+        "TIEFLING",
+        "ORC",
+        "DHAMPIR",
+    ],
+    start=0,
+)
 
 
-@unique
-class Race(Enum):
-    HUMAN = 0
-    ELF = 1
-    DWARF = 2
-    FAERIE = 3
-    GNOME = 4
-    HALFLING = 5
-    CATFOLK = 6
-    DOGFOLK = 7
-    BIRDFOLK = 8
-    RABBITFOLK = 9
-    DRAGONBORN = 10
-    SIREN = 11
-    AMAZON = 12
-    TIEFLING = 13
-    ORC = 14
-    DHAMPIR = 15
+Stats = IntEnum(
+    "Stats",
+    [
+        "XP",
+        "HP",
+        "MAX_HP",
+        "ARMOR",
+        "SPEED",
+        "STRENGTH",
+        "DEXTERITY",
+        "CONSTITUTION",
+        "INTELLIGENCE",
+        "WISDOM",
+        "CHARISMA",
+        "LUCK",
+        "ACROBATICS",
+        "ANIMAL_HANDLING",
+        "ARCANA",
+        "ATHLETICS",
+        "DECEPTION",
+        "HISTORY",
+        "INSIGHT",
+        "INTIMIDATION",
+        "INVESTIGATION",
+        "MEDICINE",
+        "NATURE",
+        "PERCEPTION",
+        "PERFORMANCE",
+        "PERSUATION",
+        "RELIGION",
+        "SLEIGHT_OF_HAND",
+        "STEALTH",
+        "SURVIVAL",
+    ],
+    start=0,
+)
+
+# TODO: create race and class classes to handle stat matrix modifications
 
 
 @dataclass
 class Character:
     identifier: UUID
+
+    @classmethod
+    async def gen_stats(cls, job: dict[Race, int], race: int, core: Iterable[int]):
+        """This should be used to generate stats."""
+        s = [0] * 30
+
+        s[Stats.STRENGTH : Stats.LUCK + 1] = core[:7]
+        s[Stats.ATHLETICS] = s[Stats.STRENGTH]
+        s[Stats.ACROBATICS] = s[Stats.SLEIGHT_OF_HAND] = s[Stats.STEALTH] = s[
+            Stats.DEXTERITY
+        ]
+        s[Stats.ARCANA] = s[Stats.HISTORY] = s[Stats.INVESTIGATION] = s[
+            Stats.NATURE
+        ] = s[Stats.RELIGION] = s[Stats.INTELLIGENCE]
+        s[Stats.ANIIMAL_HANDLING] = s[Stats.INSIGHT] = s[Stats.MEDICINE] = s[
+            Stats.PERCEPTION
+        ] = s[Stats.SURVIVAL] = s[Stats.WISDOM]
+        s[Stats.DDECEPTION] = s[Stats.INTIMIDATION] = s[Stats.PERFORMANCE] = s[
+            Stats.PERSUASION
+        ] = s[Stats.CHARISMA]
+
+        # TODO: apply racial and class modifiers here
+
+        return s
 
     @classmethod
     async def register(
@@ -66,6 +137,9 @@ class Character:
             raise ValueError
         jobs = [0] * 16
         jobs[Job[job.upper()].value] = 1
+
+        # TODO: use `gen_stats` here
+
         await bot.characters.insert_one(
             {
                 "_id": (identifier := uuid()),
@@ -73,7 +147,7 @@ class Character:
                 "name": name,
                 "jobs": jobs,
                 "race": Race[race.upper()].value,
-                "xp": 0,
+                "stats": [0] * 30,
             }
         )
         return cls(identifier)
@@ -92,20 +166,27 @@ class Character:
 
     # same thing with race
 
-    async def get_xp(self):
-        if not (char := await bot.characters.find_one({"_id": self.identifier})):
-            raise NotRegistered
-        return char["xp"]
+    for stat in Stats:
+        get_query = "{'_id': self.identifier}, {'_id': 0, 'stats': 1}"
+        set_query = "{'_id': self.identifier}, {'$set': {'stats.%s': new}}" % stat.value
 
-    async def set_xp(self, new):
-        if not await bot.characters.find_one({"_id": self.identifier}):
-            raise NotRegistered
-        await bot.characters.update_one({"_id": self.identifier}, {"$set": {"xp": new}})
+        exec(
+            textwrap.dedent(
+                f"""
+                async def get_{stat.name.lower()}(self):
+                    if not (char := await bot.characters.find_one({get_query})):
+                        raise NotRegistered
+                    return char["stats"][{stat.value}]
+                
+                async def set_{stat.name.lower()}(self, new):
+                    if not await bot.characters.find_one({get_query}):
+                        raise NotRegistered
+                    await bot.characters.update_one({set_query})
+                """
+            )
+        )
 
-    async def inc_xp(self, inc):
-        if not await bot.characters.find_one({"_id": self.identifier}):
-            raise NotRegistered
-        await bot.characters.update_one({"_id": self.identifier}, {"$inc": {"xp": inc}})
+    # TODO: make a better level algorithm
 
     async def get_level(self):
         xp = await self.get_xp()
@@ -143,4 +224,4 @@ class Character:
     async def get_player(self):
         if not (char := await bot.characters.find_one({"_id": self.identifier})):
             raise NotRegistered
-        return await bot.fetch_user(char["player"])
+        return bot.get_user(char["player"]) or (await bot.fetch_user(char["player"]))
