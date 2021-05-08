@@ -96,6 +96,11 @@ Stats = IntEnum(
     start=0,
 )
 
+
+def raw_to_mod(num: int):
+    return num // 2 - 5
+
+
 # TODO: create race and class classes to handle stat matrix modifications
 
 
