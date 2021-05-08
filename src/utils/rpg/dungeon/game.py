@@ -10,7 +10,7 @@ import numpy
 import numpy.linalg
 
 from utils.rpg import RPGException
-from utils.rpg.dungeon.piece import MovementMode, Piece
+from utils.rpg.dungeon.piece import Condition, MovementMode, Piece
 from utils.rpg.dungeon.ray import RayTracer
 
 
@@ -60,7 +60,8 @@ class TurnManager(queue.Queue):
         else:
             try:
                 self.turn.focus.on_turn(self.dungeon)
-                self.put(Turn(self.turn.focus))
+                if not (self.turn.focus.condition & Condition.DEAD):
+                    self.put(Turn(self.turn.focus))
             except AttributeError:
                 ...
         self.turn = self.get()
