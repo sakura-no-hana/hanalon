@@ -65,4 +65,4 @@ class Party:
     async def get_player(self):
         if not (party := await bot.parties.find_one({"_id": self.identifier})):
             raise NotRegistered
-        return await bot.fetch_user(party["player"])
+        return bot.get_user(party["player"]) or (await bot.fetch_user(party["player"]))

@@ -2,34 +2,33 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from numbers import Number
+from queue import PriorityQueue, Queue
 from typing import TYPE_CHECKING, Any, Callable, Iterable
 
 import numpy
 from shapely.affinity import translate
 from shapely.geometry import Point, Polygon, box
-from shapely.geometry.base import BaseGeometry
+from shapely.geometry.base import BaseGeometry, BaseMultipartGeometry
 from shapely.ops import unary_union
 
 from utils.rpg.dungeon.skin import DefiniteSkin, Skin
 
 if TYPE_CHECKING:
     from utils.rpg.dungeon.game import Dungeon, Movement
+    from utils.rpg.dungeon.ray import Ray
 
 
 @dataclass
 class Piece:
-    x: Number = 0.0
-    y: Number = 0.0
+    loc: Iterable[Number] = (0.0, 0.0)
     speed: Number = 0.0
     hitbox: BaseGeometry = box(-0.5, -0.5, 0.5, 0.5)
-    skin: Skin = DefiniteSkin([["⬛"]])
+    skin: Skin = DefiniteSkin([["*️⃣"]])
     data: Any = None
 
     def __post_init__(self):
-        self.x = float(self.x)
-        self.y = float(self.y)
+        self.loc = numpy.array(self.loc[:2])
         self.speed = float(self.speed)
-        self.loc = numpy.array([self.x, self.y])
         self.max_speed = self.speed
         self._speed = self.speed
 
@@ -44,11 +43,15 @@ class Piece:
         self.loc += movement.vector
         self.speed -= numpy.linalg.norm(movement.vector)
 
+    def on_sight(self, intersect: BaseGeometry, ray: Ray):
+        ...
+
+    @property
     def true_hitbox(self):
         return translate(self.hitbox, *self.loc)
 
     def move_hitbox(self, movement: Movement):
-        coords = list(self.true_hitbox().exterior.coords)
+        coords = list(self.true_hitbox.exterior.coords)
         pairs = [numpy.array([x, y]) for x, y in zip(coords, coords[1:])]
 
         def gen_quad(pair, vector):
@@ -61,18 +64,57 @@ class Piece:
 
         return unary_union(polys)
 
+    def process_kinesis(
+        self,
+        hook_queue: Queue,
+        ray_box: BaseGeometry,
+        origin: Iterable[Number],
+        hook: str,
+        *args,
+        **kwargs,
+    ):
+        origin = Point(origin[:2])
+        hook = eval(f"self.on_{hook}")
+
+        if is_priority := isinstance(hook_queue, PriorityQueue):
+            _queue = hook_queue
+        else:
+            _queue = PriorityQueue()
+
+        intersect = ray_box.intersection(self.true_hitbox)
+        if isinstance(intersect, BaseMultipartGeometry):
+            for shape in intersect.geoms:
+                _queue.put(
+                    (
+                        origin.distance(shape),
+                        lambda *_args, **_kwargs: hook(
+                            *args, *_args, **kwargs, **_kwargs
+                        ),
+                        shape,
+                    )
+                )
+        elif not intersect.is_empty:
+            _queue.put(
+                (
+                    origin.distance(intersect),
+                    lambda *_args, **_kwargs: hook(*args, *_args, **kwargs, **_kwargs),
+                    intersect,
+                )
+            )
+
+        if not is_priority:
+            while _queue.qsize() != 0:
+                hook_queue.put(_queue.get()[1])
+
 
 class MergedPiece(Piece):
     def __init__(self, pieces: Iterable[Piece], *args, **kwargs):
         """Creates a single piece which simulates multiple pieces. Keep in mind that hooks are overwritten."""
         super().__init__(*args, **kwargs)
 
-        self._pieces = []
-
-        for p in pieces:
-            self._pieces.append(
-                Piece(x=p.loc[0], y=p.loc[1], hitbox=p.hitbox, skin=p.skin)
-            )
+        self._pieces = [
+            Piece(x=p.loc[0], y=p.loc[1], hitbox=p.hitbox, skin=p.skin) for p in pieces
+        ]
 
         self.skin = Skin()
 
@@ -84,10 +126,10 @@ class MergedPiece(Piece):
 
         self.skin.get_index = get_tile
 
-        # bounds should be overridden for further optimization; i cba to write the algorithm
+        # bounds should be overridden for further optimization; they're boundless by default because i cba to figure out a good algorithm.
         self.skin.get_bounds = lambda: False
 
-        self.hitbox = unary_union([piece.true_hitbox() for piece in self._pieces])
+        self.hitbox = unary_union([piece.true_hitbox for piece in self._pieces])
 
 
 class Wall(Piece):
@@ -97,10 +139,13 @@ class Wall(Piece):
         else:
             movement.piece.speed -= float("inf")
 
+    def on_sight(self, intersect: BaseGeometry, ray: Ray):
+        ray.intensity -= float("inf")
+
 
 class MergedWalls(Wall):
     def __init__(
-        self, walls: str, wall_token: str = "#", skin: str = "🟥", *args, **kwargs
+        self, walls: str, wall_token: str = "#", skin: str = "⬜", *args, **kwargs
     ):
         """Creates a piece that simulates many individual walls."""
         self._skin = []
