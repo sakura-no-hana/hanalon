@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import Enum, IntFlag
+from functools import reduce
 from numbers import Number
+from operator import ior
 from queue import PriorityQueue, Queue
 from typing import TYPE_CHECKING, Any, Callable, Iterable
 
@@ -18,12 +21,66 @@ if TYPE_CHECKING:
     from utils.rpg.dungeon.ray import Ray
 
 
+Condition = IntFlag(
+    "Condition",
+    [
+        "BLINDED",
+        "CHARMED",
+        "DEAFENED",
+        "FRIGHTENED",
+        "GRAPPLED",
+        "INCAPACITATED",
+        "INVISIBLE",
+        "PARALYZED",
+        "PETRIFIED",
+        "POISONED",
+        "PRONE",
+        "RESTRAINED",
+        "STUNNED",
+        "UNCONSCIOUS",
+        "DEAD",
+        "EXHAUSTED_1",
+        "EXHAUSTED_2",
+        "EXHAUSTED_3",
+        "EXHAUSTED_4",
+        "EXHAUSTED_5",
+    ],
+)
+
+IMMOBILE = (
+    Condition.GRAPPLED
+    | Condition.INCAPACITATED
+    | Condition.PARALYZED
+    | Condition.PETRIFIED
+    | Condition.RESTRAINED
+    | Condition.UNCONSCIOUS
+    | Condition.EXHAUSTED_5
+    | Condition.DEAD
+)
+
+
+MovementMode = Enum(
+    "MovementMode",
+    [
+        "WALKING",
+        "CLIMBING",
+        "SWIMMING",
+        "CRAWLING",
+        "JUMPING",
+        "FLYING",
+        "BURROWING",
+        "MOUNT",
+    ],
+)
+
+
 @dataclass
 class Piece:
     loc: Iterable[Number] = (0.0, 0.0)
     speed: Number = 0.0
     hitbox: BaseGeometry = box(-0.5, -0.5, 0.5, 0.5)
     skin: Skin = DefiniteSkin([["*️⃣"]])
+    mount: Piece = None
     data: Any = None
 
     def __post_init__(self):
@@ -32,6 +89,14 @@ class Piece:
         self.max_speed = self.speed
         self._speed = self.speed
 
+        self.condition = 0
+
+    def apply_conditions(self, *conditions: Iterable[Condition]):
+        self.condition |= reduce(ior, conditions)
+
+    def unapply_conditions(self, *conditions: Iterable[Condition]):
+        self.condition ^= reduce(ior, conditions)
+
     def on_coincide(self, movement: Movement, mock: bool = True):
         ...
 
@@ -39,9 +104,51 @@ class Piece:
         self.speed = self.max_speed
         self._speed = self.max_speed
 
-    def on_move(self, movement: Movement):
-        self.loc += movement.vector
-        self.speed -= numpy.linalg.norm(movement.vector)
+    def on_move(self, movement: Movement, mock: bool = False):
+        # TODO: check jumping capability with athletics stat
+
+        if mock:
+            if movement.mode == MovementMode.MOUNT:
+                self._speed = self.mount.speed
+
+            if self.condition & IMMOBILE or movement.mode in {
+                MovementMode.BURROWING,
+                MovementMode.FLYING,
+            }:
+                self._speed -= float("inf")
+            elif movement.mode in {
+                MovementMode.CLIMBING,
+                MovementMode.SWIMMING,
+                MovementMode.CRAWLING,
+            }:
+                self._speed -= 2 * numpy.linalg.norm(movement.vector)
+            else:
+                self._speed -= numpy.linalg.norm(movement.vector)
+        else:
+            if movement.mode == MovementMode.MOUNT:
+                self.speed = self.mount.speed
+
+            if movement.mode == MovementMode.CRAWLING and not (
+                self.condition & Condition.PRONE
+            ):
+                self.apply_conditions(Condition.PRONE)
+            elif self.condition & Condition.PRONE:
+                self.unapply_conditions(Condition.PRONE)
+
+            if self.condition & IMMOBILE or movement.mode in {
+                MovementMode.BURROWING,
+                MovementMode.FLYING,
+            }:
+                self.speed -= float("inf")
+            elif movement.mode in {
+                MovementMode.CLIMBING,
+                MovementMode.SWIMMING,
+                MovementMode.CRAWLING,
+            }:
+                self.speed -= 2 * numpy.linalg.norm(movement.vector)
+            else:
+                self.loc += movement.vector
+                self.speed -= numpy.linalg.norm(movement.vector)
 
     def on_sight(self, intersect: BaseGeometry, ray: Ray):
         ...

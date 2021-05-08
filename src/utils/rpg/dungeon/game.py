@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import Enum
 from numbers import Number
 import queue
 from typing import Any, Iterable
@@ -9,7 +10,7 @@ import numpy
 import numpy.linalg
 
 from utils.rpg import RPGException
-from utils.rpg.dungeon.piece import Piece
+from utils.rpg.dungeon.piece import MovementMode, Piece
 from utils.rpg.dungeon.ray import RayTracer
 
 
@@ -22,7 +23,7 @@ class Movement:
     vector: Iterable[Number]
     piece: Piece
     dungeon: Dungeon
-    mode: Any = None
+    mode: MovementMode = MovementMode.WALKING
 
     def __post_init__(self):
         self.vector = numpy.array(self.vector[:2])
@@ -119,6 +120,8 @@ class Dungeon:
             return
 
         self.collide(movement, mock=True)
+
+        movement.piece.on_move(movement, mock=True)
 
         if movement.piece._speed < 0:
             movement.piece._speed = movement.piece.speed
