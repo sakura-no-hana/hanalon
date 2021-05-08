@@ -69,7 +69,6 @@ MovementMode = Enum(
         "JUMPING",
         "FLYING",
         "BURROWING",
-        "MOUNT",
     ],
 )
 
@@ -106,11 +105,11 @@ class Piece:
 
     def on_move(self, movement: Movement, mock: bool = False):
         # TODO: check jumping capability with athletics stat
+        if self.mount:
+            self.mount.on_move(movement, mock)
+            return
 
         if mock:
-            if movement.mode == MovementMode.MOUNT:
-                self._speed = self.mount.speed
-
             if self.condition & IMMOBILE or movement.mode in {
                 MovementMode.BURROWING,
                 MovementMode.FLYING,
