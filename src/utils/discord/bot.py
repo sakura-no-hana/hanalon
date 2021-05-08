@@ -2,7 +2,6 @@ import base64
 import logging
 import os
 import pathlib
-from typing import Set, Union
 
 import discord
 from discord.ext import commands
@@ -31,7 +30,7 @@ if not config:
     raise FileNotFoundError
 
 
-def prefix(bot: BotBase, message: discord.Message) -> Set[str]:
+def prefix(bot: BotBase, message: discord.Message) -> set[str]:
     """Returns the set of prefixes the bot accepts."""
     return {"$", f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "}
 
@@ -39,16 +38,19 @@ def prefix(bot: BotBase, message: discord.Message) -> Set[str]:
 intents = discord.Intents(guilds=True, messages=True, reactions=True)
 
 bot = commands.AutoShardedBot(
+    activity=discord.Activity(
+        name="the Sola bot arena", type=discord.ActivityType.competing
+    ),
     command_prefix=prefix,
     intents=intents,
-    debug_guild=config["guild"],
     owner_ids=config["devs"],
+    status=discord.Status.idle,
 )
 bot.color = config["color"]
 bot.success = config["success"]
 bot.failure = config["failure"]
 bot.db = AsyncIOMotorClient(config["mongo"])["hanalon"]
-cogs_dir = pathlib.Path("./cogs")
+cogs_dir = pathlib.Path("./bot/cogs")
 
 bot.owner_only = commands.check(lambda ctx: bot.is_owner(ctx.author))
 
@@ -82,14 +84,8 @@ def is_response(ctx, message, response):
 
 @bot.listen("on_ready")
 async def prepare():
-    """Prepares the bot; it currently changes its presence."""
+    """Prints to stdout when bot logs on."""
     print(f"Logged on as {bot.user.name}#{bot.user.discriminator}")
-    await bot.change_presence(
-        status=discord.Status.idle,
-        activity=discord.Activity(
-            name="the Sola bot arena", type=discord.ActivityType.competing
-        ),
-    )
 
 
 @bot.listen("on_command_error")
