@@ -119,7 +119,7 @@ class Character:
         s[Stats.ANIIMAL_HANDLING] = s[Stats.INSIGHT] = s[Stats.MEDICINE] = s[
             Stats.PERCEPTION
         ] = s[Stats.SURVIVAL] = s[Stats.WISDOM]
-        s[Stats.DDECEPTION] = s[Stats.INTIMIDATION] = s[Stats.PERFORMANCE] = s[
+        s[Stats.DECEPTION] = s[Stats.INTIMIDATION] = s[Stats.PERFORMANCE] = s[
             Stats.PERSUASION
         ] = s[Stats.CHARISMA]
 
