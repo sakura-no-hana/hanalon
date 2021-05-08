@@ -116,7 +116,7 @@ class Character:
         s[Stats.ARCANA] = s[Stats.HISTORY] = s[Stats.INVESTIGATION] = s[
             Stats.NATURE
         ] = s[Stats.RELIGION] = s[Stats.INTELLIGENCE]
-        s[Stats.ANIIMAL_HANDLING] = s[Stats.INSIGHT] = s[Stats.MEDICINE] = s[
+        s[Stats.ANIMAL_HANDLING] = s[Stats.INSIGHT] = s[Stats.MEDICINE] = s[
             Stats.PERCEPTION
         ] = s[Stats.SURVIVAL] = s[Stats.WISDOM]
         s[Stats.DECEPTION] = s[Stats.INTIMIDATION] = s[Stats.PERFORMANCE] = s[
