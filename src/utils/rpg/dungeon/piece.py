@@ -135,9 +135,6 @@ class Piece:
             else:
                 self._speed -= numpy.linalg.norm(movement.vector)
         else:
-            if movement.mode == MovementMode.MOUNT:
-                self.speed = self.mount.speed
-
             if movement.mode == MovementMode.CRAWLING and not (
                 self.condition & Condition.PRONE
             ):
@@ -150,6 +147,7 @@ class Piece:
                 MovementMode.FLYING,
             }:
                 self.speed -= float("inf")
+                return
             elif movement.mode in {
                 MovementMode.CLIMBING,
                 MovementMode.SWIMMING,
