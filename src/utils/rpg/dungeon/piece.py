@@ -25,9 +25,7 @@ Condition = IntFlag(
     "Condition",
     [
         "BLINDED",
-        "CHARMED",
         "DEAFENED",
-        "FRIGHTENED",
         "GRAPPLED",
         "INCAPACITATED",
         "INVISIBLE",
@@ -46,6 +44,8 @@ Condition = IntFlag(
         "EXHAUSTED_5",
     ],
 )
+
+Relation = Enum("Relation", ["CHARMED", "FRIGHTENED"])
 
 IMMOBILE = (
     Condition.GRAPPLED
@@ -90,6 +90,8 @@ class Piece:
 
         self.condition = 0
 
+        self.psychology = {Relation.CHARMED: [], Relation.FRIGHTENED: []}
+
     def apply_conditions(self, *conditions: Iterable[Condition]):
         self.condition |= reduce(ior, conditions)
 
@@ -110,11 +112,20 @@ class Piece:
             return
 
         if mock:
+            for enemy in self.psychology[Relation.FRIGHTENED]:
+                new_loc = movement.vector + self.loc
+                if numpy.linalg.norm(new_loc - enemy.loc) < numpy.linalg.norm(
+                    self.loc - enemy.loc
+                ):
+                    self._speed -= float("inf")
+                    return
+
             if self.condition & IMMOBILE or movement.mode in {
                 MovementMode.BURROWING,
                 MovementMode.FLYING,
             }:
                 self._speed -= float("inf")
+                return
             elif movement.mode in {
                 MovementMode.CLIMBING,
                 MovementMode.SWIMMING,
