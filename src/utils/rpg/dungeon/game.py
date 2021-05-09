@@ -148,6 +148,9 @@ class Dungeon:
         origin: Iterable[int],
     ) -> Iterable[Iterable[str]]:
         """Renders a 2D list for display."""
+        if self.turns.turn.focus.condition & Condition.BLINDED:
+            return [[self.blind] * width for _ in range(height)]
+
         x, y = origin
         dx, dy = (width - 1) // 2, (height - 1) // 2
         out = [[None] * width for _ in range(height)]
@@ -155,36 +158,41 @@ class Dungeon:
 
         for layer in self.pieces:
             for obj in layer:
-                coords = numpy.rint(obj.loc)
+                if not (obj.condition & Condition.INVISIBLE):
+                    coords = numpy.rint(obj.loc)
 
-                obj_bounds = obj.skin.get_bounds()
+                    obj_bounds = obj.skin.get_bounds()
 
-                if obj_bounds:
-                    for row in obj_bounds[1][
-                        max(round(y - coords[1]), 0) : max(
-                            min(round(y + height - coords[1]), len(obj_bounds[1])), 0
-                        )
-                    ]:
-                        for col in obj_bounds[0][
-                            max(round(x - coords[0]), 0) : max(
-                                min(round(x + width - coords[0]), len(obj_bounds[0])), 0
+                    if obj_bounds:
+                        for row in obj_bounds[1][
+                            max(round(y - coords[1]), 0) : max(
+                                min(round(y + height - coords[1]), len(obj_bounds[1])),
+                                0,
                             )
                         ]:
-                            if px := obj.skin.get_index(col, row):
-                                out[row + round(coords[1] - y)][
-                                    col + round(coords[0] - x)
-                                ] = px
-                else:
-                    for row in range(
-                        round(y - coords[1]), round(y + height - coords[1])
-                    ):
-                        for col in range(
-                            round(x - coords[0]), round(x + width - coords[0])
+                            for col in obj_bounds[0][
+                                max(round(x - coords[0]), 0) : max(
+                                    min(
+                                        round(x + width - coords[0]), len(obj_bounds[0])
+                                    ),
+                                    0,
+                                )
+                            ]:
+                                if px := obj.skin.get_index(col, row):
+                                    out[row + round(coords[1] - y)][
+                                        col + round(coords[0] - x)
+                                    ] = px
+                    else:
+                        for row in range(
+                            round(y - coords[1]), round(y + height - coords[1])
                         ):
-                            if px := obj.skin.get_index(col, row):
-                                out[row + round(coords[1] - y)][
-                                    col + round(coords[0] - x)
-                                ] = px
+                            for col in range(
+                                round(x - coords[0]), round(x + width - coords[0])
+                            ):
+                                if px := obj.skin.get_index(col, row):
+                                    out[row + round(coords[1] - y)][
+                                        col + round(coords[0] - x)
+                                    ] = px
 
         rays = RayTracer((width, height), origin, self.turns.turn.focus, self).field
 
