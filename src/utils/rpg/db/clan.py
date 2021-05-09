@@ -58,8 +58,8 @@ class Clan:
 
     # might as well use a class method, since there's only one possible clan a user can be in
 
-    @classmethod
-    async def rem_member(self, user: Player):
+    @staticmethod
+    async def rem_member(user: Player):
         if isinstance(user, discord.User) or isinstance(user, discord.Member):
             user = await Party.from_user(user)
         c = await Clan.from_user(user)
