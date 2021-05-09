@@ -108,8 +108,8 @@ def raw_to_mod(num: int):
 class Character:
     identifier: UUID
 
-    @classmethod
-    async def gen_stats(cls, job: dict[Race, int], race: int, core: Iterable[int]):
+    @staticmethod
+    async def gen_stats(job: dict[Race, int], race: int, core: Iterable[int]):
         """This should be used to generate stats."""
         s = [0] * 30
 
