@@ -9,6 +9,7 @@ import numpy.linalg
 
 from utils.rpg import RPGException
 from utils.rpg.dungeon.piece import Condition, MovementMode, Piece
+from utils.rpg.dungeon.ray import CameraBehavior
 
 
 class InsufficientSpeed(RPGException):
@@ -21,6 +22,7 @@ class Movement(object):
     def __init__(
         self,
         vector: Iterable[Number],
+        *,
         piece: Piece,
         dungeon: Dungeon,
         mode: MovementMode = MovementMode.WALKING,
@@ -31,7 +33,9 @@ class Movement(object):
         self.mode = mode
 
 
-class Turn(queue.Queue):
+class Turn(queue.Queue, object):
+    __slots__ = "focus"
+
     def __init__(self, focus: Piece = None):
         super().__init__()
 
@@ -42,7 +46,9 @@ class Turn(queue.Queue):
         self.get()(*args, **kwargs)
 
 
-class TurnManager(queue.Queue):
+class TurnManager(queue.Queue, object):
+    __slots__ = ("turn", "dungeon")
+
     def __init__(self, dungeon: Dungeon):
         super().__init__()
 
@@ -71,7 +77,15 @@ class TurnManager(queue.Queue):
 
 
 class Dungeon(object):
-    __slots__ = ("_pieces", "default", "blind", "turns", "render_size", "render_origin")
+    __slots__ = (
+        "_pieces",
+        "default",
+        "blind",
+        "turns",
+        "render_size",
+        "render_origin",
+        "render_behavior",
+    )
 
     def __init__(
         self,
@@ -79,8 +93,9 @@ class Dungeon(object):
         *,
         default: str = "⬛",
         blind: str = "🌫️",
-        render_size: Iterable[int] = (13, 13),
+        render_size: Iterable[int] = (9, 9),
         render_origin: Iterable[Number] = (0, 0),
+        render_behavior: CameraBehavior = CameraBehavior.FOLLOW,
     ):
         self._pieces = pieces
 
@@ -90,6 +105,7 @@ class Dungeon(object):
 
         self.render_size = render_size[:2]
         self.render_origin = tuple(int(i) for i in render_origin[:2])
+        self.render_behavior = render_behavior
 
         for piece in set.union(*map(set, pieces)):
             piece.link(self)
@@ -167,10 +183,18 @@ class Dungeon(object):
         """Starts a turn."""
         self.turns.next_turn()
 
+        if self.render_behavior == CameraBehavior.SNAP:
+            self.render_origin = tuple(int(i) for i in self.turns.turn.focus.loc)
+
     def resolve_turn(self):
         """Completes all queued actions in a turn."""
         while self.turns.turn.qsize() != 0:
             self.turns.turn.do_next()
+
+        if self.render_behavior == CameraBehavior.FOLLOW:
+            self.render_origin = tuple(int(i) for i in self.turns.turn.focus.loc)
+
+        self.turns.turn.focus.raytracer.clear_cache()
 
     @property
     def render(self) -> Iterable[Iterable[str]]:

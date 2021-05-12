@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from enum import Enum
 from numbers import Number
 import queue
 from typing import TYPE_CHECKING, Iterable
@@ -11,6 +12,8 @@ from shapely.ops import nearest_points
 if TYPE_CHECKING:
     from utils.rpg.dungeon.game import Dungeon
     from utils.rpg.dungeon.piece import Piece
+
+CameraBehavior = Enum("CameraBehavior", ["FOLLOW", "DETACH", "SNAP"])
 
 
 class Ray(object):
@@ -57,16 +60,14 @@ class Ray(object):
 
 
 class RayTracer(object):
-    __slots__ = ("source", "dungeon", "traced", "_loc")
+    __slots__ = ("source", "dungeon", "_traced")
     corners = numpy.array(((0.5, 0.5), (0.5, -0.5), (-0.5, 0.5), (-0.5, -0.5)))
 
     def __init__(self, dungeon: Dungeon, source: Piece) -> None:
         self.source = source
         self.dungeon = dungeon
 
-        self._loc = numpy.array(self.dungeon.render_origin)
-
-        self.traced = dict()
+        self._traced = dict()
 
     @property
     def origin(self):
@@ -84,11 +85,10 @@ class RayTracer(object):
     def dy(self):
         return self.size[1] // 2
 
-    def trace(self):
-        if not numpy.array_equal(self._loc, self.origin):
-            self._loc = numpy.array(self.origin)
-            self.traced.clear()
+    def clear_cache(self):
+        self._traced.clear()
 
+    def trace(self):
         field = numpy.zeros(self.size[2::-1], dtype=bool)
 
         for i in range(self.size[1]):
@@ -100,16 +100,16 @@ class RayTracer(object):
                 for corner in RayTracer.corners:
                     destination = goal + corner
 
-                    dest_rep = str(destination)
+                    dest_rep = tuple(int(i) for i in destination)
 
-                    if dest_rep in self.traced:
-                        if self.traced[dest_rep]:
+                    if dest_rep in self._traced:
+                        if self._traced[dest_rep]:
                             field[i][j] = True
                             break
                         continue
 
                     r = Ray(
-                        self.origin,
+                        self.source.loc,
                         destination,
                         1,
                         self.dungeon,
@@ -119,9 +119,9 @@ class RayTracer(object):
 
                     if Point(destination).distance(Point(end)) <= 0.1:
                         field[i][j] = True
-                        self.traced[dest_rep] = True
+                        self._traced[dest_rep] = True
                         break
 
-                    self.traced[dest_rep] = False
+                    self._traced[dest_rep] = False
 
         return field

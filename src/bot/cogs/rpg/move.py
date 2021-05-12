@@ -1,4 +1,5 @@
 from discord.ext import commands
+import numpy
 
 from utils.discord.bot import is_response
 from utils.discord.responses import HanalonEmbed
@@ -98,9 +99,13 @@ class GameAction(commands.Cog):
                 embed = await self.move(
                     await self.bot.get_context(j), int(contents[1]), int(contents[2])
                 )
+            elif contents[0] == "pan":
+                embed = await self.pan(
+                    await self.bot.get_context(j), int(contents[1]), int(contents[2])
+                )
             elif contents[0] == "next":
                 self.dungeons[ctx.author.id].resolve_turn()
-                self.dungeons[ctx.author.id].turns.next_turn()
+                self.dungeons[ctx.author.id].start_turn()
                 embed = await self.show(await self.bot.get_context(j))
             else:
                 del self.dungeons[ctx.author.id]
@@ -113,9 +118,9 @@ class GameAction(commands.Cog):
             self.dungeons[ctx.author.id].move(
                 Movement(
                     (delta_x, delta_y),
-                    self.dungeons[ctx.author.id].turns.turn.focus,
-                    self.dungeons[ctx.author.id],
-                    MovementMode.WALKING,
+                    piece=self.dungeons[ctx.author.id].turns.turn.focus,
+                    dungeon=self.dungeons[ctx.author.id],
+                    mode=MovementMode.WALKING,
                 )
             )
             error = False
@@ -126,9 +131,6 @@ class GameAction(commands.Cog):
             embed.add_field(
                 name="Notice", value="Cannot reach the destination!", inline=False
             )
-
-        hash = ctx.author.id
-        self.dungeons[hash].render_origin = self.dungeons[hash].turns.turn.focus.loc
 
         embed.add_field(
             name="Character",
@@ -145,6 +147,30 @@ class GameAction(commands.Cog):
             await embed.respond(False)
         else:
             await embed.respond(True, override=True)
+
+        return embed
+
+    async def pan(self, ctx, delta_x: int, delta_y: int) -> None:
+        embed = HanalonEmbed(ctx)
+
+        embed.add_field(
+            name="Character",
+            value=self.dungeons[ctx.author.id].turns.turn.focus.__class__.__name__,
+            inline=False,
+        )
+        embed.add_field(
+            name="Remaining Distance",
+            value=float(self.dungeons[ctx.author.id].turns.turn.focus.speed),
+            inline=False,
+        )
+
+        origin = numpy.array(self.dungeons[ctx.author.id].render_origin)
+        self.dungeons[ctx.author.id].render_origin = tuple(
+            int(i) for i in origin + numpy.array([delta_x, delta_y])
+        )
+
+        embed.description = f"**View**\n{self.board(ctx.author.id)}"
+        await embed.respond(True, override=True)
 
         return embed
 
