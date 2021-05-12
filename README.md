@@ -30,7 +30,7 @@ Hanalon is an RPG Discord bot.
 
 ### Python
 
-- [Python 3.8+](https://www.python.org/downloads/)
+- [Python 3.9+](https://www.python.org/downloads/)
 
 ## Usage
 

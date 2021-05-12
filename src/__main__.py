@@ -8,6 +8,9 @@ from utils.discord.bot import run
 from utils.log import MongoLog
 
 if __name__ == "__main__":
+    if sys.version_info < (3, 9):
+        sys.exit("Python version must be ≥ 3.9")
+
     dname = os.path.dirname(os.path.abspath(__file__))
     os.chdir(dname)
     sys.path.insert(1, dname)
