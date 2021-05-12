@@ -153,6 +153,7 @@ class Character:
                 "jobs": jobs,
                 "race": Race[race.upper()].value,
                 "stats": [0] * 30,
+                "items": [],
             }
         )
         return cls(identifier)
