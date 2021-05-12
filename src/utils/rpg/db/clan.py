@@ -1,22 +1,18 @@
-from dataclasses import dataclass
 from typing import Iterable, Union
-from uuid import UUID
 from uuid import uuid4 as uuid
 
 import bson
 import discord
 
 from utils.discord.bot import bot
+from utils.rpg.db.base import BaseData
 from utils.rpg.db.exceptions import AlreadyRegistered, NotRegistered
 from utils.rpg.db.party import Party
 
 Player = Union[discord.User, discord.Member, Party]
 
 
-@dataclass
-class Clan:
-    identifier: UUID
-
+class Clan(BaseData):
     @classmethod
     async def register(cls, player: Player, name: str):
         exists = await bot.clans.find_one({"members": bson.Int64(player.id)})

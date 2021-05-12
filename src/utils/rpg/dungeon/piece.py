@@ -6,7 +6,7 @@ from functools import reduce
 from numbers import Number
 from operator import ior
 from queue import PriorityQueue, Queue
-from typing import TYPE_CHECKING, Any, Callable, Iterable
+from typing import TYPE_CHECKING, Any, Callable, Iterable, Optional
 
 import numpy
 from shapely.affinity import translate
@@ -14,11 +14,11 @@ from shapely.geometry import Point, Polygon, box
 from shapely.geometry.base import BaseGeometry, BaseMultipartGeometry
 from shapely.ops import unary_union
 
+from utils.rpg.dungeon.ray import Ray, RayTracer
 from utils.rpg.dungeon.skin import DefiniteSkin, Skin
 
 if TYPE_CHECKING:
     from utils.rpg.dungeon.game import Dungeon, Movement
-    from utils.rpg.dungeon.ray import Ray
 
 
 Condition = IntFlag(
@@ -73,24 +73,44 @@ MovementMode = Enum(
 )
 
 
-@dataclass
-class Piece:
-    loc: Iterable[Number] = (0.0, 0.0)
-    speed: Number = 0.0
-    hitbox: BaseGeometry = box(-0.5, -0.5, 0.5, 0.5)
-    skin: Skin = DefiniteSkin([["*️⃣"]])
-    mount: Piece = None
-    data: Any = None
+class Piece(object):
+    __slots__ = (
+        "loc",
+        "speed",
+        "hitbox",
+        "skin",
+        "mount",
+        "condition",
+        "psychology",
+        "data",
+        "raytracer",
+    )
 
-    def __post_init__(self):
-        self.loc = numpy.array(self.loc[:2])
-        self.speed = float(self.speed)
-        self.max_speed = self.speed
-        self._speed = self.speed
+    def __init__(
+        self,
+        loc: Iterable[Number] = (0.0, 0.0),
+        *,
+        speed: Number = 0.0,
+        hitbox: BaseGeometry = box(-0.5, -0.5, 0.5, 0.5),
+        skin: Skin = DefiniteSkin([["*️⃣"]]),
+        mount: Optional[Piece] = None,
+        data: Any = None,
+    ) -> None:
+        self.loc = numpy.array(loc[:2])
+        self._speed = self.max_speed = self.speed = float(speed)
 
         self.condition = 0
-
         self.psychology = {Relation.CHARMED: [], Relation.FRIGHTENED: []}
+
+        self.hitbox = hitbox
+        self.skin = skin
+
+        self.mount = mount
+
+        self.data = data
+
+    def link(self, dungeon: Dungeon):
+        self.raytracer = RayTracer(source=self, dungeon=dungeon)
 
     def apply_conditions(self, *conditions: Iterable[Condition]):
         self.condition |= reduce(ior, conditions)
@@ -284,15 +304,17 @@ class MergedWalls(Wall):
 
 
 class Surface(Piece):
-    def __post_init__(self):
-        super().__post_init__()
-        self.hitbox = Polygon()
+    def __init__(self, *args, **kwargs):
+        kwargs.update(zip(super().__init__.__code__.co_varnames, args))
+        kwargs |= {"hitbox": Polygon()}
+        super().__init__(**kwargs)
 
 
 class Being(Piece):
-    def __post_init__(self):
-        super().__post_init__()
-        self.hitbox = Point(0, 0).buffer(0.125)
+    def __init__(self, *args, **kwargs):
+        kwargs.update(zip(super().__init__.__code__.co_varnames, args))
+        kwargs |= {"hitbox": Point(0, 0).buffer(0.125)}
+        super().__init__(**kwargs)
 
     def on_coincide(self, movement: Movement, mock: bool = True):
         if mock:
@@ -303,13 +325,14 @@ class Being(Piece):
 
 class Plane(Piece):
     def __init__(self, skin_alg: Callable, *args, **kwargs):
-        """Creates an infinite non-colliding piece."""
-        super().__init__(*args, **kwargs)
-        self.hitbox = Polygon()
+        kwargs.update(zip(super().__init__.__code__.co_varnames, args))
 
-        self.skin = Skin()
-        self.skin.get_bounds = lambda: False
-        self.skin.get_index = skin_alg
+        skin = Skin()
+        skin.get_bounds = lambda: False
+        skin.get_index = skin_alg
+
+        kwargs |= {"hitbox": Polygon(), "skin": skin}
+        super().__init__(**kwargs)
 
 
 class BoringPlane(Plane):

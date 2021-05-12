@@ -10,7 +10,9 @@ class Skin:
         raise NotImplementedError
 
 
-class DefiniteSkin(Skin):
+class DefiniteSkin(Skin, object):
+    __slots__ = ("_skin",)
+
     def __init__(self, skin: Iterable[Iterable[str]]):
         self._skin = skin
         self._skin.reverse()

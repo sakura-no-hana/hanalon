@@ -2,7 +2,8 @@ from numbers import Number
 import textwrap
 
 
-class Money:
+class Money(object):
+    __slots__ = ("amount",)
     DENOMINATIONS = {"copper": 0, "silver": 2, "gold": 4, "platinum": 6}
 
     def __init__(self, amount: Number = 0):

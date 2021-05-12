@@ -14,21 +14,27 @@ if TYPE_CHECKING:
     from utils.rpg.dungeon.piece import Piece
 
 
-@dataclass
-class Ray:
-    start: Iterable[Number]
-    end: Iterable[Number]
-    intensity: Number  # we need this for potential view distance implementation. x-ray vision, maybe?
-    dungeon: Dungeon
-    ignore: Iterable[Piece]
+class Ray(object):
+    __slots__ = ("start", "end", "intensity", "dungeon", "ignore", "vector", "hitbox")
 
-    def __post_init__(self):
-        self.start = numpy.array(self.start[:2])
-        self.end = numpy.array(self.end[:2])
-        self.intensity = float(self.intensity)
+    def __init__(
+        self,
+        start: Iterable[Number],
+        end: Iterable[Number],
+        intensity: Number,
+        dungeon: Dungeon,
+        ignore: Iterable[Piece],
+    ):
+        self.start = numpy.array(start[:2])
+        self.end = numpy.array(end[:2])
+
+        self.intensity = float(intensity)
 
         self.vector = self.end - self.start
         self.hitbox = LineString([self.start, self.end])
+
+        self.dungeon = dungeon
+        self.ignore = ignore
 
     def trace(self):
         collisions = queue.PriorityQueue()
@@ -51,22 +57,40 @@ class Ray:
         return Point(self.end)
 
 
-@dataclass
-class RayTracer:
-    size: Iterable[int]
-    origin: Iterable[Number]
-    source: Piece
-    dungeon: Dungeon
+class RayTracer(object):
+    __slots__ = ("source", "dungeon", "traced", "_loc")
+    corners = numpy.array(((0.5, 0.5), (0.5, -0.5), (-0.5, 0.5), (-0.5, -0.5)))
 
-    def __post_init__(self):
-        self.field = numpy.zeros(self.size[2::-1], dtype=bool)
+    def __init__(self, dungeon: Dungeon, source: Piece) -> None:
+        self.source = source
+        self.dungeon = dungeon
 
-        self.origin = tuple(round(i) for i in self.origin)
-        self.dx = self.size[0] // 2
-        self.dy = self.size[1] // 2
+        self._loc = numpy.array(self.dungeon.render_origin)
 
-        corners = numpy.array(((0.5, 0.5), (0.5, -0.5), (-0.5, 0.5), (-0.5, -0.5)))
-        traced = dict()
+        self.traced = dict()
+
+    @property
+    def origin(self):
+        return self.dungeon.render_origin
+
+    @property
+    def size(self):
+        return self.dungeon.render_size
+
+    @property
+    def dx(self):
+        return self.size[0] // 2
+
+    @property
+    def dy(self):
+        return self.size[1] // 2
+
+    def trace(self):
+        if not numpy.array_equal(self._loc, self.origin):
+            self._loc = numpy.array(self.origin)
+            self.traced.clear()
+
+        field = numpy.zeros(self.size[2::-1], dtype=bool)
 
         for i in range(self.size[1]):
             for j in range(self.size[0]):
@@ -74,14 +98,14 @@ class RayTracer:
                     (self.origin[0] + j - self.dx, self.origin[1] + i - self.dy)
                 )
 
-                for corner in corners:
+                for corner in RayTracer.corners:
                     destination = goal + corner
 
                     dest_rep = str(destination)
 
-                    if dest_rep in traced:
-                        if traced[dest_rep]:
-                            self.field[i][j] = True
+                    if dest_rep in self.traced:
+                        if self.traced[dest_rep]:
+                            field[i][j] = True
                             break
                         continue
 
@@ -95,8 +119,10 @@ class RayTracer:
                     end = r.trace()
 
                     if Point(destination).distance(Point(end)) <= 0.1:
-                        self.field[i][j] = True
-                        traced[dest_rep] = True
+                        field[i][j] = True
+                        self.traced[dest_rep] = True
                         break
 
-                    traced[dest_rep] = False
+                    self.traced[dest_rep] = False
+
+        return field

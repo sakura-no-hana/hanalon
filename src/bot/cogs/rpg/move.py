@@ -3,6 +3,7 @@ from discord.ext import commands
 from utils.discord.bot import is_response
 from utils.discord.responses import HanalonEmbed
 from utils.rpg.dungeon import Dungeon, InsufficientSpeed, MergedWalls, Movement, Turn
+from utils.rpg.dungeon.piece import MovementMode
 from utils.rpg.prefabs import protohero
 
 
@@ -32,9 +33,7 @@ class GameAction(commands.Cog):
         self.dungeons = dict()
 
     def board(self, hash) -> str:
-        return self.dungeons[hash].render_str(
-            13, 13, self.dungeons[hash].turns.turn.focus.loc
-        )
+        return self.dungeons[hash].render_str
 
     def create_dungeon(self, hash):
         charas = [
@@ -54,6 +53,8 @@ class GameAction(commands.Cog):
 
         for c in charas:
             self.dungeons[hash].turns.put(Turn(c))
+
+        self.dungeons[hash].render_origin = self.dungeons[hash].turns.turn.focus.loc
 
     @commands.command()
     async def show(self, ctx) -> None:
@@ -105,10 +106,6 @@ class GameAction(commands.Cog):
                 del self.dungeons[ctx.author.id]
                 return
 
-            # if self.dungeons[ctx.author.id].turns.turn.focus.speed < 1:
-            #     self.dungeons[ctx.author.id].resolve_turn()
-            #     self.dungeons[ctx.author.id].turns.next_turn()
-
     async def move(self, ctx, delta_x: int, delta_y: int) -> None:
         error = True
         embed = HanalonEmbed(ctx)
@@ -118,7 +115,7 @@ class GameAction(commands.Cog):
                     (delta_x, delta_y),
                     self.dungeons[ctx.author.id].turns.turn.focus,
                     self.dungeons[ctx.author.id],
-                    "walk",
+                    MovementMode.WALKING,
                 )
             )
             error = False
@@ -129,6 +126,9 @@ class GameAction(commands.Cog):
             embed.add_field(
                 name="Notice", value="Cannot reach the destination!", inline=False
             )
+
+        hash = ctx.author.id
+        self.dungeons[hash].render_origin = self.dungeons[hash].turns.turn.focus.loc
 
         embed.add_field(
             name="Character",

@@ -1,15 +1,14 @@
-from dataclasses import dataclass
 from enum import IntEnum
 import math
 import textwrap
 from typing import Iterable, Optional
-from uuid import UUID
 from uuid import uuid4 as uuid
 
 import bson
 import discord
 
 from utils.discord.bot import bot
+from utils.rpg.db.base import BaseData
 from utils.rpg.db.exceptions import NotRegistered
 
 Job = IntEnum(
@@ -96,6 +95,8 @@ Stats = IntEnum(
     start=0,
 )
 
+CORE_ATTRS = slice(Stats.STRENGTH, Stats.LUCK + 1)
+
 
 def raw_to_mod(num: int):
     return num // 2 - 5
@@ -104,16 +105,13 @@ def raw_to_mod(num: int):
 # TODO: create race and class classes to handle stat matrix modifications
 
 
-@dataclass
-class Character:
-    identifier: UUID
-
+class Character(BaseData):
     @staticmethod
     async def gen_stats(job: dict[Race, int], race: int, core: Iterable[int]):
         """This should be used to generate stats."""
         s = [0] * 30
 
-        s[Stats.STRENGTH : Stats.LUCK + 1] = core[:7]
+        s[CORE_ATTRS] = core[:7]
         s[Stats.ATHLETICS] = s[Stats.STRENGTH]
         s[Stats.ACROBATICS] = s[Stats.SLEIGHT_OF_HAND] = s[Stats.STEALTH] = s[
             Stats.DEXTERITY
@@ -170,23 +168,22 @@ class Character:
         return Race(char["race"]).name
 
     # same thing with race
+    _get = "{'_id': self.identifier}, {'_id': 0, 'stats': 1}"
+    _set = "{'_id': self.identifier}, {'$set': {'stats.%s': new}}"
 
     for stat in Stats:
-        get_query = "{'_id': self.identifier}, {'_id': 0, 'stats': 1}"
-        set_query = "{'_id': self.identifier}, {'$set': {'stats.%s': new}}" % stat.value
-
         exec(
             textwrap.dedent(
                 f"""
                 async def get_{stat.name.lower()}(self):
-                    if not (char := await bot.characters.find_one({get_query})):
+                    if not (char := await bot.characters.find_one({_get})):
                         raise NotRegistered
                     return char["stats"][{stat.value}]
                 
                 async def set_{stat.name.lower()}(self, new):
-                    if not await bot.characters.find_one({get_query}):
+                    if not await bot.characters.find_one({_get}):
                         raise NotRegistered
-                    await bot.characters.update_one({set_query})
+                    await bot.characters.update_one({_set % stat.value})
                 """
             )
         )

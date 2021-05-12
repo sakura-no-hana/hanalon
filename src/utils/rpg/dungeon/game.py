@@ -11,22 +11,26 @@ import numpy.linalg
 
 from utils.rpg import RPGException
 from utils.rpg.dungeon.piece import Condition, MovementMode, Piece
-from utils.rpg.dungeon.ray import RayTracer
 
 
 class InsufficientSpeed(RPGException):
     ...
 
 
-@dataclass
-class Movement:
-    vector: Iterable[Number]
-    piece: Piece
-    dungeon: Dungeon
-    mode: MovementMode = MovementMode.WALKING
+class Movement(object):
+    __slots__ = ("vector", "piece", "dungeon", "mode")
 
-    def __post_init__(self):
-        self.vector = numpy.array(self.vector[:2])
+    def __init__(
+        self,
+        vector: Iterable[Number],
+        piece: Piece,
+        dungeon: Dungeon,
+        mode: MovementMode = MovementMode.WALKING,
+    ):
+        self.vector = numpy.array(vector[:2])
+        self.piece = piece
+        self.dungeon = dungeon
+        self.mode = mode
 
 
 class Turn(queue.Queue):
@@ -68,15 +72,44 @@ class TurnManager(queue.Queue):
         return self.turn
 
 
-@dataclass
-class Dungeon:
-    pieces: Iterable[Iterable[Iterable[Piece]]]
-    default: str = "⬛"
-    # blind: str = "<:__:834557109235482686>"
-    blind: str = "🌫️"
+class Dungeon(object):
+    __slots__ = ("_pieces", "default", "blind", "turns", "render_size", "render_origin")
 
-    def __post_init__(self):
+    def __init__(
+        self,
+        pieces: Iterable[Iterable[Piece]],
+        *,
+        default: str = "⬛",
+        blind: str = "🌫️",
+        render_size: Iterable[int] = (13, 13),
+        render_origin: Iterable[Number] = (0, 0),
+    ):
+        self._pieces = pieces
+
+        self.default = default
+        self.blind = blind
+        # blind: str = "<:__:834557109235482686>"
+
+        self.render_size = render_size[:2]
+        self.render_origin = tuple(int(i) for i in render_origin[:2])
+
+        for piece in set.union(*map(set, pieces)):
+            piece.link(self)
+
         self.turns = TurnManager(self)
+
+    @property
+    def pieces(self):
+        return self._pieces
+
+    @pieces.setter
+    def pieces(self, new: Iterable[Iterable[Piece]]):
+        diff = set.union(*map(set, new)).difference(set.union(*map(set, self._pieces)))
+
+        for piece in diff:
+            piece.link(self)
+
+        self._pieces = new
 
     def collide(self, movement: Movement, mock: bool) -> None:
         """Simulates collisions."""
@@ -141,17 +174,15 @@ class Dungeon:
         while self.turns.turn.qsize() != 0:
             self.turns.turn.do_next()
 
-    def render(
-        self,
-        width: int,
-        height: int,
-        origin: Iterable[int],
-    ) -> Iterable[Iterable[str]]:
+    @property
+    def render(self) -> Iterable[Iterable[str]]:
         """Renders a 2D list for display."""
+        x, y = self.render_origin
+        width, height = self.render_size
+
         if self.turns.turn.focus.condition & Condition.BLINDED:
             return [[self.blind] * width for _ in range(height)]
 
-        x, y = origin
         dx, dy = (width - 1) // 2, (height - 1) // 2
         out = [[None] * width for _ in range(height)]
         x, y = x - dx, y - dy
@@ -194,7 +225,7 @@ class Dungeon:
                                         col + round(coords[0] - x)
                                     ] = px
 
-        rays = RayTracer((width, height), origin, self.turns.turn.focus, self).field
+        rays = self.turns.turn.focus.raytracer.trace()
 
         for i, row in enumerate(out):
             for j, px in enumerate(row):
@@ -205,8 +236,9 @@ class Dungeon:
 
         return out
 
-    def render_str(self, width: int, height: int, origin: Iterable[int]) -> str:
+    @property
+    def render_str(self) -> str:
         """Creates string to display board."""
-        board = self.render(width, height, origin)
+        board = self.render
         board.reverse()
         return "\n".join(["".join(a) for a in board])

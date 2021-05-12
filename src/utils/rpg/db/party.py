@@ -1,20 +1,16 @@
-from dataclasses import dataclass
 from typing import Iterable, Optional
-from uuid import UUID
 from uuid import uuid4 as uuid
 
 import bson
 import discord
 
 from utils.discord.bot import bot
+from utils.rpg.db.base import BaseData
 from utils.rpg.db.character import Character
 from utils.rpg.db.exceptions import AlreadyRegistered, NotRegistered
 
 
-@dataclass
-class Party:
-    identifier: UUID
-
+class Party(BaseData):
     @classmethod
     async def register(
         cls, player: discord.User, characters: Optional[Iterable[Character]] = tuple()
