@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from enum import Enum, IntFlag
 from functools import reduce
 from numbers import Number

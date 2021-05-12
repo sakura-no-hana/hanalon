@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from enum import Enum
 from numbers import Number
 import queue
-from typing import Any, Iterable
+from typing import Iterable
 
 import numpy
 import numpy.linalg

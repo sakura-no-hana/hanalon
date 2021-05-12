@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from numbers import Number
 import queue
 from typing import TYPE_CHECKING, Iterable
