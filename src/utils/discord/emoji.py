@@ -11,11 +11,21 @@ from utils.discord.bot import bot
 with open(pathlib.Path("utils/discord/emoji.json")) as defaults:
     EMOJI = json.load(defaults)
 
+
+def _unfe0f(emoji: str) -> str:
+    return emoji.replace("\ufe0f", "")
+
+
 EMOJI_DICT = {
     _[0]: _[1]
     for _ in itertools.chain(
         *[
-            [_ for _ in itertools.product(emoji["names"], [emoji["string"]])]
+            [
+                _
+                for _ in itertools.product(
+                    emoji["names"], [_unfe0f(emoji["strings"][0])]
+                )
+            ]
             for emoji in EMOJI
         ]
     )
@@ -35,8 +45,8 @@ def condense(emoji: str) -> str:
             return f"<:_:{emoji_id}>"
 
     if emoji in EMOJI_NAMES:
-        return EMOJI_DICT["emoji"]
-    elif emoji in EMOJI_STRS:
-        return emoji
+        return _unfe0f(EMOJI_DICT[emoji][0])
+    elif _unfe0f(emoji.replace("\ufe0f", "")) in EMOJI_STRS:
+        return _unfe0f(emoji.replace("\ufe0f", ""))
 
     raise EmojiNotFound

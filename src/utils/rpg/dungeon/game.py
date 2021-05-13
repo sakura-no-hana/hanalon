@@ -93,8 +93,8 @@ class Dungeon(object):
         self,
         pieces: Iterable[Iterable[Piece]],
         *,
-        default: str = "⬛",
-        blind: str = "🌫️",
+        default: str = ":black_large_square:",
+        blind: str = "<:blank:834557109235482686>",
         render_size: Iterable[int] = (9, 9),
         render_origin: Iterable[Number] = (0, 0),
         render_behavior: CameraBehavior = CameraBehavior.FOLLOW,
@@ -103,7 +103,6 @@ class Dungeon(object):
 
         self.default = default
         self.blind = blind
-        # blind: str = "<:__:834557109235482686>"
 
         self.render_size = render_size[:2]
         self.render_origin = tuple(int(i) for i in render_origin[:2])
@@ -234,11 +233,6 @@ class Dungeon(object):
                                 )
                             ]:
                                 if px := obj.skin.get_index(col, row):
-                                    try:
-                                        px = utils.discord.emoji.condense(px)
-                                    except EmojiNotFound:
-                                        px = None
-
                                     out[row + round(coords[1] - y)][
                                         col + round(coords[0] - x)
                                     ] = px
@@ -250,23 +244,21 @@ class Dungeon(object):
                                 round(x - coords[0]), round(x + width - coords[0])
                             ):
                                 if px := obj.skin.get_index(col, row):
-                                    try:
-                                        px = utils.discord.emoji.condense(px)
-                                    except EmojiNotFound:
-                                        px = None
-
                                     out[row + round(coords[1] - y)][
                                         col + round(coords[0] - x)
                                     ] = px
 
         rays = self.turns.turn.focus.raytracer.trace()
 
-        for i, row in enumerate(out):
-            for j, px in enumerate(row):
-                if not rays[i][j]:
-                    out[i][j] = self.blind
-                elif not out[i][j]:
-                    out[i][j] = self.default
+        out = [
+            [
+                utils.discord.emoji.condense(
+                    self.blind if not rays[i][j] else self.default if not px else px
+                )
+                for j, px in enumerate(row)
+            ]
+            for i, row in enumerate(out)
+        ]
 
         return out
 
