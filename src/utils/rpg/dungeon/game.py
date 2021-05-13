@@ -4,9 +4,11 @@ from numbers import Number
 import queue
 from typing import Iterable
 
+from discord.ext.commands import EmojiNotFound
 import numpy
 import numpy.linalg
 
+import utils.discord.emoji
 from utils.rpg import RPGException
 from utils.rpg.dungeon.piece import Condition, MovementMode, Piece
 from utils.rpg.dungeon.ray import CameraBehavior
@@ -183,7 +185,7 @@ class Dungeon(object):
         """Starts a turn."""
         self.turns.next_turn()
 
-        if self.render_behavior == CameraBehavior.SNAP:
+        if self.render_behavior in {CameraBehavior.SNAP, CameraBehavior.FOLLOW}:
             self.render_origin = tuple(int(i) for i in self.turns.turn.focus.loc)
 
     def resolve_turn(self):
@@ -232,6 +234,11 @@ class Dungeon(object):
                                 )
                             ]:
                                 if px := obj.skin.get_index(col, row):
+                                    try:
+                                        px = utils.discord.emoji.condense(px)
+                                    except EmojiNotFound:
+                                        px = None
+
                                     out[row + round(coords[1] - y)][
                                         col + round(coords[0] - x)
                                     ] = px
@@ -243,6 +250,11 @@ class Dungeon(object):
                                 round(x - coords[0]), round(x + width - coords[0])
                             ):
                                 if px := obj.skin.get_index(col, row):
+                                    try:
+                                        px = utils.discord.emoji.condense(px)
+                                    except EmojiNotFound:
+                                        px = None
+
                                     out[row + round(coords[1] - y)][
                                         col + round(coords[0] - x)
                                     ] = px

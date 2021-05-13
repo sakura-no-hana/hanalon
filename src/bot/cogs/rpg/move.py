@@ -71,7 +71,7 @@ class GameAction(commands.Cog):
             value=float(self.dungeons[ctx.author.id].turns.turn.focus.speed),
             inline=False,
         )
-        embed.add_field(name="View", value=self.board(ctx.author.id))
+        embed.description = self.board(ctx.author.id)
         await embed.respond(True)
 
         return embed
@@ -83,9 +83,7 @@ class GameAction(commands.Cog):
 
         self.dungeons[ctx.author.id].start_turn()
 
-        embed = HanalonEmbed(ctx)
-        embed.description = f"**View**\n{self.board(ctx.author.id)}"
-        await embed.respond(True)
+        embed = await self.show(ctx)
 
         while True:
             j = await self.bot.wait_for(
@@ -151,26 +149,12 @@ class GameAction(commands.Cog):
         return embed
 
     async def pan(self, ctx, delta_x: int, delta_y: int) -> None:
-        embed = HanalonEmbed(ctx)
-
-        embed.add_field(
-            name="Character",
-            value=self.dungeons[ctx.author.id].turns.turn.focus.__class__.__name__,
-            inline=False,
-        )
-        embed.add_field(
-            name="Remaining Distance",
-            value=float(self.dungeons[ctx.author.id].turns.turn.focus.speed),
-            inline=False,
-        )
-
         origin = numpy.array(self.dungeons[ctx.author.id].render_origin)
         self.dungeons[ctx.author.id].render_origin = tuple(
             int(i) for i in origin + numpy.array([delta_x, delta_y])
         )
 
-        embed.description = f"**View**\n{self.board(ctx.author.id)}"
-        await embed.respond(True, override=True)
+        embed = await self.show(ctx)
 
         return embed
 
