@@ -231,3 +231,10 @@ class Character:
         if not (char := await bot.characters.find_one({"_id": self.identifier})):
             raise NotRegistered
         return bot.get_user(char["player"]) or (await bot.fetch_user(char["player"]))
+
+    # TODO: make items into a string or some format that can be inserted into
+    # mongo
+    async def get_items(self):
+        if not (char := await bot.characters.find_one({"_id": self.identifier})):
+            raise NotRegistered
+        return char["items"]
