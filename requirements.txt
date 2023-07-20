@@ -1,4 +1,4 @@
-aiohttp==3.7.4.post0; python_version >= "3.6" and python_full_version >= "3.5.3"
+aiohttp==3.8.5; python_version >= "3.6" and python_full_version >= "3.5.3"
 async-timeout==3.0.1; python_version >= "3.6" and python_full_version >= "3.5.3"
 attrs==20.3.0; python_version >= "3.6" and python_full_version >= "3.5.3"
 cachetools==4.2.1; python_version >= "3.6" and python_version < "4.0"
